@@ -60,3 +60,22 @@ invoke node RPC, use wallet data, or broadcast transactions.
 objective. [The handoff](docs/rebuild-handoff.md) specifies the interface for the
 other rebuild thread. The original full study stays pinned in
 [bitcoin-rs](https://github.com/patrickdugan/bitcoin-rs/blob/24a5593350f42efc8a96047aa9e7e114fa22cb08/docs/research/bitvm-authority-enumeration.md).
+
+## BA-CPA-02 fixed-target campaign
+
+[Fixed-target scoring and finite-policy mathematics](docs/fixed-target-campaign.md)
+extends the study to all 1,851 programs and 14,808 Boolean assignments. The
+reference scorer freezes target authority, outpoint, locking path and policy.
+Forty-four mutation/control episodes carry exact candidate and transaction bytes;
+a deliberately widened guard has a separately labelled counterexample.
+
+```sh
+python3 -I -S -B research/canonical-proof-authority/scripts/run.py \
+  --bitcoin-rs /path/to/pinned/bitcoin-rs --out /tmp/arena-cpa-run-02 \
+  --campaign --timeout 240
+```
+
+The optional campaign runs 30 additional scorer tests. It writes a full output-key
+catalogue and replayable episode records under `campaign/`, with hashes checked
+against `fixtures/campaign-lock.json`. The dedicated workflow runs both studies.
+The reference scorer remains isolated from the rebuild's core registration.

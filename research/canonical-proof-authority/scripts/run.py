@@ -14,6 +14,8 @@ import tempfile
 MODULE = Path(__file__).resolve().parents[1]
 LOCK = MODULE / 'fixtures/source-lock.json'
 SCENARIOS = MODULE / 'scenarios/arena_scenarios.jsonl'
+CAMPAIGN_LOCK = MODULE / 'fixtures/campaign-lock.json'
+CAMPAIGN_FILES = ('scripts/fixed_target.py', 'scripts/campaign.py', 'tests/test_fixed_target.py')
 
 
 class VerificationError(ValueError):
@@ -85,6 +87,19 @@ def verify_outputs(root: Path, hashes: dict[str, str], expected: dict) -> dict:
     return measured
 
 
+def verify_campaign(root: Path) -> dict:
+    lock = json.loads(CAMPAIGN_LOCK.read_text())
+    if lock.get('schema') != 'BA-CPA-02/evidence-lock-v1':
+        raise VerificationError('Unknown campaign lock')
+    for name, expected in lock['outputs'].items():
+        if digest(checked_path(root, name).read_bytes()) != expected:
+            raise VerificationError(f'Campaign evidence SHA256 mismatch: {name}')
+    summary = json.loads((root / 'summary.json').read_text())
+    if summary != lock['expected_summary']:
+        raise VerificationError('Campaign summary differs from the fixed experiment')
+    return summary
+
+
 def run_stage(snapshot: Path, output: Path, label: str, arguments: list[str], timeout: int) -> None:
     environment = {key: value for key, value in os.environ.items()
                    if key in {'PATH', 'SYSTEMROOT', 'WINDIR', 'TEMP', 'TMP', 'LANG', 'LC_ALL'}}
@@ -96,7 +111,7 @@ def run_stage(snapshot: Path, output: Path, label: str, arguments: list[str], ti
         raise VerificationError(f'{label} failed with exit {completed.returncode}; see {label}.log')
 
 
-def run(source: Path, output: Path, timeout: int = 120) -> dict:
+def run(source: Path, output: Path, timeout: int = 120, campaign: bool = False) -> dict:
     if timeout <= 0 or sys.flags.optimize:
         raise VerificationError('Use a positive timeout and run Python without -O')
     lock = json.loads(LOCK.read_text())
@@ -132,6 +147,30 @@ def run(source: Path, output: Path, timeout: int = 120) -> dict:
                       [str(snapshot / 'scripts/research/bitvm_authority_enumeration.py'),
                        '--bitcoin-rs', str(snapshot), '--out', str(output / 'generated'),
                        '--max-gates', '5', '--sample-limit', '32'], timeout)
+            if campaign:
+                verify_outputs(output / 'generated', lock['outputs'], lock['expected'])
+                campaign_hashes = {}
+                for name in CAMPAIGN_FILES:
+                    data = checked_path(MODULE, name).read_bytes()
+                    destination = snapshot / 'arena_cpa' / name
+                    destination.parent.mkdir(parents=True, exist_ok=True)
+                    destination.write_bytes(data)
+                    campaign_hashes[name] = digest(data)
+                receipt['campaign_source_sha256'] = campaign_hashes
+                worker = str(snapshot / 'arena_cpa/scripts/campaign.py')
+                run_stage(snapshot, output, 'fixed-target-tests',
+                          [worker, '--bitcoin-rs', str(snapshot), '--tests'], timeout)
+                run_stage(snapshot, output, 'fixed-target-campaign',
+                          [worker, '--bitcoin-rs', str(snapshot),
+                           '--corpus', str(output / 'generated/circuits.jsonl'),
+                           '--out', str(output / 'campaign')], timeout)
+                receipt['campaign'] = verify_campaign(output / 'campaign')
+                receipt['campaign_lock_sha256'] = digest(CAMPAIGN_LOCK.read_bytes())
+                receipt['campaign_output_sha256'] = json.loads(CAMPAIGN_LOCK.read_text())['outputs']
+                text = (output / 'fixed-target-tests.log').read_text()
+                if re.search(r'Ran 30 tests? in ', text) is None:
+                    raise VerificationError('Unexpected fixed-target test count')
+                receipt['fixed_target_tests'] = 30
         receipt['measured'] = verify_outputs(output / 'generated', lock['outputs'], lock['expected'])
         receipt['output_sha256'] = lock['outputs']
         for label, count in (('study-tests', 14), ('cpa-tests', 42)):
@@ -152,9 +191,10 @@ def main() -> None:
     parser.add_argument('--bitcoin-rs', type=Path, required=True)
     parser.add_argument('--out', type=Path, required=True, help='New output directory; never overwritten')
     parser.add_argument('--timeout', type=int, default=120, help='Seconds per subprocess')
+    parser.add_argument('--campaign', action='store_true', help='Run BA-CPA-02 fixed-target tests and exhaustive corpus')
     args = parser.parse_args()
     try:
-        receipt = run(args.bitcoin_rs, args.out, args.timeout)
+        receipt = run(args.bitcoin_rs, args.out, args.timeout, args.campaign)
     except (ValueError, OSError, subprocess.TimeoutExpired) as error:
         parser.exit(1, f'{error}\n')
     print(json.dumps(receipt, indent=2))

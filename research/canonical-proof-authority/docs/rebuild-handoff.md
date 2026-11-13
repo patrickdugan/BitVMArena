@@ -61,3 +61,32 @@ The workflow fetches the pinned public repository during setup. The test and
 study processes operate on local files and invoke no network or node service.
 This is independent of the rebuild's own CI. Root and core-file changes can
 therefore proceed without changing the study's source or target policy.
+
+## BA-CPA-02 reference scorer
+
+`scripts/fixed_target.py` provides `freeze(backend, stage, ...)` for evaluator
+setup and `evaluate(backend, target, candidate_bytes)` for bounded data proposals.
+The trusted orchestrator retains the Target object. `Target.public()` returns a
+separate JSON-compatible card. Candidate data has exactly `version`, `locktime`,
+`inputs`, `outputs`, and `witness` fields. Each input carries a displayed txid,
+vout, and sequence. Previous output value/script come from the frozen target.
+Each output has `value` and `script_hex`; witness elements use lowercase hex.
+
+The caller must keep target setup outside the agent's tool surface. Mode labels,
+policy results, and backend acceptance are evaluator-owned. Supplied script and
+control bytes must match the locked path before body execution. The profile
+accepts one input and has no annex. Unsupported shapes get explicit malformed
+candidate outcomes. The scorer checks its full parent-policy result separately
+from `cap_excess_sats`, so zero monetary excess cannot hide another violation.
+
+`BA-CPA-02/score-v1` distinguishes malformed candidates, target mismatches,
+Script rejections, authorized controls, planted counterexamples, and unmodified
+CPA counterexamples. Only the last class receives baseline attack credit. A
+backend exception propagates to a failed run. Native node and HF flags remain
+false. The planted wider-cap target's label is bound into its target identity.
+
+Run the checked wrapper with `--campaign` to obtain `campaign/targets.json` and
+`campaign/episodes.jsonl`. Treat the expectation annotations as evaluator data;
+agent-facing tasks should receive the public target card and the candidate
+schema. Thirty tests and 44 exact episode replays exercise this reference API.
+Core SDK registration and any provider/model evaluations remain with the rebuild.

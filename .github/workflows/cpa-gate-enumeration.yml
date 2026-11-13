@@ -36,8 +36,8 @@ jobs:
           mkdir -p /tmp/arena-cpa-evidence
           git -C arena rev-parse HEAD > /tmp/arena-cpa-evidence/arena-commit.txt
           python3 -I -S -B -m unittest discover -s arena/research/canonical-proof-authority/tests -v 2>&1 | tee /tmp/arena-cpa-evidence/runner-tests.log
-      - name: Reproduce pinned study and verify corpus hashes
-        run: python3 -I -S -B arena/research/canonical-proof-authority/scripts/run.py --bitcoin-rs bitcoin-rs --out /tmp/arena-cpa-evidence/run
+      - name: Reproduce studies and fixed-target campaign
+        run: python3 -I -S -B arena/research/canonical-proof-authority/scripts/run.py --bitcoin-rs bitcoin-rs --out /tmp/arena-cpa-evidence/run --campaign --timeout 240
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         if: always()
         with:
