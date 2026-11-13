@@ -1,0 +1,129 @@
+{
+  "engine_version": "0.1.0",
+  "events": [
+    {
+      "accepted": true,
+      "action": {
+        "amount_sats": 90000,
+        "kind": "claim"
+      },
+      "after": "6db3241b2317bbcd7bcb7d0e88082aa49a29ca6eee618329c0765d6b1a5b7529",
+      "before": "51f77c5ff6cd4661f22f1b60a28718a6f23dfb91fee71704c03d644bc6dcb6c0",
+      "error": null,
+      "event_hash": "6cbe9300d7563f1a554c2af02e457cb849f108f6b5e2dfe2460da073af41863e",
+      "height": 0,
+      "index": 0,
+      "phase": "claimed",
+      "previous_event_hash": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "accepted": true,
+      "action": {
+        "blocks": 1,
+        "kind": "advance"
+      },
+      "after": "47e3d8981eeb66ba31818760c026d117abfd1b557502b98a676cf5cacc2c6fba",
+      "before": "6db3241b2317bbcd7bcb7d0e88082aa49a29ca6eee618329c0765d6b1a5b7529",
+      "error": null,
+      "event_hash": "eb2808d1e493aedf4178772f208088d9a9ea3cbd751a6e074fa7a0f7b6b61b0b",
+      "height": 1,
+      "index": 1,
+      "phase": "challenged",
+      "previous_event_hash": "6cbe9300d7563f1a554c2af02e457cb849f108f6b5e2dfe2460da073af41863e"
+    },
+    {
+      "accepted": true,
+      "action": {
+        "kind": "respond"
+      },
+      "after": "42dd3265955926c3fe4043ded31427a2c2542be3d454768ade2a89983585021c",
+      "before": "47e3d8981eeb66ba31818760c026d117abfd1b557502b98a676cf5cacc2c6fba",
+      "error": null,
+      "event_hash": "a56ad02ab9ac108e7ba156fb8073db9bb883e0810536a71fb9d8e1863422e453",
+      "height": 1,
+      "index": 2,
+      "phase": "proven",
+      "previous_event_hash": "eb2808d1e493aedf4178772f208088d9a9ea3cbd751a6e074fa7a0f7b6b61b0b"
+    },
+    {
+      "accepted": true,
+      "action": {
+        "kind": "finalize"
+      },
+      "after": "3c9e5360f80f8c56afeab309833ea0d49642cf662392ef0ffb9ce4fd8a9303f7",
+      "before": "42dd3265955926c3fe4043ded31427a2c2542be3d454768ade2a89983585021c",
+      "error": null,
+      "event_hash": "edaab040d4c71d34749b1a86d79ddc5181afb4fce4533607871f69b10e0672a5",
+      "height": 1,
+      "index": 3,
+      "phase": "settled",
+      "previous_event_hash": "a56ad02ab9ac108e7ba156fb8073db9bb883e0810536a71fb9d8e1863422e453"
+    }
+  ],
+  "final_state": {
+    "censored_until": -1,
+    "censorship_used": 0,
+    "challenge_deadline": 6,
+    "claim": {
+      "amount_sats": 90000,
+      "authority_id": "2808326ea2af1505252d52e05b7498d9b97f6019a669b7d557181e5dd9d979b2",
+      "context": "f80435c274d430590f54a09369ddd797171875dd8710b7fd241c7afd7a1d0ead",
+      "outpoint": "e9ae357b9204794ccb45b023e4bc2ecc79fc9cae929fe8191bd6d96b65e5ecd5:0",
+      "program_id": "toy-muladd-v1",
+      "recipient": "synthetic:depositor",
+      "witness": {
+        "a": 7,
+        "b": 11,
+        "c": 3,
+        "modulus": 97,
+        "result": 80
+      }
+    },
+    "claim_height": 0,
+    "cost_sats": 4,
+    "escrow_sats": 0,
+    "funded_target_digest": "5dd5334779ba9cc8de06668f3e45e4b7cdd59d0ab237f3aa26170cb077b6ef7d",
+    "height": 1,
+    "phase": "settled",
+    "response_deadline": 4,
+    "transfers": [
+      {
+        "amount_sats": 90000,
+        "authorized": false,
+        "recipient": "synthetic:depositor",
+        "violated_checks": [
+          "amount_sats"
+        ]
+      },
+      {
+        "amount_sats": 10000,
+        "authorized": true,
+        "recipient": "synthetic:depositor",
+        "violated_checks": []
+      }
+    ]
+  },
+  "funded_target_digest": "5dd5334779ba9cc8de06668f3e45e4b7cdd59d0ab237f3aa26170cb077b6ef7d",
+  "profile": "amount-unbound",
+  "scenario_digest": "8c8354339c11b906d54ef396c7f643fc7f71d489299136663fc74d8dd6145226",
+  "scenario_id": "amount-substitution",
+  "schema_version": 1,
+  "score": {
+    "attacker_success": true,
+    "cost_model": "synthetic units labelled sats; no fee or ROI inference",
+    "cost_sats": 4,
+    "diverted_sats": 0,
+    "elapsed_blocks": 1,
+    "evidence_level": "synthetic-model",
+    "frozen_sats": 0,
+    "funded_target_preserved": true,
+    "legitimate_success": false,
+    "steps": 4,
+    "terminal": true,
+    "unauthorized_sats": 90000,
+    "violated_checks": [
+      "amount_sats"
+    ]
+  },
+  "seed_action_count": 1
+}

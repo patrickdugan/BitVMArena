@@ -1,0 +1,537 @@
+{
+  "all_expectations_met": true,
+  "cases": [
+    {
+      "category": "honest-control",
+      "expectation_met": true,
+      "expected_attacker_success": false,
+      "profile": "strict",
+      "replay_verified": true,
+      "scenario_id": "honest-uncontested",
+      "score": {
+        "attacker_success": false,
+        "cost_model": "synthetic units labelled sats; no fee or ROI inference",
+        "cost_sats": 3,
+        "diverted_sats": 0,
+        "elapsed_blocks": 7,
+        "evidence_level": "synthetic-model",
+        "frozen_sats": 0,
+        "funded_target_preserved": true,
+        "legitimate_success": true,
+        "steps": 3,
+        "terminal": true,
+        "unauthorized_sats": 0,
+        "violated_checks": []
+      }
+    },
+    {
+      "category": "honest-control",
+      "expectation_met": true,
+      "expected_attacker_success": false,
+      "profile": "strict",
+      "replay_verified": true,
+      "scenario_id": "honest-challenged",
+      "score": {
+        "attacker_success": false,
+        "cost_model": "synthetic units labelled sats; no fee or ROI inference",
+        "cost_sats": 4,
+        "diverted_sats": 0,
+        "elapsed_blocks": 0,
+        "evidence_level": "synthetic-model",
+        "frozen_sats": 0,
+        "funded_target_preserved": true,
+        "legitimate_success": true,
+        "steps": 4,
+        "terminal": true,
+        "unauthorized_sats": 0,
+        "violated_checks": []
+      }
+    },
+    {
+      "category": "authority-binding",
+      "expectation_met": true,
+      "expected_attacker_success": false,
+      "profile": "strict",
+      "replay_verified": true,
+      "scenario_id": "output-substitution",
+      "score": {
+        "attacker_success": false,
+        "cost_model": "synthetic units labelled sats; no fee or ROI inference",
+        "cost_sats": 5,
+        "diverted_sats": 0,
+        "elapsed_blocks": 5,
+        "evidence_level": "synthetic-model",
+        "frozen_sats": 0,
+        "funded_target_preserved": true,
+        "legitimate_success": true,
+        "steps": 5,
+        "terminal": true,
+        "unauthorized_sats": 0,
+        "violated_checks": []
+      }
+    },
+    {
+      "category": "authority-binding",
+      "expectation_met": true,
+      "expected_attacker_success": true,
+      "profile": "output-unbound",
+      "replay_verified": true,
+      "scenario_id": "output-substitution",
+      "score": {
+        "attacker_success": true,
+        "cost_model": "synthetic units labelled sats; no fee or ROI inference",
+        "cost_sats": 4,
+        "diverted_sats": 100000,
+        "elapsed_blocks": 1,
+        "evidence_level": "synthetic-model",
+        "frozen_sats": 0,
+        "funded_target_preserved": true,
+        "legitimate_success": false,
+        "steps": 4,
+        "terminal": true,
+        "unauthorized_sats": 100000,
+        "violated_checks": [
+          "recipient"
+        ]
+      }
+    },
+    {
+      "category": "authority-binding",
+      "expectation_met": true,
+      "expected_attacker_success": false,
+      "profile": "strict",
+      "replay_verified": true,
+      "scenario_id": "amount-substitution",
+      "score": {
+        "attacker_success": false,
+        "cost_model": "synthetic units labelled sats; no fee or ROI inference",
+        "cost_sats": 5,
+        "diverted_sats": 0,
+        "elapsed_blocks": 5,
+        "evidence_level": "synthetic-model",
+        "frozen_sats": 0,
+        "funded_target_preserved": true,
+        "legitimate_success": true,
+        "steps": 5,
+        "terminal": true,
+        "unauthorized_sats": 0,
+        "violated_checks": []
+      }
+    },
+    {
+      "category": "authority-binding",
+      "expectation_met": true,
+      "expected_attacker_success": true,
+      "profile": "amount-unbound",
+      "replay_verified": true,
+      "scenario_id": "amount-substitution",
+      "score": {
+        "attacker_success": true,
+        "cost_model": "synthetic units labelled sats; no fee or ROI inference",
+        "cost_sats": 4,
+        "diverted_sats": 0,
+        "elapsed_blocks": 1,
+        "evidence_level": "synthetic-model",
+        "frozen_sats": 0,
+        "funded_target_preserved": true,
+        "legitimate_success": false,
+        "steps": 4,
+        "terminal": true,
+        "unauthorized_sats": 90000,
+        "violated_checks": [
+          "amount_sats"
+        ]
+      }
+    },
+    {
+      "category": "authority-binding",
+      "expectation_met": true,
+      "expected_attacker_success": false,
+      "profile": "strict",
+      "replay_verified": true,
+      "scenario_id": "context-rebinding",
+      "score": {
+        "attacker_success": false,
+        "cost_model": "synthetic units labelled sats; no fee or ROI inference",
+        "cost_sats": 5,
+        "diverted_sats": 0,
+        "elapsed_blocks": 5,
+        "evidence_level": "synthetic-model",
+        "frozen_sats": 0,
+        "funded_target_preserved": true,
+        "legitimate_success": true,
+        "steps": 5,
+        "terminal": true,
+        "unauthorized_sats": 0,
+        "violated_checks": []
+      }
+    },
+    {
+      "category": "authority-binding",
+      "expectation_met": true,
+      "expected_attacker_success": true,
+      "profile": "context-unbound",
+      "replay_verified": true,
+      "scenario_id": "context-rebinding",
+      "score": {
+        "attacker_success": true,
+        "cost_model": "synthetic units labelled sats; no fee or ROI inference",
+        "cost_sats": 4,
+        "diverted_sats": 0,
+        "elapsed_blocks": 1,
+        "evidence_level": "synthetic-model",
+        "frozen_sats": 0,
+        "funded_target_preserved": true,
+        "legitimate_success": false,
+        "steps": 4,
+        "terminal": true,
+        "unauthorized_sats": 100000,
+        "violated_checks": [
+          "context"
+        ]
+      }
+    },
+    {
+      "category": "authority-binding",
+      "expectation_met": true,
+      "expected_attacker_success": false,
+      "profile": "strict",
+      "replay_verified": true,
+      "scenario_id": "outpoint-rebinding",
+      "score": {
+        "attacker_success": false,
+        "cost_model": "synthetic units labelled sats; no fee or ROI inference",
+        "cost_sats": 5,
+        "diverted_sats": 0,
+        "elapsed_blocks": 5,
+        "evidence_level": "synthetic-model",
+        "frozen_sats": 0,
+        "funded_target_preserved": true,
+        "legitimate_success": true,
+        "steps": 5,
+        "terminal": true,
+        "unauthorized_sats": 0,
+        "violated_checks": []
+      }
+    },
+    {
+      "category": "authority-binding",
+      "expectation_met": true,
+      "expected_attacker_success": true,
+      "profile": "outpoint-unbound",
+      "replay_verified": true,
+      "scenario_id": "outpoint-rebinding",
+      "score": {
+        "attacker_success": true,
+        "cost_model": "synthetic units labelled sats; no fee or ROI inference",
+        "cost_sats": 4,
+        "diverted_sats": 0,
+        "elapsed_blocks": 1,
+        "evidence_level": "synthetic-model",
+        "frozen_sats": 0,
+        "funded_target_preserved": true,
+        "legitimate_success": false,
+        "steps": 4,
+        "terminal": true,
+        "unauthorized_sats": 100000,
+        "violated_checks": [
+          "outpoint"
+        ]
+      }
+    },
+    {
+      "category": "authority-binding",
+      "expectation_met": true,
+      "expected_attacker_success": false,
+      "profile": "strict",
+      "replay_verified": true,
+      "scenario_id": "authority-rebinding",
+      "score": {
+        "attacker_success": false,
+        "cost_model": "synthetic units labelled sats; no fee or ROI inference",
+        "cost_sats": 5,
+        "diverted_sats": 0,
+        "elapsed_blocks": 5,
+        "evidence_level": "synthetic-model",
+        "frozen_sats": 0,
+        "funded_target_preserved": true,
+        "legitimate_success": true,
+        "steps": 5,
+        "terminal": true,
+        "unauthorized_sats": 0,
+        "violated_checks": []
+      }
+    },
+    {
+      "category": "authority-binding",
+      "expectation_met": true,
+      "expected_attacker_success": true,
+      "profile": "authority-unbound",
+      "replay_verified": true,
+      "scenario_id": "authority-rebinding",
+      "score": {
+        "attacker_success": true,
+        "cost_model": "synthetic units labelled sats; no fee or ROI inference",
+        "cost_sats": 4,
+        "diverted_sats": 0,
+        "elapsed_blocks": 1,
+        "evidence_level": "synthetic-model",
+        "frozen_sats": 0,
+        "funded_target_preserved": true,
+        "legitimate_success": false,
+        "steps": 4,
+        "terminal": true,
+        "unauthorized_sats": 100000,
+        "violated_checks": [
+          "authority_id"
+        ]
+      }
+    },
+    {
+      "category": "authority-binding",
+      "expectation_met": true,
+      "expected_attacker_success": false,
+      "profile": "strict",
+      "replay_verified": true,
+      "scenario_id": "program-rebinding",
+      "score": {
+        "attacker_success": false,
+        "cost_model": "synthetic units labelled sats; no fee or ROI inference",
+        "cost_sats": 5,
+        "diverted_sats": 0,
+        "elapsed_blocks": 5,
+        "evidence_level": "synthetic-model",
+        "frozen_sats": 0,
+        "funded_target_preserved": true,
+        "legitimate_success": true,
+        "steps": 5,
+        "terminal": true,
+        "unauthorized_sats": 0,
+        "violated_checks": []
+      }
+    },
+    {
+      "category": "authority-binding",
+      "expectation_met": true,
+      "expected_attacker_success": true,
+      "profile": "program-unbound",
+      "replay_verified": true,
+      "scenario_id": "program-rebinding",
+      "score": {
+        "attacker_success": true,
+        "cost_model": "synthetic units labelled sats; no fee or ROI inference",
+        "cost_sats": 4,
+        "diverted_sats": 0,
+        "elapsed_blocks": 1,
+        "evidence_level": "synthetic-model",
+        "frozen_sats": 0,
+        "funded_target_preserved": true,
+        "legitimate_success": false,
+        "steps": 4,
+        "terminal": true,
+        "unauthorized_sats": 100000,
+        "violated_checks": [
+          "program_id"
+        ]
+      }
+    },
+    {
+      "category": "proof-validity",
+      "expectation_met": true,
+      "expected_attacker_success": false,
+      "profile": "strict",
+      "replay_verified": true,
+      "scenario_id": "invalid-arithmetic",
+      "score": {
+        "attacker_success": false,
+        "cost_model": "synthetic units labelled sats; no fee or ROI inference",
+        "cost_sats": 5,
+        "diverted_sats": 0,
+        "elapsed_blocks": 5,
+        "evidence_level": "synthetic-model",
+        "frozen_sats": 0,
+        "funded_target_preserved": true,
+        "legitimate_success": true,
+        "steps": 5,
+        "terminal": true,
+        "unauthorized_sats": 0,
+        "violated_checks": []
+      }
+    },
+    {
+      "category": "proof-validity",
+      "expectation_met": true,
+      "expected_attacker_success": true,
+      "profile": "proof-unchecked",
+      "replay_verified": true,
+      "scenario_id": "invalid-arithmetic",
+      "score": {
+        "attacker_success": true,
+        "cost_model": "synthetic units labelled sats; no fee or ROI inference",
+        "cost_sats": 4,
+        "diverted_sats": 0,
+        "elapsed_blocks": 1,
+        "evidence_level": "synthetic-model",
+        "frozen_sats": 0,
+        "funded_target_preserved": true,
+        "legitimate_success": false,
+        "steps": 4,
+        "terminal": true,
+        "unauthorized_sats": 100000,
+        "violated_checks": [
+          "witness"
+        ]
+      }
+    },
+    {
+      "category": "timeout",
+      "expectation_met": true,
+      "expected_attacker_success": false,
+      "profile": "strict",
+      "replay_verified": true,
+      "scenario_id": "early-finalization",
+      "score": {
+        "attacker_success": false,
+        "cost_model": "synthetic units labelled sats; no fee or ROI inference",
+        "cost_sats": 3,
+        "diverted_sats": 0,
+        "elapsed_blocks": 7,
+        "evidence_level": "synthetic-model",
+        "frozen_sats": 0,
+        "funded_target_preserved": true,
+        "legitimate_success": true,
+        "steps": 3,
+        "terminal": true,
+        "unauthorized_sats": 0,
+        "violated_checks": []
+      }
+    },
+    {
+      "category": "timeout",
+      "expectation_met": true,
+      "expected_attacker_success": true,
+      "profile": "early-finalize",
+      "replay_verified": true,
+      "scenario_id": "early-finalization",
+      "score": {
+        "attacker_success": true,
+        "cost_model": "synthetic units labelled sats; no fee or ROI inference",
+        "cost_sats": 2,
+        "diverted_sats": 100000,
+        "elapsed_blocks": 0,
+        "evidence_level": "synthetic-model",
+        "frozen_sats": 0,
+        "funded_target_preserved": true,
+        "legitimate_success": false,
+        "steps": 2,
+        "terminal": true,
+        "unauthorized_sats": 100000,
+        "violated_checks": [
+          "challenge_window",
+          "recipient"
+        ]
+      }
+    },
+    {
+      "category": "timeout",
+      "expectation_met": true,
+      "expected_attacker_success": false,
+      "profile": "strict",
+      "replay_verified": true,
+      "scenario_id": "deadline-boundary",
+      "score": {
+        "attacker_success": false,
+        "cost_model": "synthetic units labelled sats; no fee or ROI inference",
+        "cost_sats": 5,
+        "diverted_sats": 0,
+        "elapsed_blocks": 10,
+        "evidence_level": "synthetic-model",
+        "frozen_sats": 0,
+        "funded_target_preserved": true,
+        "legitimate_success": true,
+        "steps": 5,
+        "terminal": true,
+        "unauthorized_sats": 0,
+        "violated_checks": []
+      }
+    },
+    {
+      "category": "timeout",
+      "expectation_met": true,
+      "expected_attacker_success": true,
+      "profile": "output-unbound",
+      "replay_verified": true,
+      "scenario_id": "deadline-boundary",
+      "score": {
+        "attacker_success": true,
+        "cost_model": "synthetic units labelled sats; no fee or ROI inference",
+        "cost_sats": 4,
+        "diverted_sats": 100000,
+        "elapsed_blocks": 6,
+        "evidence_level": "synthetic-model",
+        "frozen_sats": 0,
+        "funded_target_preserved": true,
+        "legitimate_success": false,
+        "steps": 4,
+        "terminal": true,
+        "unauthorized_sats": 100000,
+        "violated_checks": [
+          "recipient"
+        ]
+      }
+    },
+    {
+      "category": "liveness",
+      "expectation_met": true,
+      "expected_attacker_success": false,
+      "profile": "strict",
+      "replay_verified": true,
+      "scenario_id": "bounded-censorship",
+      "score": {
+        "attacker_success": false,
+        "cost_model": "synthetic units labelled sats; no fee or ROI inference",
+        "cost_sats": 203,
+        "diverted_sats": 0,
+        "elapsed_blocks": 7,
+        "evidence_level": "synthetic-model",
+        "frozen_sats": 0,
+        "funded_target_preserved": true,
+        "legitimate_success": true,
+        "steps": 3,
+        "terminal": true,
+        "unauthorized_sats": 0,
+        "violated_checks": []
+      }
+    },
+    {
+      "category": "assumption-control",
+      "expectation_met": true,
+      "expected_attacker_success": true,
+      "profile": "strict",
+      "replay_verified": true,
+      "scenario_id": "watchtower-outage",
+      "score": {
+        "attacker_success": true,
+        "cost_model": "synthetic units labelled sats; no fee or ROI inference",
+        "cost_sats": 3,
+        "diverted_sats": 100000,
+        "elapsed_blocks": 7,
+        "evidence_level": "synthetic-model",
+        "frozen_sats": 0,
+        "funded_target_preserved": true,
+        "legitimate_success": false,
+        "steps": 3,
+        "terminal": true,
+        "unauthorized_sats": 100000,
+        "violated_checks": [
+          "recipient"
+        ]
+      }
+    }
+  ],
+  "engine_version": "0.1.0",
+  "episodes": 22,
+  "evidence_level": "synthetic-model",
+  "schema_version": 1,
+  "scope": "Scripted calibration and assumption controls; no empirical model or Bitcoin security rate."
+}

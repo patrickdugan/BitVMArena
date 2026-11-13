@@ -1,0 +1,57 @@
+{
+  "schema": "bitvm-arena/recovered-study/v1",
+  "repository": "patrickdugan/bitcoin-rs",
+  "commit": "24a5593350f42efc8a96047aa9e7e114fa22cb08",
+  "base_commit": "29ca519031fcd67f467881e16ba73e0eb1211759",
+  "pull_request": "https://github.com/patrickdugan/bitcoin-rs/pull/4",
+  "files": [
+    {
+      "path": ".github/workflows/bitvm-authority-enumeration.yml",
+      "git_blob_sha1": "6bc6fd90a598ab0a8fa10b11d351b88575699d85",
+      "sha256": "7dbb1376cf90691627dc74e73742947c7e59b0521b53026f411859cf9ebd0e81",
+      "bytes": 2291
+    },
+    {
+      "path": "docs/research/bitvm-authority-enumeration.md",
+      "git_blob_sha1": "17b8e488ba401ae076e0badd292d75d6db74ab38",
+      "sha256": "e4f35a61a071e146bff0f7c3eb4a72b4583ccd82167e94a31912805a9046dbd9",
+      "bytes": 19584
+    },
+    {
+      "path": "scripts/research/bitvm_authority_enumeration.py",
+      "git_blob_sha1": "0bfaca0e4c494ecb794ac934e2e90b4499f1375f",
+      "sha256": "d429c580196cfca559c02c0e363eaae11317cc54e054da6c1639fba971175780",
+      "bytes": 14474
+    },
+    {
+      "path": "scripts/tests/data/bitvm-authority-enumeration/arena_scenarios.jsonl",
+      "git_blob_sha1": "a34fe1e1a300595b46846237c74ca3b1d41db9f5",
+      "sha256": "7576dce41a106e2988ecfd8ebff5ae1250a84415fc4f8d00d09e2f488d550e7f",
+      "bytes": 4600
+    },
+    {
+      "path": "scripts/tests/data/bitvm-authority-enumeration/evidence.sha256",
+      "git_blob_sha1": "b3174227c32ce2e38f21ef3dd1f3483e228002ac",
+      "sha256": "3a1fd3a0e029352db01bf8e985ecc51353da026a3b12d716849f8f0231373c1e",
+      "bytes": 252
+    },
+    {
+      "path": "scripts/tests/data/bitvm-authority-enumeration/provenance.json",
+      "git_blob_sha1": "ff290e60de6e27eb9d71422a893bdf385c3d122c",
+      "sha256": "862ab059d1706007bccefd2705d266dee0213c7bd8b0cd4b5d20efcfd875ae06",
+      "bytes": 2190
+    },
+    {
+      "path": "scripts/tests/data/bitvm-authority-enumeration/results.json",
+      "git_blob_sha1": "f2a99828743258b1cc96eae0a6daa2988e850b80",
+      "sha256": "ace9c26f8dcbb6e94a3dbfce9ec3a0bfd8b5363727e869d87f3f7c05438ff729",
+      "bytes": 6642
+    },
+    {
+      "path": "scripts/tests/test_bitvm_authority_enumeration.py",
+      "git_blob_sha1": "9e4a4cee32bd4393d59582ea47d84ff2c7573315",
+      "sha256": "bdca4db188d4b85020cd98e4270cd5bfee1564a9f43e1ce9b82ff62d29223a30",
+      "bytes": 4192
+    }
+  ]
+}

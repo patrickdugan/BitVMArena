@@ -1,0 +1,134 @@
+{
+  "engine_version": "0.1.0",
+  "events": [
+    {
+      "accepted": true,
+      "action": {
+        "amount_sats": 90000,
+        "kind": "claim"
+      },
+      "after": "6db3241b2317bbcd7bcb7d0e88082aa49a29ca6eee618329c0765d6b1a5b7529",
+      "before": "51f77c5ff6cd4661f22f1b60a28718a6f23dfb91fee71704c03d644bc6dcb6c0",
+      "error": null,
+      "event_hash": "6cbe9300d7563f1a554c2af02e457cb849f108f6b5e2dfe2460da073af41863e",
+      "height": 0,
+      "index": 0,
+      "phase": "claimed",
+      "previous_event_hash": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "accepted": true,
+      "action": {
+        "blocks": 1,
+        "kind": "advance"
+      },
+      "after": "47e3d8981eeb66ba31818760c026d117abfd1b557502b98a676cf5cacc2c6fba",
+      "before": "6db3241b2317bbcd7bcb7d0e88082aa49a29ca6eee618329c0765d6b1a5b7529",
+      "error": null,
+      "event_hash": "eb2808d1e493aedf4178772f208088d9a9ea3cbd751a6e074fa7a0f7b6b61b0b",
+      "height": 1,
+      "index": 1,
+      "phase": "challenged",
+      "previous_event_hash": "6cbe9300d7563f1a554c2af02e457cb849f108f6b5e2dfe2460da073af41863e"
+    },
+    {
+      "accepted": false,
+      "action": {
+        "kind": "respond"
+      },
+      "after": "58d55439a1ffd922f1a6d69dcfa7b13bc245b86cd6ec02d686278ef1ae6a4bef",
+      "before": "47e3d8981eeb66ba31818760c026d117abfd1b557502b98a676cf5cacc2c6fba",
+      "error": "implementation rejected proof or authority binding",
+      "event_hash": "c7809ccc7813f92a7e99be02080d2057e2754193e189f943720156783d135c5f",
+      "height": 1,
+      "index": 2,
+      "phase": "challenged",
+      "previous_event_hash": "eb2808d1e493aedf4178772f208088d9a9ea3cbd751a6e074fa7a0f7b6b61b0b"
+    },
+    {
+      "accepted": false,
+      "action": {
+        "kind": "finalize"
+      },
+      "after": "570b632708ef03673bd3bf00e31810ec24646a345cd80f9f39eb94705be8616c",
+      "before": "58d55439a1ffd922f1a6d69dcfa7b13bc245b86cd6ec02d686278ef1ae6a4bef",
+      "error": "claim cannot settle in current phase",
+      "event_hash": "16de13782c2b2bcc88d4a681224e088f552d7f6fcd1cde0d3ffcefe4bf6a3465",
+      "height": 1,
+      "index": 3,
+      "phase": "challenged",
+      "previous_event_hash": "c7809ccc7813f92a7e99be02080d2057e2754193e189f943720156783d135c5f"
+    },
+    {
+      "accepted": true,
+      "action": {
+        "blocks": 4,
+        "kind": "advance"
+      },
+      "after": "e14fad830ecd28ffa34295ebe2bf0c98d66083760110762ebe231da74b4f62dc",
+      "before": "570b632708ef03673bd3bf00e31810ec24646a345cd80f9f39eb94705be8616c",
+      "error": null,
+      "event_hash": "aff923ade93a1db7c7a7b433e0d66f877b75d3adffcec4e927947c3820b9d7d4",
+      "height": 5,
+      "index": 4,
+      "phase": "rejected",
+      "previous_event_hash": "16de13782c2b2bcc88d4a681224e088f552d7f6fcd1cde0d3ffcefe4bf6a3465"
+    }
+  ],
+  "final_state": {
+    "censored_until": -1,
+    "censorship_used": 0,
+    "challenge_deadline": 6,
+    "claim": {
+      "amount_sats": 90000,
+      "authority_id": "2808326ea2af1505252d52e05b7498d9b97f6019a669b7d557181e5dd9d979b2",
+      "context": "f80435c274d430590f54a09369ddd797171875dd8710b7fd241c7afd7a1d0ead",
+      "outpoint": "e9ae357b9204794ccb45b023e4bc2ecc79fc9cae929fe8191bd6d96b65e5ecd5:0",
+      "program_id": "toy-muladd-v1",
+      "recipient": "synthetic:depositor",
+      "witness": {
+        "a": 7,
+        "b": 11,
+        "c": 3,
+        "modulus": 97,
+        "result": 80
+      }
+    },
+    "claim_height": 0,
+    "cost_sats": 5,
+    "escrow_sats": 0,
+    "funded_target_digest": "5dd5334779ba9cc8de06668f3e45e4b7cdd59d0ab237f3aa26170cb077b6ef7d",
+    "height": 5,
+    "phase": "rejected",
+    "response_deadline": 4,
+    "transfers": [
+      {
+        "amount_sats": 100000,
+        "authorized": true,
+        "recipient": "synthetic:depositor",
+        "violated_checks": []
+      }
+    ]
+  },
+  "funded_target_digest": "5dd5334779ba9cc8de06668f3e45e4b7cdd59d0ab237f3aa26170cb077b6ef7d",
+  "profile": "strict",
+  "scenario_digest": "8c8354339c11b906d54ef396c7f643fc7f71d489299136663fc74d8dd6145226",
+  "scenario_id": "amount-substitution",
+  "schema_version": 1,
+  "score": {
+    "attacker_success": false,
+    "cost_model": "synthetic units labelled sats; no fee or ROI inference",
+    "cost_sats": 5,
+    "diverted_sats": 0,
+    "elapsed_blocks": 5,
+    "evidence_level": "synthetic-model",
+    "frozen_sats": 0,
+    "funded_target_preserved": true,
+    "legitimate_success": true,
+    "steps": 5,
+    "terminal": true,
+    "unauthorized_sats": 0,
+    "violated_checks": []
+  },
+  "seed_action_count": 1
+}

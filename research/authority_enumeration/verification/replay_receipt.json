@@ -1,0 +1,23 @@
+{
+  "schema": "bitvm-arena/authority-replay/v1",
+  "evidence_level": "measured_CPA_python",
+  "source_commit": "29ca519031fcd67f467881e16ba73e0eb1211759",
+  "study_commit": "24a5593350f42efc8a96047aa9e7e114fa22cb08",
+  "verified_dependency_files": 9,
+  "generated_evidence_sha256": {
+    "results.json": "ace9c26f8dcbb6e94a3dbfce9ec3a0bfd8b5363727e869d87f3f7c05438ff729",
+    "compiled_authorities.json": "6ea83cc280956b456bf8b02181d37956a8e22638e17f8faf7174c7e6f19441ae",
+    "circuits.jsonl": "35ccc2601e705bb5a8de0bc383e571d3ca5bc6eac51848f841ef38f26b0b4614"
+  },
+  "compiler": {
+    "programs_tested": 32,
+    "exhaustive_truth_tables_represented": 16,
+    "input_cases": 256,
+    "accepted": 72,
+    "mismatches": 0,
+    "level": "existing independent Python Script oracle; no native HF verifier"
+  },
+  "mutations": 11,
+  "native_consensus_run": false,
+  "live_funds": false
+}

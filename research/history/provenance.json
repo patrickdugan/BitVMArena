@@ -1,0 +1,117 @@
+{
+  "schema": "bitvm-arena/historical-source-recovery/v1",
+  "source": "user-provided rollout-2026-04-25T13-02-38-019dc597-e18e-7a02-8ab0-c0c8ada0ca0b(1).jsonl",
+  "source_read_date": "2026-11-13",
+  "recorded_checkout": "C:\\projects\\BitVMArena",
+  "observed_head_prefix": "da9056f",
+  "observed_history": [
+    {
+      "commit_prefix": "da9056f",
+      "subject": "Add Shinigami ZK proof arena extension"
+    },
+    {
+      "commit_prefix": "2cd6112",
+      "subject": "Add TradeLayer stack Arena round two"
+    },
+    {
+      "commit_prefix": "547840a",
+      "subject": "Add UTXORef TradeLayer send Arena red-team pass"
+    },
+    {
+      "commit_prefix": "6ca5b6c",
+      "subject": "Add BitVM Arena five-layer red-team stack"
+    },
+    {
+      "commit_prefix": "db7fd56",
+      "subject": "Initial BitVM Arena with UTXORef research loop"
+    }
+  ],
+  "recovery_method": "PowerShell Get-Content output captured on 2026-07-12; command preamble removed, concatenated files split at independently inspected file boundaries, CRLF normalized to LF",
+  "source_git_blob_hashes_available": false,
+  "runtime_dependencies_complete": false,
+  "files": [
+    {
+      "path": "src/bitvm_arena/rig.py",
+      "sha256": "a50fe1098cbd45b8c2a94ced93c346ce898b33629f327d4964b7bf08f3afe582",
+      "bytes": 9513,
+      "record_line": 47752,
+      "completeness": "complete_command_output",
+      "executable_in_current_arena": false,
+      "recorded_read_utc": "2026-07-12T21:58:29.852Z"
+    },
+    {
+      "path": "src/bitvm_arena/review.py",
+      "sha256": "f06a3abf8966a1eb0dec3379a6c2ff185913da3dfa15a55c6d1b7cbb420e5d40",
+      "bytes": 7618,
+      "record_line": 47752,
+      "completeness": "complete_command_output",
+      "executable_in_current_arena": false,
+      "recorded_read_utc": "2026-07-12T21:58:29.852Z"
+    },
+    {
+      "path": "src/bitvm_arena/attack.py",
+      "sha256": "853d8054bc9d39968a125d81399d4b9f68422337f010217ea1f5ac7ee24df042",
+      "bytes": 3592,
+      "record_line": 47752,
+      "completeness": "complete_command_output",
+      "executable_in_current_arena": false,
+      "recorded_read_utc": "2026-07-12T21:58:29.852Z"
+    },
+    {
+      "path": "src/bitvm_arena/validation.py",
+      "sha256": "d72bcb27618bf82aca376ec2a5d9f6743bc0a50a8b0ca94538cc1e63614ca7bc",
+      "bytes": 7583,
+      "record_line": 47752,
+      "completeness": "complete_command_output",
+      "executable_in_current_arena": false,
+      "recorded_read_utc": "2026-07-12T21:58:29.852Z"
+    },
+    {
+      "path": "scripts/run_five_layer_stack.py",
+      "sha256": "6bbd8c847032f30358e8f092bcc073eac4c565292106c3c80c781ccaadc8a723",
+      "bytes": 3576,
+      "record_line": 47752,
+      "completeness": "complete_command_output",
+      "executable_in_current_arena": false,
+      "recorded_read_utc": "2026-07-12T21:58:29.852Z"
+    },
+    {
+      "path": "pyproject.toml",
+      "sha256": "695675a3c86ed6db738ac0d5b87b2a3c058de5050f0497327b03d26418bc3b63",
+      "bytes": 544,
+      "record_line": 47731,
+      "completeness": "complete_command_output",
+      "executable_in_current_arena": false,
+      "recorded_read_utc": "2026-07-12T21:57:51.722Z"
+    },
+    {
+      "path": "README.md",
+      "sha256": "101c41478bec02c4065d5bd0eb9bb2232e17eae2a4101fe5a9b154a311ffffc0",
+      "bytes": 7595,
+      "record_line": 47731,
+      "completeness": "bounded_read_240_lines",
+      "executable_in_current_arena": false,
+      "recorded_read_utc": "2026-07-12T21:57:51.722Z"
+    },
+    {
+      "path": "docs/five_layer_architecture.md",
+      "sha256": "6dad5a65bc2f0944d8b39071316975928afd99e8ac649bf6ea774fe8b4b68b42",
+      "bytes": 3243,
+      "record_line": 47764,
+      "completeness": "complete_command_output",
+      "executable_in_current_arena": false,
+      "recorded_read_utc": "2026-07-12T21:58:50.049Z"
+    },
+    {
+      "path": "docs/v0_5_5_deepening.md",
+      "sha256": "ace27853bcf9e4a07424e684c0c0e2ccc310baa8fe2bcdc3a2a530c9f93e803f",
+      "bytes": 6174,
+      "record_line": 47764,
+      "completeness": "complete_command_output",
+      "executable_in_current_arena": false,
+      "recorded_read_utc": "2026-07-12T21:58:50.049Z"
+    }
+  ],
+  "source_filename": "silico_cluster_setup_and_claim__rollout-2026-04-25T13-02-38-019dc597-e18e-7a02-8ab0-c0c8ada0ca0b(1).jsonl",
+  "observed_branch": "main"
+}

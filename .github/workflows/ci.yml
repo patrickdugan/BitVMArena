@@ -1,0 +1,51 @@
+name: BitVM Arena
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  core:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: ['3.11', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - run: python -m pip install -e .
+      - run: python -m unittest discover -s tests -v
+      - run: bitvm-arena benchmark --output runs/calibration
+
+  control-arena:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install -e '.[control]'
+      - run: python -m unittest discover -s tests -p test_control_arena.py -v
+
+  authority-replay:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: actions/checkout@v4
+        with:
+          repository: patrickdugan/bitcoin-rs
+          ref: 29ca519031fcd67f467881e16ba73e0eb1211759
+          path: .deps/bitcoin-rs
+      - run: python research/authority_enumeration/replay.py --bitcoin-rs .deps/bitcoin-rs --out runs/authority
+      - run: python -m unittest discover -s research/authority_enumeration/upstream/scripts/tests -p test_bitvm_authority_enumeration.py -v
+        env:
+          CPA_SOURCE: ${{ github.workspace }}/.deps/bitcoin-rs

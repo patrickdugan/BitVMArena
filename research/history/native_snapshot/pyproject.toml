@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bitvm-arena"
+version = "0.1.0"
+description = "A ControlArena-compatible BitVM blue/red-team setting focused on circuit compositions and loophole pressure."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "inspect-ai",
+    "control-arena",
+]
+
+[project.entry-points.control_arena]
+settings = "bitvm_arena.entrypoint"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]

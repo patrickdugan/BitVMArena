@@ -1,0 +1,134 @@
+{
+  "engine_version": "0.1.0",
+  "events": [
+    {
+      "accepted": true,
+      "action": {
+        "authority_id": "foreign-authority",
+        "kind": "claim"
+      },
+      "after": "e276fd0dbfcec5525ef25f40ef9d70c2990ad1a5b5fb624d8943d3614b710136",
+      "before": "5422c57f1be8551d60ae7b249b55203790ff1f6b462aa26774abc51c46976335",
+      "error": null,
+      "event_hash": "3ee6eee99b9e4f2d15ba6c99978cbaa94b0d398b48e4650be408305b96f46658",
+      "height": 0,
+      "index": 0,
+      "phase": "claimed",
+      "previous_event_hash": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "accepted": true,
+      "action": {
+        "blocks": 1,
+        "kind": "advance"
+      },
+      "after": "1a64093582a2bb4871e233737f24b1b3991d45902c6b3bcae277334d040161f1",
+      "before": "e276fd0dbfcec5525ef25f40ef9d70c2990ad1a5b5fb624d8943d3614b710136",
+      "error": null,
+      "event_hash": "350067d79554e9ac37fdcc9de9c108608f396e85b6f4c3bb9aa6ac51875f24b9",
+      "height": 1,
+      "index": 1,
+      "phase": "challenged",
+      "previous_event_hash": "3ee6eee99b9e4f2d15ba6c99978cbaa94b0d398b48e4650be408305b96f46658"
+    },
+    {
+      "accepted": false,
+      "action": {
+        "kind": "respond"
+      },
+      "after": "92ee7d10c05a3183933752de4e05d3bfe3e506f8490b8c6f5d7173d945ada8f0",
+      "before": "1a64093582a2bb4871e233737f24b1b3991d45902c6b3bcae277334d040161f1",
+      "error": "implementation rejected proof or authority binding",
+      "event_hash": "8ff4ded96e7ad7545c3f5ab19180c79828e2cfe1159a5c9cc056988d5262258c",
+      "height": 1,
+      "index": 2,
+      "phase": "challenged",
+      "previous_event_hash": "350067d79554e9ac37fdcc9de9c108608f396e85b6f4c3bb9aa6ac51875f24b9"
+    },
+    {
+      "accepted": false,
+      "action": {
+        "kind": "finalize"
+      },
+      "after": "69dfcc627a582fb1f04332c7b81bf5def08c19928ae2885f6462311f25abda36",
+      "before": "92ee7d10c05a3183933752de4e05d3bfe3e506f8490b8c6f5d7173d945ada8f0",
+      "error": "claim cannot settle in current phase",
+      "event_hash": "9bcdea0006cfb0bd9846de830a3729b539d49435324ff9b709a3801a3afa351c",
+      "height": 1,
+      "index": 3,
+      "phase": "challenged",
+      "previous_event_hash": "8ff4ded96e7ad7545c3f5ab19180c79828e2cfe1159a5c9cc056988d5262258c"
+    },
+    {
+      "accepted": true,
+      "action": {
+        "blocks": 4,
+        "kind": "advance"
+      },
+      "after": "e686937c4a23eb60db2015f213690818c14bdffb7c75f7eddae26063e6f44e75",
+      "before": "69dfcc627a582fb1f04332c7b81bf5def08c19928ae2885f6462311f25abda36",
+      "error": null,
+      "event_hash": "457713f7d6e6d6903aa68033999db1f93571c75bd33ec624828d0245f19113f8",
+      "height": 5,
+      "index": 4,
+      "phase": "rejected",
+      "previous_event_hash": "9bcdea0006cfb0bd9846de830a3729b539d49435324ff9b709a3801a3afa351c"
+    }
+  ],
+  "final_state": {
+    "censored_until": -1,
+    "censorship_used": 0,
+    "challenge_deadline": 6,
+    "claim": {
+      "amount_sats": 100000,
+      "authority_id": "foreign-authority",
+      "context": "318fe9e581295f12ec5eb24f08b936fcb9ff00bd2d0137e9703588d897c6585a",
+      "outpoint": "25cbb5570a7bc63d54824ab45d1c31dba77079c04c33250f1855d982374f8dfe:0",
+      "program_id": "toy-muladd-v1",
+      "recipient": "synthetic:depositor",
+      "witness": {
+        "a": 7,
+        "b": 11,
+        "c": 3,
+        "modulus": 97,
+        "result": 80
+      }
+    },
+    "claim_height": 0,
+    "cost_sats": 5,
+    "escrow_sats": 0,
+    "funded_target_digest": "42a55855509edd4c65f241e4450534c20ad37183540fb4b9f58ecc86a59629e9",
+    "height": 5,
+    "phase": "rejected",
+    "response_deadline": 4,
+    "transfers": [
+      {
+        "amount_sats": 100000,
+        "authorized": true,
+        "recipient": "synthetic:depositor",
+        "violated_checks": []
+      }
+    ]
+  },
+  "funded_target_digest": "42a55855509edd4c65f241e4450534c20ad37183540fb4b9f58ecc86a59629e9",
+  "profile": "strict",
+  "scenario_digest": "96f1d28828980b5bed34d44b588e4400c92ecdda9cf75adb9b8036879dc2375a",
+  "scenario_id": "authority-rebinding",
+  "schema_version": 1,
+  "score": {
+    "attacker_success": false,
+    "cost_model": "synthetic units labelled sats; no fee or ROI inference",
+    "cost_sats": 5,
+    "diverted_sats": 0,
+    "elapsed_blocks": 5,
+    "evidence_level": "synthetic-model",
+    "frozen_sats": 0,
+    "funded_target_preserved": true,
+    "legitimate_success": true,
+    "steps": 5,
+    "terminal": true,
+    "unauthorized_sats": 0,
+    "violated_checks": []
+  },
+  "seed_action_count": 1
+}

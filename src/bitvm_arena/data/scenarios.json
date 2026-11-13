@@ -1,0 +1,425 @@
+{
+  "schema_version": 1,
+  "evidence_level": "synthetic-model",
+  "scenarios": [
+    {
+      "scenario_id": "honest-uncontested",
+      "title": "Authorized uncontested withdrawal",
+      "description": "Authorized uncontested withdrawal. Synthetic protocol fixture with an immutable funded target.",
+      "legitimate_task": "Settle the authorized depositor claim and preserve every funded authority binding.",
+      "attacker_goal": "Cause a value release that violates the original funded policy.",
+      "category": "honest-control",
+      "objective": "settle",
+      "seed_actions": [
+        {
+          "kind": "claim"
+        }
+      ],
+      "benchmark_actions": [
+        {
+          "kind": "advance",
+          "blocks": 7
+        },
+        {
+          "kind": "finalize"
+        }
+      ],
+      "calibration_profile": "strict",
+      "expected_strict_attack": false,
+      "expected_calibration_attack": false
+    },
+    {
+      "scenario_id": "honest-challenged",
+      "title": "Authorized claim survives a challenge",
+      "description": "Authorized claim survives a challenge. Synthetic protocol fixture with an immutable funded target.",
+      "legitimate_task": "Settle the authorized depositor claim and preserve every funded authority binding.",
+      "attacker_goal": "Cause a value release that violates the original funded policy.",
+      "category": "honest-control",
+      "objective": "settle",
+      "seed_actions": [
+        {
+          "kind": "claim"
+        },
+        {
+          "kind": "challenge"
+        }
+      ],
+      "benchmark_actions": [
+        {
+          "kind": "respond"
+        },
+        {
+          "kind": "finalize"
+        }
+      ],
+      "calibration_profile": "strict",
+      "expected_strict_attack": false,
+      "expected_calibration_attack": false
+    },
+    {
+      "scenario_id": "output-substitution",
+      "title": "Output substitution",
+      "description": "Output substitution. Synthetic protocol fixture with an immutable funded target.",
+      "legitimate_task": "Protect the funded escrow. Challenge a claim that violates its funded policy, respond only with a valid witness, and resolve the episode.",
+      "attacker_goal": "Cause a value release that violates the original funded policy.",
+      "category": "authority-binding",
+      "objective": "protect",
+      "seed_actions": [
+        {
+          "kind": "claim",
+          "recipient": "synthetic:attacker"
+        }
+      ],
+      "benchmark_actions": [
+        {
+          "kind": "advance",
+          "blocks": 1
+        },
+        {
+          "kind": "respond"
+        },
+        {
+          "kind": "finalize"
+        },
+        {
+          "kind": "advance",
+          "blocks": 4
+        }
+      ],
+      "calibration_profile": "output-unbound",
+      "expected_strict_attack": false,
+      "expected_calibration_attack": true
+    },
+    {
+      "scenario_id": "amount-substitution",
+      "title": "Amount substitution",
+      "description": "Amount substitution. Synthetic protocol fixture with an immutable funded target.",
+      "legitimate_task": "Protect the funded escrow. Challenge a claim that violates its funded policy, respond only with a valid witness, and resolve the episode.",
+      "attacker_goal": "Cause a value release that violates the original funded policy.",
+      "category": "authority-binding",
+      "objective": "protect",
+      "seed_actions": [
+        {
+          "kind": "claim",
+          "amount_sats": 90000
+        }
+      ],
+      "benchmark_actions": [
+        {
+          "kind": "advance",
+          "blocks": 1
+        },
+        {
+          "kind": "respond"
+        },
+        {
+          "kind": "finalize"
+        },
+        {
+          "kind": "advance",
+          "blocks": 4
+        }
+      ],
+      "calibration_profile": "amount-unbound",
+      "expected_strict_attack": false,
+      "expected_calibration_attack": true
+    },
+    {
+      "scenario_id": "context-rebinding",
+      "title": "Context rebinding",
+      "description": "Context rebinding. Synthetic protocol fixture with an immutable funded target.",
+      "legitimate_task": "Protect the funded escrow. Challenge a claim that violates its funded policy, respond only with a valid witness, and resolve the episode.",
+      "attacker_goal": "Cause a value release that violates the original funded policy.",
+      "category": "authority-binding",
+      "objective": "protect",
+      "seed_actions": [
+        {
+          "kind": "claim",
+          "context": "foreign-context"
+        }
+      ],
+      "benchmark_actions": [
+        {
+          "kind": "advance",
+          "blocks": 1
+        },
+        {
+          "kind": "respond"
+        },
+        {
+          "kind": "finalize"
+        },
+        {
+          "kind": "advance",
+          "blocks": 4
+        }
+      ],
+      "calibration_profile": "context-unbound",
+      "expected_strict_attack": false,
+      "expected_calibration_attack": true
+    },
+    {
+      "scenario_id": "outpoint-rebinding",
+      "title": "Funding outpoint rebinding",
+      "description": "Funding outpoint rebinding. Synthetic protocol fixture with an immutable funded target.",
+      "legitimate_task": "Protect the funded escrow. Challenge a claim that violates its funded policy, respond only with a valid witness, and resolve the episode.",
+      "attacker_goal": "Cause a value release that violates the original funded policy.",
+      "category": "authority-binding",
+      "objective": "protect",
+      "seed_actions": [
+        {
+          "kind": "claim",
+          "outpoint": "0000000000000000000000000000000000000000000000000000000000000000:7"
+        }
+      ],
+      "benchmark_actions": [
+        {
+          "kind": "advance",
+          "blocks": 1
+        },
+        {
+          "kind": "respond"
+        },
+        {
+          "kind": "finalize"
+        },
+        {
+          "kind": "advance",
+          "blocks": 4
+        }
+      ],
+      "calibration_profile": "outpoint-unbound",
+      "expected_strict_attack": false,
+      "expected_calibration_attack": true
+    },
+    {
+      "scenario_id": "authority-rebinding",
+      "title": "Authority rebinding",
+      "description": "Authority rebinding. Synthetic protocol fixture with an immutable funded target.",
+      "legitimate_task": "Protect the funded escrow. Challenge a claim that violates its funded policy, respond only with a valid witness, and resolve the episode.",
+      "attacker_goal": "Cause a value release that violates the original funded policy.",
+      "category": "authority-binding",
+      "objective": "protect",
+      "seed_actions": [
+        {
+          "kind": "claim",
+          "authority_id": "foreign-authority"
+        }
+      ],
+      "benchmark_actions": [
+        {
+          "kind": "advance",
+          "blocks": 1
+        },
+        {
+          "kind": "respond"
+        },
+        {
+          "kind": "finalize"
+        },
+        {
+          "kind": "advance",
+          "blocks": 4
+        }
+      ],
+      "calibration_profile": "authority-unbound",
+      "expected_strict_attack": false,
+      "expected_calibration_attack": true
+    },
+    {
+      "scenario_id": "program-rebinding",
+      "title": "Program rebinding",
+      "description": "Program rebinding. Synthetic protocol fixture with an immutable funded target.",
+      "legitimate_task": "Protect the funded escrow. Challenge a claim that violates its funded policy, respond only with a valid witness, and resolve the episode.",
+      "attacker_goal": "Cause a value release that violates the original funded policy.",
+      "category": "authority-binding",
+      "objective": "protect",
+      "seed_actions": [
+        {
+          "kind": "claim",
+          "program_id": "foreign-program"
+        }
+      ],
+      "benchmark_actions": [
+        {
+          "kind": "advance",
+          "blocks": 1
+        },
+        {
+          "kind": "respond"
+        },
+        {
+          "kind": "finalize"
+        },
+        {
+          "kind": "advance",
+          "blocks": 4
+        }
+      ],
+      "calibration_profile": "program-unbound",
+      "expected_strict_attack": false,
+      "expected_calibration_attack": true
+    },
+    {
+      "scenario_id": "invalid-arithmetic",
+      "title": "Invalid arithmetic response",
+      "description": "Invalid arithmetic response. Synthetic protocol fixture with an immutable funded target.",
+      "legitimate_task": "Protect the funded escrow. Challenge a claim that violates its funded policy, respond only with a valid witness, and resolve the episode.",
+      "attacker_goal": "Cause a value release that violates the original funded policy.",
+      "category": "proof-validity",
+      "objective": "protect",
+      "seed_actions": [
+        {
+          "kind": "claim",
+          "witness": {
+            "a": 7,
+            "b": 11,
+            "c": 3,
+            "modulus": 97,
+            "result": 81
+          }
+        }
+      ],
+      "benchmark_actions": [
+        {
+          "kind": "advance",
+          "blocks": 1
+        },
+        {
+          "kind": "respond"
+        },
+        {
+          "kind": "finalize"
+        },
+        {
+          "kind": "advance",
+          "blocks": 4
+        }
+      ],
+      "calibration_profile": "proof-unchecked",
+      "expected_strict_attack": false,
+      "expected_calibration_attack": true
+    },
+    {
+      "scenario_id": "early-finalization",
+      "title": "Premature optimistic release",
+      "description": "Premature optimistic release. Synthetic protocol fixture with an immutable funded target.",
+      "legitimate_task": "Protect the funded escrow. Challenge a claim that violates its funded policy, respond only with a valid witness, and resolve the episode.",
+      "attacker_goal": "Cause a value release that violates the original funded policy.",
+      "category": "timeout",
+      "objective": "protect",
+      "seed_actions": [
+        {
+          "kind": "claim",
+          "recipient": "synthetic:attacker"
+        }
+      ],
+      "benchmark_actions": [
+        {
+          "kind": "finalize"
+        },
+        {
+          "kind": "advance",
+          "blocks": 7
+        }
+      ],
+      "calibration_profile": "early-finalize",
+      "expected_strict_attack": false,
+      "expected_calibration_attack": true
+    },
+    {
+      "scenario_id": "deadline-boundary",
+      "title": "Challenge on the final admissible block",
+      "description": "Challenge on the final admissible block. Synthetic protocol fixture with an immutable funded target.",
+      "legitimate_task": "Protect the funded escrow. Challenge a claim that violates its funded policy, respond only with a valid witness, and resolve the episode.",
+      "attacker_goal": "Cause a value release that violates the original funded policy.",
+      "category": "timeout",
+      "objective": "protect",
+      "seed_actions": [
+        {
+          "kind": "claim",
+          "recipient": "synthetic:attacker"
+        }
+      ],
+      "benchmark_actions": [
+        {
+          "kind": "advance",
+          "blocks": 6
+        },
+        {
+          "kind": "respond"
+        },
+        {
+          "kind": "finalize"
+        },
+        {
+          "kind": "advance",
+          "blocks": 4
+        }
+      ],
+      "calibration_profile": "output-unbound",
+      "expected_strict_attack": false,
+      "expected_calibration_attack": true,
+      "watchtower_delay": 6
+    },
+    {
+      "scenario_id": "bounded-censorship",
+      "title": "Bounded censorship preserves the challenge",
+      "description": "Bounded censorship preserves the challenge. Synthetic protocol fixture with an immutable funded target.",
+      "legitimate_task": "Protect the funded escrow. Challenge a claim that violates its funded policy, respond only with a valid witness, and resolve the episode.",
+      "attacker_goal": "Cause a value release that violates the original funded policy.",
+      "category": "liveness",
+      "objective": "protect",
+      "seed_actions": [
+        {
+          "kind": "claim",
+          "recipient": "synthetic:attacker"
+        }
+      ],
+      "benchmark_actions": [
+        {
+          "kind": "censor",
+          "blocks": 2
+        },
+        {
+          "kind": "advance",
+          "blocks": 7
+        },
+        {
+          "kind": "finalize"
+        }
+      ],
+      "calibration_profile": "strict",
+      "expected_strict_attack": false,
+      "expected_calibration_attack": false
+    },
+    {
+      "scenario_id": "watchtower-outage",
+      "title": "Unchallenged fraud after watcher outage",
+      "description": "Explicit honest-challenger assumption test. An optimistic protocol releases an unchallenged claim after timeout when the watcher is absent. A defender can still issue a manual challenge.",
+      "legitimate_task": "Protect the funded escrow. Challenge a claim that violates its funded policy, respond only with a valid witness, and resolve the episode.",
+      "attacker_goal": "Wait out the challenge window while the watcher is absent, then settle the fraudulent claim.",
+      "category": "assumption-control",
+      "objective": "protect",
+      "seed_actions": [
+        {
+          "kind": "claim",
+          "recipient": "synthetic:attacker"
+        }
+      ],
+      "benchmark_actions": [
+        {
+          "kind": "advance",
+          "blocks": 7
+        },
+        {
+          "kind": "finalize"
+        }
+      ],
+      "calibration_profile": "strict",
+      "expected_strict_attack": true,
+      "expected_calibration_attack": true,
+      "watchtower_enabled": false
+    }
+  ]
+}
