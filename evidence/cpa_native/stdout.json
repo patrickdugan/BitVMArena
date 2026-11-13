@@ -1,0 +1,12 @@
+{
+  "status": "passed",
+  "confirmed_transitions": 4,
+  "rejection_count": 49,
+  "final_height": 104,
+  "peer_count": 0,
+  "node_exit_codes": [
+    0,
+    0,
+    0
+  ]
+}

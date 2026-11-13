@@ -1,0 +1,30 @@
+{
+  "artifact_id": 14006830303,
+  "artifact_sha256": "5676cc6f044e98b134266c13133f0451339fa371ddb4c3057209847c52d730a4",
+  "artifact_digest_matches_published": true,
+  "binary_source_commit": "188e2d78fbb623a12a42772120a2aa4e437905c1",
+  "binary_build_commit": "2e8f5f1f588ccf3bc85e8c2a8399bd1a05368a98",
+  "binary_source_tree": "c9f0f775b4ff5b08376505bb010b63ca731ba726",
+  "source": "https://github.com/patrickdugan/bitcoin-rs/blob/29ca519031fcd67f467881e16ba73e0eb1211759/docs/research/canonical-proof-authority.md",
+  "archive_member_sha256": {
+    "bitcoin-rs": "fe506c638478d173edd267422856b9fb02c8ab424b694b6c81554dce2a48caa6",
+    "source.tar.gz": "e976c8740a0459ef20b299bebd7b3715d9ab8924d1a3035b33550073f2455d78",
+    "staging/report.json": "1130b2aee6b11dfd332bcd6da9fad8c183b3cee47d46e78c2783fbe1e1e4b73c"
+  },
+  "build_command": [
+    "cargo",
+    "build",
+    "--locked",
+    "--jobs",
+    "2",
+    "--profile",
+    "quickstart",
+    "--target-dir",
+    "<build-target>",
+    "-p",
+    "bitcoin-rs",
+    "--no-default-features",
+    "--features",
+    "fjall,experimental-keyless-checksig-regtest,experimental-op-cat-regtest"
+  ]
+}

@@ -2,8 +2,9 @@
 
 BitVM Arena provides replayable adversarial protocol games and an independently
 maintained [ControlArena](https://github.com/UKGovernmentBEIS/control-arena)
-setting. The first release restores the project lineage, ships a working
-offline benchmark, and imports the current canonical-authority research.
+setting. It includes an offline dispute benchmark, a CPA reference-verifier
+setting, and a runner for the pinned CPA native regtest suite. Recovered
+project history and the canonical-authority study retain their provenance.
 
 ## Run it
 
@@ -26,16 +27,55 @@ Benchmark outputs contain deterministic event traces and a JSON summary.
 | Component | Scope | Evidence |
 | --- | --- | --- |
 | Protocol simulator | 13 scenarios and 22 scripted episodes, including nine runs under eight deliberately weakened profiles | Executed synthetic model |
-| ControlArena adapter | Typed tools, sample-local state, replay scoring, honest and attack modes | Actual SDK integration tests with scripted agents |
+| ControlArena settings | Dispute actions and 28 published CPA fixtures, with per-sample histories and replay scoring | Actual SDK integration tests with scripted agents |
+| CPA reference verifier | 28 fixtures with fixed-target scoring; 26 rejections and two accepted controls | Pinned compiler, independent Python Script interpreter and replayed receipts |
+| CPA native runner | Four confirmed transitions, 49 rejected adversarial cases and seven positive controls | Arena-executed isolated regtest, with exact transaction bytes and binary provenance |
 | Authority enumeration | 1,851 canonical NAND programs, 32 compiled authorities, 256 Python Script-oracle executions | Reproduced pinned CPA research |
 | Historical recovery | Nine reconstructed files from the original local Arena | Archived source captures with per-file provenance |
 | Campaign map | Seven lanes covering the simulator, CPA, Keyless-CHECKSIG, MULADDMOD, UTXORef and BitVM2 | Source-pinned plan; each lane declares its adapter status |
 
-The active engine executes a bounded optimistic dispute model. Its arithmetic
-witnesses are public fixtures. All balances and block heights are simulated;
-the engine has no network, wallet, node, or private-key interface.
-Native Bitcoin Script and regtest integrations have separate acceptance gates
-in [the campaign map](docs/campaigns.md).
+The dispute engine executes a bounded optimistic model with public arithmetic
+fixtures and simulated balances. The CPA reference setting executes a Python
+Script interpreter. The native runner starts an isolated experimental node and
+checks the upstream suite's funded transitions. Each receipt records its
+execution layer. [The campaign map](docs/campaigns.md) tracks the remaining
+adapter gates.
+
+## CPA verification
+
+Use a checkout of the pinned CPA source:
+
+```sh
+git clone https://github.com/patrickdugan/bitcoin-rs.git /tmp/bitcoin-rs-cpa
+git -C /tmp/bitcoin-rs-cpa checkout 29ca519031fcd67f467881e16ba73e0eb1211759
+bitvm-arena cpa-benchmark --source /tmp/bitcoin-rs-cpa --output runs/cpa
+bitvm-arena cpa-replay runs/cpa/trace.json --source /tmp/bitcoin-rs-cpa
+```
+
+The agent selects a published `case_id` from a finite catalogue. The evaluator
+owns the original funded outpoint, parent policy and attempt budget. An
+independent policy check evaluates each interpreter result. The wider-parent
+control uses its own funded authority and receives zero attack credit against
+the original parent.
+
+```python
+from bitvm_arena.cpa_control_arena import CPAReferenceSetting
+
+setting = CPAReferenceSetting(source_root="/tmp/bitcoin-rs-cpa", max_attempts=8)
+```
+
+[The reference guide](docs/cpa_reference.md) describes the fixtures and receipt
+contract. [The ControlArena guide](docs/control_arena_cpa.md) includes a
+model-free SDK run. The [native runner guide](docs/cpa_native.md) covers the
+separate end-to-end suite and its required binary. Retained evidence lives in
+[`evidence/cpa_reference`](evidence/cpa_reference) and
+[`evidence/cpa_native`](evidence/cpa_native).
+
+The native suite confirmed authorized transitions for two original funded
+coins and their committed successors. Its 49 rejected cases produced zero
+unauthorized release in that run. The seven positive controls include
+admission checks whose receipts explicitly record their confirmation scope.
+Model-driven trials and per-sample native fixture selection remain pending.
 
 ## Protocol games
 
@@ -112,15 +152,17 @@ execution and reproduces the frozen evidence. See
 
 | Path | Purpose |
 | --- | --- |
-| `src/bitvm_arena/` | Active simulator, CLI, fixtures and optional ControlArena setting |
+| `src/bitvm_arena/` | Simulator, CPA backends, CLI and optional ControlArena settings |
 | `tests/` | Core invariants, imported-study boundaries and SDK integration |
 | `research/authority_enumeration/` | Pinned imported research, catalogue and replay wrapper |
 | `research/history/` | Reconstructed historical source outside the active package |
 | `campaigns/initial_campaigns.json` | Exact target revisions, commands and acceptance gates |
 | `docs/architecture.md` | Trust boundaries and transition semantics |
+| `evidence/cpa_reference/` | Complete reference trace and benchmark summary |
+| `evidence/cpa_native/` | Native report, normalized receipt, frozen profile and executable provenance |
 
-CI runs the core on Python 3.11 and 3.13, the real ControlArena adapter on
-Python 3.11, and the authority replay against pinned `bitcoin-rs` source.
-Model-generated red-team results and full Bitcoin integration measurements
-will be added as their campaigns execute. Scripted calibration outcomes carry
-their synthetic evidence label throughout the exported data.
+CI runs the core on Python 3.11 and 3.13, both ControlArena settings on
+Python 3.11, the CPA reference fixtures and the authority replay against pinned
+`bitcoin-rs` source. Core tests also check the retained native receipt and its
+rejection paths. Running the native node again requires the explicitly selected
+experimental binary. [Validation notes](docs/validation.md) record what ran.

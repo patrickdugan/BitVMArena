@@ -25,7 +25,8 @@
     "upstream_recorded_regtest": "The source repository records native regtest evidence; Arena has not independently replayed it.",
     "arena_replayed_regtest": "Arena executed the pinned target and retained independently checked native receipts.",
     "design_hypothesis": "A specified campaign without a completed executable backend.",
-    "synthetic-model": "An executable Arena model with explicitly selected assumptions and planted faults."
+    "synthetic-model": "An executable Arena model with explicitly selected assumptions and planted faults.",
+    "native-regtest": "Receipt-level label for arena_replayed_regtest; execution_verified is true only after the pinned suite has run."
   },
   "campaigns": [
     {
@@ -94,7 +95,7 @@
         "dependency_commit": "29ca519031fcd67f467881e16ba73e0eb1211759",
         "local_import": "research/authority_enumeration/upstream"
       },
-      "arena_execution_status": "replayed_reference_study",
+      "arena_execution_status": "reference_setting_ready",
       "evidence_level": "reference_interpreter",
       "scenario_families": [
         "CPA_ENUM_PUBLIC_SCALAR",
@@ -116,12 +117,14 @@
       ],
       "upstream_commands": [],
       "next_acceptance_gates": [
-        "Attach candidate mutation actions to the ControlArena tool interface while retaining fixed-target receipt checks.",
-        "Promote individual cases to native regtest only after retaining their actual transaction receipts."
+        "Run declared model and control configurations against the reviewed fixture catalogue and retain full evaluation logs.",
+        "Extend reviewed fixture coverage with the original funded target held fixed.",
+        "Promote individual cases to native per-sample execution after binding their actual transaction receipts to the selected fixture."
       ],
       "limits": [
         "The catalogue includes planted controls and design hypotheses alongside measured oracle cases.",
-        "Prefix grinding and resource-profile proposals require separate execution evidence."
+        "Prefix grinding and resource-profile proposals require separate execution evidence.",
+        "The current agent tool selects published fixture IDs; reference acceptance has native_execution=false and settlement_observed=false."
       ],
       "sources": [
         "https://github.com/patrickdugan/bitcoin-rs/pull/4",
@@ -130,8 +133,19 @@
       "completed_checks": [
         "Eight imported files verified byte-for-byte",
         "Nine CPA dependency files verified before isolated execution",
-        "1851 canonical programs and 256 Script-oracle executions reproduced; zero expectation mismatches"
-      ]
+        "1851 canonical programs and 256 Script-oracle executions reproduced; zero expectation mismatches",
+        "All 28 reference fixtures matched expected outcomes and replayed exactly: 26 rejections, honest acceptance and a separately funded wider-parent calibration.",
+        "Eight CPA ControlArena SDK checks passed, including evaluator-owned scoring, attempt budgets and concurrent sample isolation.",
+        "Reference sessions execute captured worker and dependency bytes under their recorded hashes."
+      ],
+      "active_adapter": {
+        "path": "src/bitvm_arena/cpa_backend.py",
+        "control_arena_setting": "bitvm_cpa_reference",
+        "input_contract": "Select one published case_id from 28 allowlisted fixtures.",
+        "source_commit": "29ca519031fcd67f467881e16ba73e0eb1211759",
+        "receipt": "evidence/cpa_reference/trace.json",
+        "summary": "evidence/cpa_reference/summary.json"
+      }
     },
     {
       "id": "BVA-MULADDMOD",
@@ -298,8 +312,8 @@
         "pull_request": 3,
         "dependency_commit": "188e2d78fbb623a12a42772120a2aa4e437905c1"
       },
-      "arena_execution_status": "adapter_pending",
-      "evidence_level": "upstream_recorded_regtest",
+      "arena_execution_status": "native_builtin_suite_replayed",
+      "evidence_level": "arena_replayed_regtest",
       "scenario_families": [
         "parent guard escape",
         "identical-address cross-coin replay",
@@ -364,17 +378,38 @@
         }
       ],
       "next_acceptance_gates": [
-        "Run the same funded reserve through proof, policy and native receipt checks.",
-        "Retain the 9,000-sat wider-parent case only as a positive calibration control.",
-        "Require independent native receipts before promoting imported oracle cases."
+        "Connect selected reviewed fixtures to isolated native runs per ControlArena sample and retain their funded-origin chains.",
+        "Declare a model/protocol configuration and execute a native-backed campaign after that interface is verified."
       ],
       "limits": [
         "The current verifier checks disclosed NAND traces.",
-        "Cross-coin allowance conservation, private delegate credentials and general revocation remain separate campaigns."
+        "Cross-coin allowance conservation, private delegate credentials and general revocation remain separate campaigns.",
+        "The native runner executes the fixed upstream suite; native fixtures are not currently selected by the agent.",
+        "Positive admission controls carry confirmed_by_this_check=false; the four confirmed transitions have separate chain receipts.",
+        "CI validates the retained native evidence. A fresh node run requires an explicitly supplied executable with the pinned hash."
       ],
       "sources": [
         "https://github.com/patrickdugan/bitcoin-rs/pull/3",
         "https://github.com/patrickdugan/bitcoin-rs/blob/29ca519031fcd67f467881e16ba73e0eb1211759/docs/research/canonical-proof-authority.md"
+      ],
+      "active_adapter": {
+        "path": "src/bitvm_arena/cpa_native.py",
+        "runner": "scripts/run_cpa_regtest.py",
+        "execution_mode": "pinned-built-in-suite",
+        "receipt_evidence_level": "native-regtest",
+        "receipt": "evidence/cpa_native/receipt.json",
+        "upstream_report": "evidence/cpa_native/upstream_report.json",
+        "binary_provenance": "evidence/cpa_native/binary_provenance.json",
+        "binary_sha256": "fe506c638478d173edd267422856b9fb02c8ab424b694b6c81554dce2a48caa6",
+        "agent_selected_native_mutations": false
+      },
+      "completed_checks": [
+        "The Arena wrapper executed five pinned source modules and the exact native binary in isolated regtest.",
+        "Four authorized transitions confirmed for two original coins and their committed successors; 200000 funded sats became 192000 beneficiary sats and 8000 fee sats.",
+        "All 49 adversarial cases were rejected across admission, broadcast and block validation; seven positive controls passed their admission checks.",
+        "The 9000-sat wider-parent case remains a separate calibration target; zero unauthorized or diverted sats were observed.",
+        "State persisted across two restarts; the run ended at height 104 with zero peers and three clean daemon exits.",
+        "Receipt checks bind transaction identities, expected outpoints, output vectors, case coverage and rejection tips to the expected execution phases."
       ]
     },
     {

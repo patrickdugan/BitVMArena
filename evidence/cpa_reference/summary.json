@@ -1,0 +1,221 @@
+{
+  "all_expectations_met": true,
+  "cases": [
+    {
+      "calibration": false,
+      "case_id": "honest",
+      "expectation_met": true,
+      "expected_verifier_accept": true,
+      "verifier_accept": true
+    },
+    {
+      "calibration": false,
+      "case_id": "permission_00",
+      "expectation_met": true,
+      "expected_verifier_accept": false,
+      "verifier_accept": false
+    },
+    {
+      "calibration": false,
+      "case_id": "permission_01",
+      "expectation_met": true,
+      "expected_verifier_accept": false,
+      "verifier_accept": false
+    },
+    {
+      "calibration": false,
+      "case_id": "permission_10",
+      "expectation_met": true,
+      "expected_verifier_accept": false,
+      "verifier_accept": false
+    },
+    {
+      "calibration": false,
+      "case_id": "parent_cap",
+      "expectation_met": true,
+      "expected_verifier_accept": false,
+      "verifier_accept": false
+    },
+    {
+      "calibration": false,
+      "case_id": "context_state_opening",
+      "expectation_met": true,
+      "expected_verifier_accept": false,
+      "verifier_accept": false
+    },
+    {
+      "calibration": false,
+      "case_id": "context_parent_id",
+      "expectation_met": true,
+      "expected_verifier_accept": false,
+      "verifier_accept": false
+    },
+    {
+      "calibration": false,
+      "case_id": "context_current_state",
+      "expectation_met": true,
+      "expected_verifier_accept": false,
+      "verifier_accept": false
+    },
+    {
+      "calibration": false,
+      "case_id": "context_grant_id",
+      "expectation_met": true,
+      "expected_verifier_accept": false,
+      "verifier_accept": false
+    },
+    {
+      "calibration": false,
+      "case_id": "context_public_digest",
+      "expectation_met": true,
+      "expected_verifier_accept": false,
+      "verifier_accept": false
+    },
+    {
+      "calibration": false,
+      "case_id": "context_child_statement",
+      "expectation_met": true,
+      "expected_verifier_accept": false,
+      "verifier_accept": false
+    },
+    {
+      "calibration": false,
+      "case_id": "context_outpoint",
+      "expectation_met": true,
+      "expected_verifier_accept": false,
+      "verifier_accept": false
+    },
+    {
+      "calibration": false,
+      "case_id": "context_spent_key",
+      "expectation_met": true,
+      "expected_verifier_accept": false,
+      "verifier_accept": false
+    },
+    {
+      "calibration": false,
+      "case_id": "context_tapleaf",
+      "expectation_met": true,
+      "expected_verifier_accept": false,
+      "verifier_accept": false
+    },
+    {
+      "calibration": false,
+      "case_id": "output_amount_low",
+      "expectation_met": true,
+      "expected_verifier_accept": false,
+      "verifier_accept": false
+    },
+    {
+      "calibration": false,
+      "case_id": "output_amount_high",
+      "expectation_met": true,
+      "expected_verifier_accept": false,
+      "verifier_accept": false
+    },
+    {
+      "calibration": false,
+      "case_id": "output_recipient",
+      "expectation_met": true,
+      "expected_verifier_accept": false,
+      "verifier_accept": false
+    },
+    {
+      "calibration": false,
+      "case_id": "output_order",
+      "expectation_met": true,
+      "expected_verifier_accept": false,
+      "verifier_accept": false
+    },
+    {
+      "calibration": false,
+      "case_id": "successor_script",
+      "expectation_met": true,
+      "expected_verifier_accept": false,
+      "verifier_accept": false
+    },
+    {
+      "calibration": false,
+      "case_id": "gate_flip_0",
+      "expectation_met": true,
+      "expected_verifier_accept": false,
+      "verifier_accept": false
+    },
+    {
+      "calibration": false,
+      "case_id": "gate_flip_1",
+      "expectation_met": true,
+      "expected_verifier_accept": false,
+      "verifier_accept": false
+    },
+    {
+      "calibration": false,
+      "case_id": "gate_flip_2",
+      "expectation_met": true,
+      "expected_verifier_accept": false,
+      "verifier_accept": false
+    },
+    {
+      "calibration": false,
+      "case_id": "gate_flip_3",
+      "expectation_met": true,
+      "expected_verifier_accept": false,
+      "verifier_accept": false
+    },
+    {
+      "calibration": false,
+      "case_id": "gate_flip_4",
+      "expectation_met": true,
+      "expected_verifier_accept": false,
+      "verifier_accept": false
+    },
+    {
+      "calibration": false,
+      "case_id": "noncanonical_zero",
+      "expectation_met": true,
+      "expected_verifier_accept": false,
+      "verifier_accept": false
+    },
+    {
+      "calibration": false,
+      "case_id": "noncanonical_one",
+      "expectation_met": true,
+      "expected_verifier_accept": false,
+      "verifier_accept": false
+    },
+    {
+      "calibration": false,
+      "case_id": "cross_coin_replay",
+      "expectation_met": true,
+      "expected_verifier_accept": false,
+      "verifier_accept": false
+    },
+    {
+      "calibration": true,
+      "case_id": "wider_authority_calibration",
+      "expectation_met": true,
+      "expected_verifier_accept": true,
+      "verifier_accept": true
+    }
+  ],
+  "replay_verified": true,
+  "schema": "cpa-reference-benchmark/v1",
+  "score": {
+    "attacker_success": false,
+    "attempts": 28,
+    "calibration_acceptances": 1,
+    "cases_covered": 28,
+    "evidence_level": "reference_interpreter",
+    "funded_target_digest": "d47b0267575078e0b39573881253eb488d5fdc6fac74a07fda9631f8ca80b5c2",
+    "legitimate_success": true,
+    "native_execution": false,
+    "settlement_observed": false,
+    "verifier_rejections": 26
+  },
+  "source_identity": {
+    "adapter_sha256": "0625b58d46cace4d303180c02a7f5b17371c5677699292058366cd3bdc2eb04f",
+    "manifest_digest": "682015071c2c935aa38fd31b6758fbc04c340f0722afb9aec0de4f4d6c84ddc5",
+    "source_commit": "29ca519031fcd67f467881e16ba73e0eb1211759",
+    "verified_files": 9
+  }
+}

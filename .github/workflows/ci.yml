@@ -30,8 +30,33 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+      - uses: actions/checkout@v4
+        with:
+          repository: patrickdugan/bitcoin-rs
+          ref: 29ca519031fcd67f467881e16ba73e0eb1211759
+          path: .deps/bitcoin-rs
       - run: python -m pip install -e '.[control]'
-      - run: python -m unittest discover -s tests -p test_control_arena.py -v
+      - run: python -m unittest discover -s tests -p 'test_*control_arena.py' -v
+        env:
+          CPA_SOURCE: ${{ github.workspace }}/.deps/bitcoin-rs
+
+  cpa-reference:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: actions/checkout@v4
+        with:
+          repository: patrickdugan/bitcoin-rs
+          ref: 29ca519031fcd67f467881e16ba73e0eb1211759
+          path: .deps/bitcoin-rs
+      - run: python -m pip install -e .
+      - run: python -m unittest discover -s tests -p test_cpa_backend.py -v
+        env:
+          CPA_SOURCE: ${{ github.workspace }}/.deps/bitcoin-rs
+      - run: bitvm-arena cpa-benchmark --source .deps/bitcoin-rs --output runs/cpa-reference
 
   authority-replay:
     runs-on: ubuntu-latest
