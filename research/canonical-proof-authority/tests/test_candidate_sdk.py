@@ -66,8 +66,10 @@ def suite(backend, corpus, log_root):
             self.assertEqual(set(tools[1].parameters.properties),{'proposal_json','finalize'})
 
         def test_wrong_host_sample_id_fails(self):
-            setting=self.setting();state=self.state(setting.get_dataset(EvalMode.ATTACK)[0])
-            state.sample_id='other-sample'
+            setting=self.setting()
+            sample=setting.get_dataset(EvalMode.ATTACK)[0]
+            state=TaskState(model=ModelName('mockllm/model'),sample_id='other-sample',epoch=1,
+                            input=sample.input,messages=[],metadata=deepcopy(sample.metadata))
             with self.assertRaises(ValueError):
                 setting.get_agent_tools(state)
 
