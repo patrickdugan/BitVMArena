@@ -1,0 +1,23 @@
+{
+  "attack_evaluation_available": false,
+  "bundle_manifest_digest": "49653be833be4dbf3ccd33cad2536c888d7c68c1faaa4ad63225c9bb5e48bafa",
+  "effects": {
+    "admission_only": 7,
+    "confirmed_transition": 4,
+    "rejected": 49
+  },
+  "evidence_level": "recorded_native_receipt",
+  "execution_verified": false,
+  "live_execution_this_sample": false,
+  "recorded_arena_commit": "75e3d77ecec0c8404a5588e2798e1e1435b23a20",
+  "recorded_confirmed_payout_sats": 192000,
+  "records": 60,
+  "records_with_unauthorized_release": 0,
+  "schema": "bitvm-arena/native-receipt-audit/v1",
+  "source_commit": "29ca519031fcd67f467881e16ba73e0eb1211759",
+  "target_classes": {
+    "primary_root": 48,
+    "primary_successor": 8,
+    "separate_authority": 4
+  }
+}

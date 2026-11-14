@@ -167,3 +167,27 @@ Admission controls retain their limited confirmation scope in the receipt.
 
 This runner executes the pinned upstream suite as a whole. Selecting native
 fixtures per ControlArena sample requires a separate integration gate.
+
+## Recorded native receipt audit
+
+`CPANativeAuditDataset` captures the existing five-file native bundle and checks
+its hashes against the installed manifest. It normalizes the recorded suite,
+then derives 60 observation records. Funded lineage comes from decoded inputs
+and outputs. Confirmed payout amounts come from the transaction bytes after
+the original policy checks pass.
+
+Each record has an opaque ID. Its public view includes receipt-local node
+observations and the applicable funded policy. Expected classifications remain
+in the evaluator. An admission check stays scoped to admission even when a
+different record reports confirmation of the same transaction.
+
+The ControlArena setting accepts one typed answer per sample and binds it to
+the Inspect sample UUID, record ID and captured bundle digest. The scorer
+compares that answer with the derived result. It reports evidence-classification
+accuracy in HONEST mode; attack evaluation remains unavailable. The audit
+invokes no process or RPC call.
+
+Audit traces bind the answer and assessment to the observation digest. Replay
+requires an externally selected record ID, regenerates the assessment from the
+captured evidence and compares the entire trace. Every audit result retains
+`execution_verified=false` and `live_execution_this_sample=false`.

@@ -22,6 +22,7 @@ jobs:
       - run: python -m pip install -e .
       - run: python -m unittest discover -s tests -v
       - run: bitvm-arena benchmark --output runs/calibration
+      - run: bitvm-arena cpa-audit-list --bundle evidence/cpa_native > runs/native-audit-catalogue.json
 
   control-arena:
     runs-on: ubuntu-latest

@@ -106,6 +106,20 @@ def main(argv: list[str] | None = None) -> int:
     cpa_replay.add_argument("trace", type=Path)
     cpa_replay.add_argument("--source", type=Path, required=True)
     cpa_replay.add_argument("--max-attempts", type=int, default=32)
+    audit_list = commands.add_parser("cpa-audit-list", help="List records in the pinned native receipt audit")
+    audit_list.add_argument("--bundle", type=Path, required=True)
+    audit_observe = commands.add_parser("cpa-audit-observe", help="Read one native audit observation")
+    audit_observe.add_argument("case_id")
+    audit_observe.add_argument("--bundle", type=Path, required=True)
+    audit_assess = commands.add_parser("cpa-audit-assess", help="Check a classification against recorded native evidence")
+    audit_assess.add_argument("case_id")
+    audit_assess.add_argument("--bundle", type=Path, required=True)
+    audit_assess.add_argument("--answer", type=Path, required=True)
+    audit_assess.add_argument("--output", type=Path)
+    audit_replay = commands.add_parser("cpa-audit-replay", help="Recheck an audit trace against a host-selected record")
+    audit_replay.add_argument("trace", type=Path)
+    audit_replay.add_argument("--bundle", type=Path, required=True)
+    audit_replay.add_argument("--expected-case", required=True)
     args = parser.parse_args(argv)
     try:
         if args.command == "list":
@@ -128,6 +142,28 @@ def main(argv: list[str] | None = None) -> int:
             summary = cpa_benchmark(args.source, args.output)
             print(json.dumps(summary, indent=2))
             return 0 if summary["all_expectations_met"] else 1
+        elif args.command.startswith("cpa-audit-"):
+            from .cpa_native_audit import CPANativeAuditDataset
+            dataset = CPANativeAuditDataset(args.bundle)
+            if args.command == "cpa-audit-list":
+                print(json.dumps({**dataset.summary(), "catalogue": [
+                    {"case_id": case_id, "source_name": dataset.observe(case_id)["source_name"]}
+                    for case_id in dataset.case_ids()]}, indent=2))
+            elif args.command == "cpa-audit-observe":
+                print(json.dumps(dataset.observe(args.case_id), indent=2))
+            elif args.command == "cpa-audit-assess":
+                if args.answer.stat().st_size > 4096:
+                    raise ValueError("audit answer exceeds 4 KB limit")
+                trace = dataset.export_trace(args.case_id, json.loads(args.answer.read_text()))
+                if args.output:
+                    write_json(args.output, trace)
+                print(json.dumps(trace["assessment"], indent=2))
+                return 0 if trace["assessment"]["correct"] else 1
+            else:
+                if args.trace.stat().st_size > 32_000:
+                    raise ValueError("audit trace exceeds 32 KB limit")
+                trace = dataset.replay_trace(json.loads(args.trace.read_text()), expected_case_id=args.expected_case)
+                print(json.dumps({"replay_verified": True, "assessment": trace["assessment"]}, indent=2))
         else:
             from .cpa_backend import CPAReferenceSession, replay_trace as replay_cpa
             if args.command == "cpa-run":

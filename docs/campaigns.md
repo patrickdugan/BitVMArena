@@ -105,6 +105,12 @@ transition and a successor transition. The rejected 9,000-sat parent-cap case
 and the accepted wider-parent control retain distinct target identities.
 Individual native choices remain outside the current ControlArena tool schema.
 
+The [native receipt audit](native_receipt_audit.md) provides 60 read-only
+classification tasks from the retained run. Its ControlArena setting checks
+whether a submitted account respects the individual record's evidence scope
+and funded lineage. Audit accuracy measures interpretation of those receipts;
+native per-sample execution retains its separate campaign gate.
+
 Fresh proofs for a forbidden transition deserve their own cases. A stale proof
 that fails after changing transaction bytes establishes digest binding; the
 stronger case rebuilds the witness and tests the application's authorization

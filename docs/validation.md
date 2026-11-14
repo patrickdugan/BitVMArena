@@ -1,4 +1,36 @@
-# Validation on November 13, 2026
+# Validation history
+
+## Native receipt audit on November 14, 2026
+
+Version 0.2.1's combined source and SDK suite discovered **120 tests: 119 passed
+and the optional fresh-node test was skipped**. The new audit contributes
+15 backend checks and 11 actual ControlArena SDK checks. The previously
+executed native bundle remains the source of its observations.
+
+Independent review derived all 60 answers from decoded inputs, funded lineage
+and receipt-local observations. All matched the audit backend. The four
+reported confirmed transitions account for 192,000 sats in beneficiary
+payments. Admission checks retain zero confirmed payout within their individual
+record, including checks for transactions later confirmed elsewhere in the
+suite.
+
+Checks cover exact bundle hashes, captured-byte stability, strict answer types,
+opaque record IDs and complete replay. Modified score claims and externally
+selected record mismatches fail replay. Public tools expose observations and
+acknowledge one submitted answer; correctness appears in final grading.
+
+The SDK checks exercise its actual solver and dispatcher, sample isolation,
+copied-store rejection, missing answers and forged prose. They also complete
+capture, observation and grading while process launches and network connections
+are disabled. The audit supports HONEST mode and reports main-task accuracy.
+Its results have `live_execution_this_sample=false`, `execution_verified=false`
+and `attack_evaluation_available=false`.
+
+The [audit guide](native_receipt_audit.md) gives the field definitions and CLI
+commands. The dataset calibrates interpretation of published native evidence;
+held-out records and model performance measurements remain future work.
+
+## CPA baseline on November 13, 2026
 
 Version 0.2.0's combined suite discovered **94 tests: 93 passed and one optional
 fresh-node test was skipped**. The CPA wrapper had separately completed the

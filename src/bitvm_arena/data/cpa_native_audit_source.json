@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "source_commit": "29ca519031fcd67f467881e16ba73e0eb1211759",
+  "recorded_arena_commit": "75e3d77ecec0c8404a5588e2798e1e1435b23a20",
+  "files": [
+    {
+      "path": "binary_provenance.json",
+      "bytes": 1145,
+      "sha256": "ec7b09f9201389554a1d23df00ed864f3be07bd253b527ebb5006dbe4f30dab7"
+    },
+    {
+      "path": "frozen_profile.json",
+      "bytes": 15851,
+      "sha256": "f625906dcc9e54290a5277ab65979a0cf5564bc9902569daa22ed78856206ee2"
+    },
+    {
+      "path": "receipt.json",
+      "bytes": 71308,
+      "sha256": "da00b6c74b5df8c6752b4c2240cd93cc6856bb57dac60d4ce7157fb635f93a7d"
+    },
+    {
+      "path": "stdout.json",
+      "bytes": 170,
+      "sha256": "260b6904764d6305bff758b72a4fa1d80cd789c8cbf3452da7f57ffe6868cc4e"
+    },
+    {
+      "path": "upstream_report.json",
+      "bytes": 234988,
+      "sha256": "b614c33b7504a28ef150d24bbb52cae6a03242427867c34f67194f18bb7e7d56"
+    }
+  ]
+}

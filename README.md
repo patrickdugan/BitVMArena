@@ -30,6 +30,7 @@ Benchmark outputs contain deterministic event traces and a JSON summary.
 | ControlArena settings | Dispute actions and 28 published CPA fixtures, with per-sample histories and replay scoring | Actual SDK integration tests with scripted agents |
 | CPA reference verifier | 28 fixtures with fixed-target scoring; 26 rejections and two accepted controls | Pinned compiler, independent Python Script interpreter and replayed receipts |
 | CPA native runner | Four confirmed transitions, 49 rejected adversarial cases and seven positive controls | Arena-executed isolated regtest, with exact transaction bytes and binary provenance |
+| Native receipt audit | 60 recorded observations exposed through a read-only ControlArena setting | Evidence classification with independently derived answers |
 | Authority enumeration | 1,851 canonical NAND programs, 32 compiled authorities, 256 Python Script-oracle executions | Reproduced pinned CPA research |
 | Historical recovery | Nine reconstructed files from the original local Arena | Archived source captures with per-file provenance |
 | Campaign map | Seven lanes covering the simulator, CPA, Keyless-CHECKSIG, MULADDMOD, UTXORef and BitVM2 | Source-pinned plan; each lane declares its adapter status |
@@ -76,6 +77,26 @@ coins and their committed successors. Its 49 rejected cases produced zero
 unauthorized release in that run. The seven positive controls include
 admission checks whose receipts explicitly record their confirmation scope.
 Model-driven trials and per-sample native fixture selection remain pending.
+
+## Audit the native receipts
+
+`CPANativeAuditSetting` gives each sample one recorded observation to classify.
+Its 60 records cover 49 rejections, seven admission checks and four reported
+confirmed transitions. The evaluator checks the claimed payout and follows the
+spent output back to its funded origin. An admission record for a transaction
+retains its scope when another record later confirms that transaction.
+
+```python
+from bitvm_arena.cpa_native_audit_control_arena import CPANativeAuditSetting
+
+setting = CPANativeAuditSetting(bundle_root="evidence/cpa_native")
+```
+
+This setting supports ControlArena's HONEST mode. The captured bundle is pinned
+by file hashes, and expected answers stay in evaluator state. Audit runs carry
+`live_execution_this_sample=false` and `attack_evaluation_available=false`.
+The [audit guide](docs/native_receipt_audit.md) explains the evidence contract;
+[the SDK guide](docs/control_arena_native_audit.md) shows how to evaluate it.
 
 ## Protocol games
 
@@ -161,7 +182,7 @@ execution and reproduces the frozen evidence. See
 | `evidence/cpa_reference/` | Complete reference trace and benchmark summary |
 | `evidence/cpa_native/` | Native report, normalized receipt, frozen profile and executable provenance |
 
-CI runs the core on Python 3.11 and 3.13, both ControlArena settings on
+CI runs the core on Python 3.11 and 3.13, all three ControlArena settings on
 Python 3.11, the CPA reference fixtures and the authority replay against pinned
 `bitcoin-rs` source. Core tests also check the retained native receipt and its
 rejection paths. Running the native node again requires the explicitly selected

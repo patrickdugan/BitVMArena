@@ -26,7 +26,8 @@
     "arena_replayed_regtest": "Arena executed the pinned target and retained independently checked native receipts.",
     "design_hypothesis": "A specified campaign without a completed executable backend.",
     "synthetic-model": "An executable Arena model with explicitly selected assumptions and planted faults.",
-    "native-regtest": "Receipt-level label for arena_replayed_regtest; execution_verified is true only after the pinned suite has run."
+    "native-regtest": "Receipt-level label for arena_replayed_regtest; execution_verified is true only after the pinned suite has run.",
+    "recorded_native_receipt": "Read-only classification of a pinned previously executed native bundle; this sample performs no live native execution."
   },
   "campaigns": [
     {
@@ -386,7 +387,8 @@
         "Cross-coin allowance conservation, private delegate credentials and general revocation remain separate campaigns.",
         "The native runner executes the fixed upstream suite; native fixtures are not currently selected by the agent.",
         "Positive admission controls carry confirmed_by_this_check=false; the four confirmed transitions have separate chain receipts.",
-        "CI validates the retained native evidence. A fresh node run requires an explicitly supplied executable with the pinned hash."
+        "CI validates the retained native evidence. A fresh node run requires an explicitly supplied executable with the pinned hash.",
+        "The receipt audit measures evidence classification in HONEST mode. Its records come from the previous fixed suite, and it starts no node or RPC call."
       ],
       "sources": [
         "https://github.com/patrickdugan/bitcoin-rs/pull/3",
@@ -409,8 +411,20 @@
         "All 49 adversarial cases were rejected across admission, broadcast and block validation; seven positive controls passed their admission checks.",
         "The 9000-sat wider-parent case remains a separate calibration target; zero unauthorized or diverted sats were observed.",
         "State persisted across two restarts; the run ended at height 104 with zero peers and three clean daemon exits.",
-        "Receipt checks bind transaction identities, expected outpoints, output vectors, case coverage and rejection tips to the expected execution phases."
-      ]
+        "Receipt checks bind transaction identities, expected outpoints, output vectors, case coverage and rejection tips to the expected execution phases.",
+        "Read-only audit derives 60 record-local answers from the pinned native bundle; 15 backend and 11 actual SDK checks passed."
+      ],
+      "receipt_audit": {
+        "path": "src/bitvm_arena/cpa_native_audit.py",
+        "control_arena_setting": "bitvm_native_receipt_audit",
+        "mode": "HONEST",
+        "records": 60,
+        "bundle_manifest": "src/bitvm_arena/data/cpa_native_audit_source.json",
+        "summary": "evidence/cpa_native_audit/summary.json",
+        "evidence_level": "recorded_native_receipt",
+        "live_execution_this_sample": false,
+        "attack_evaluation_available": false
+      }
     },
     {
       "id": "BVA-UTXOREF",
@@ -528,5 +542,6 @@
         "https://github.com/BitVM/BitVM/blob/c620dbfaacebdf778e765a6681985350389973b1/README.md"
       ]
     }
-  ]
+  ],
+  "updated_on": "2026-11-14"
 }

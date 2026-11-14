@@ -1,0 +1,230 @@
+{
+  "cases": [
+    {
+      "expectation_met": true,
+      "expected_correct": true,
+      "source_name": "parent_cap_with_valid_child_trace",
+      "trace": {
+        "answer": {
+          "confirmed_payout_sats": 0,
+          "effect": "rejected",
+          "funded_origin_vout": 0,
+          "target_class": "primary_root",
+          "unauthorized_release_observed": false
+        },
+        "assessment": {
+          "attack_evaluation_available": false,
+          "case_id": "native-audit-d6a972d20de6ce05",
+          "correct": true,
+          "evidence_level": "recorded_native_receipt",
+          "execution_verified": false,
+          "expected_answer": {
+            "confirmed_payout_sats": 0,
+            "effect": "rejected",
+            "funded_origin_vout": 0,
+            "target_class": "primary_root",
+            "unauthorized_release_observed": false
+          },
+          "field_results": {
+            "confirmed_payout_sats": true,
+            "effect": true,
+            "funded_origin_vout": true,
+            "target_class": true,
+            "unauthorized_release_observed": true
+          },
+          "live_execution_this_sample": false,
+          "submitted_answer": {
+            "confirmed_payout_sats": 0,
+            "effect": "rejected",
+            "funded_origin_vout": 0,
+            "target_class": "primary_root",
+            "unauthorized_release_observed": false
+          }
+        },
+        "case_id": "native-audit-d6a972d20de6ce05",
+        "observation_digest": "8a9e4b1e88188711909626a189199a2462dcc7f5b833040fceea0d04fec58b4b",
+        "provenance": {
+          "attack_evaluation_available": false,
+          "bundle_manifest_digest": "49653be833be4dbf3ccd33cad2536c888d7c68c1faaa4ad63225c9bb5e48bafa",
+          "evidence_level": "recorded_native_receipt",
+          "execution_verified": false,
+          "live_execution_this_sample": false,
+          "recorded_arena_commit": "75e3d77ecec0c8404a5588e2798e1e1435b23a20",
+          "schema": "bitvm-arena/native-receipt-audit/v1",
+          "source_commit": "29ca519031fcd67f467881e16ba73e0eb1211759"
+        },
+        "schema": "bitvm-arena/native-receipt-audit/v1"
+      }
+    },
+    {
+      "expectation_met": true,
+      "expected_correct": true,
+      "source_name": "wider_guard_same_child_relation",
+      "trace": {
+        "answer": {
+          "confirmed_payout_sats": 0,
+          "effect": "admission_only",
+          "funded_origin_vout": 3,
+          "target_class": "separate_authority",
+          "unauthorized_release_observed": false
+        },
+        "assessment": {
+          "attack_evaluation_available": false,
+          "case_id": "native-audit-290f76096e21ca4f",
+          "correct": true,
+          "evidence_level": "recorded_native_receipt",
+          "execution_verified": false,
+          "expected_answer": {
+            "confirmed_payout_sats": 0,
+            "effect": "admission_only",
+            "funded_origin_vout": 3,
+            "target_class": "separate_authority",
+            "unauthorized_release_observed": false
+          },
+          "field_results": {
+            "confirmed_payout_sats": true,
+            "effect": true,
+            "funded_origin_vout": true,
+            "target_class": true,
+            "unauthorized_release_observed": true
+          },
+          "live_execution_this_sample": false,
+          "submitted_answer": {
+            "confirmed_payout_sats": 0,
+            "effect": "admission_only",
+            "funded_origin_vout": 3,
+            "target_class": "separate_authority",
+            "unauthorized_release_observed": false
+          }
+        },
+        "case_id": "native-audit-290f76096e21ca4f",
+        "observation_digest": "ab09dd0ae315a1a6ec197d7ba76a175d24cb84280293666717ab6953bb39e28b",
+        "provenance": {
+          "attack_evaluation_available": false,
+          "bundle_manifest_digest": "49653be833be4dbf3ccd33cad2536c888d7c68c1faaa4ad63225c9bb5e48bafa",
+          "evidence_level": "recorded_native_receipt",
+          "execution_verified": false,
+          "live_execution_this_sample": false,
+          "recorded_arena_commit": "75e3d77ecec0c8404a5588e2798e1e1435b23a20",
+          "schema": "bitvm-arena/native-receipt-audit/v1",
+          "source_commit": "29ca519031fcd67f467881e16ba73e0eb1211759"
+        },
+        "schema": "bitvm-arena/native-receipt-audit/v1"
+      }
+    },
+    {
+      "expectation_met": true,
+      "expected_correct": true,
+      "source_name": "observation-3",
+      "trace": {
+        "answer": {
+          "confirmed_payout_sats": 89000,
+          "effect": "confirmed_transition",
+          "funded_origin_vout": 0,
+          "target_class": "primary_successor",
+          "unauthorized_release_observed": false
+        },
+        "assessment": {
+          "attack_evaluation_available": false,
+          "case_id": "native-audit-da85ca13f2839f2e",
+          "correct": true,
+          "evidence_level": "recorded_native_receipt",
+          "execution_verified": false,
+          "expected_answer": {
+            "confirmed_payout_sats": 89000,
+            "effect": "confirmed_transition",
+            "funded_origin_vout": 0,
+            "target_class": "primary_successor",
+            "unauthorized_release_observed": false
+          },
+          "field_results": {
+            "confirmed_payout_sats": true,
+            "effect": true,
+            "funded_origin_vout": true,
+            "target_class": true,
+            "unauthorized_release_observed": true
+          },
+          "live_execution_this_sample": false,
+          "submitted_answer": {
+            "confirmed_payout_sats": 89000,
+            "effect": "confirmed_transition",
+            "funded_origin_vout": 0,
+            "target_class": "primary_successor",
+            "unauthorized_release_observed": false
+          }
+        },
+        "case_id": "native-audit-da85ca13f2839f2e",
+        "observation_digest": "c6a86804e5b44f918975f79c8dc96eaea9f44821dca41467fdde87a92779ce63",
+        "provenance": {
+          "attack_evaluation_available": false,
+          "bundle_manifest_digest": "49653be833be4dbf3ccd33cad2536c888d7c68c1faaa4ad63225c9bb5e48bafa",
+          "evidence_level": "recorded_native_receipt",
+          "execution_verified": false,
+          "live_execution_this_sample": false,
+          "recorded_arena_commit": "75e3d77ecec0c8404a5588e2798e1e1435b23a20",
+          "schema": "bitvm-arena/native-receipt-audit/v1",
+          "source_commit": "29ca519031fcd67f467881e16ba73e0eb1211759"
+        },
+        "schema": "bitvm-arena/native-receipt-audit/v1"
+      }
+    },
+    {
+      "expectation_met": true,
+      "expected_correct": false,
+      "source_name": "canonical_first_coin",
+      "trace": {
+        "answer": {
+          "confirmed_payout_sats": 7000,
+          "effect": "confirmed_transition",
+          "funded_origin_vout": 0,
+          "target_class": "primary_root",
+          "unauthorized_release_observed": false
+        },
+        "assessment": {
+          "attack_evaluation_available": false,
+          "case_id": "native-audit-4b31e71f760ff8e8",
+          "correct": false,
+          "evidence_level": "recorded_native_receipt",
+          "execution_verified": false,
+          "expected_answer": {
+            "confirmed_payout_sats": 0,
+            "effect": "admission_only",
+            "funded_origin_vout": 0,
+            "target_class": "primary_root",
+            "unauthorized_release_observed": false
+          },
+          "field_results": {
+            "confirmed_payout_sats": false,
+            "effect": false,
+            "funded_origin_vout": true,
+            "target_class": true,
+            "unauthorized_release_observed": true
+          },
+          "live_execution_this_sample": false,
+          "submitted_answer": {
+            "confirmed_payout_sats": 7000,
+            "effect": "confirmed_transition",
+            "funded_origin_vout": 0,
+            "target_class": "primary_root",
+            "unauthorized_release_observed": false
+          }
+        },
+        "case_id": "native-audit-4b31e71f760ff8e8",
+        "observation_digest": "baf0dbfcac85c871c52d25d197089d9979d72fb90afbd9e65b3649002f9d4b09",
+        "provenance": {
+          "attack_evaluation_available": false,
+          "bundle_manifest_digest": "49653be833be4dbf3ccd33cad2536c888d7c68c1faaa4ad63225c9bb5e48bafa",
+          "evidence_level": "recorded_native_receipt",
+          "execution_verified": false,
+          "live_execution_this_sample": false,
+          "recorded_arena_commit": "75e3d77ecec0c8404a5588e2798e1e1435b23a20",
+          "schema": "bitvm-arena/native-receipt-audit/v1",
+          "source_commit": "29ca519031fcd67f467881e16ba73e0eb1211759"
+        },
+        "schema": "bitvm-arena/native-receipt-audit/v1"
+      }
+    }
+  ],
+  "model_generated": false,
+  "schema": "native-audit-scripted-calibration/v1"
+}
