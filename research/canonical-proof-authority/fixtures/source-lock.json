@@ -1,0 +1,32 @@
+{
+  "schema": "BA-CPA-01/source-lock-v1",
+  "repository": "patrickdugan/bitcoin-rs",
+  "commit": "24a5593350f42efc8a96047aa9e7e114fa22cb08",
+  "cpa_commit": "29ca519031fcd67f467881e16ba73e0eb1211759",
+  "files": {
+    "scripts/research/bitvm_authority_enumeration.py": "d429c580196cfca559c02c0e363eaae11317cc54e054da6c1639fba971175780",
+    "scripts/research/canonical_proof_authority.py": "a7dcd6bbad68589247ebc4f5567654d83d0631e18f01911a21f4c00957e16076",
+    "scripts/research/cpa_transition.py": "8cf6cd2eb274ec2c52f9e9f7d7563577977a2d0c61268c07770b6b18a15da761",
+    "scripts/research/keyless_checksig_rpc.py": "2ba2df30bba64476acf1f71e2fb0b9950c0dbf2509a87ef40876a3a78b0d7e9a",
+    "scripts/research/keyless_state_machine.py": "897bec48af6349485fd63bdef8da7ad5b6f8bcafbe61f0737695c20c67e4da2f",
+    "scripts/tests/data/cpa-v0-commitments.json": "29edc971123f3f92ded9b48e7850f693ec7026c98d977ab518699b56c69bb7c6",
+    "scripts/tests/test_bitvm_authority_enumeration.py": "bdca4db188d4b85020cd98e4270cd5bfee1564a9f43e1ce9b82ff62d29223a30",
+    "scripts/tests/test_cpa_commitments.py": "1e0c4125577a4b5fa00b57c88d2ab24938c452231ac6401e0064d629053aa7fd",
+    "scripts/tests/test_cpa_transition.py": "60bdfc0ddcc1d1401686a583afda9c9a84dd34930a0315800dc00a3668d44481",
+    "scripts/tests/test_keyless_state_machine.py": "d1bad08be5ba20ee8ef70b70c6ecdf5b90ec62f5151d79921483a7c67ab743e4"
+  },
+  "outputs": {
+    "results.json": "ace9c26f8dcbb6e94a3dbfce9ec3a0bfd8b5363727e869d87f3f7c05438ff729",
+    "compiled_authorities.json": "6ea83cc280956b456bf8b02181d37956a8e22638e17f8faf7174c7e6f19441ae",
+    "circuits.jsonl": "35ccc2601e705bb5a8de0bc383e571d3ca5bc6eac51848f841ef38f26b0b4614"
+  },
+  "expected": {
+    "unique_programs": 1851,
+    "semantic_functions": 16,
+    "programs_tested": 32,
+    "input_cases": 256,
+    "accepted": 72,
+    "mismatches": 0,
+    "mutation_cases": 11
+  }
+}

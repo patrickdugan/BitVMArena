@@ -1,0 +1,40 @@
+{
+  "expected_summary": {
+    "HF_verified": false,
+    "action_submissions": 768,
+    "by_scenario": {
+      "planted-guard": {
+        "authorized": 22,
+        "planted_control": 22,
+        "unspent": 84
+      },
+      "strict-payment": {
+        "authorized": 23,
+        "unspent": 105
+      },
+      "wide-policy": {
+        "authorized": 44,
+        "unspent": 84
+      }
+    },
+    "controlarena_sdk_executed": false,
+    "execution_layer": "CPA Python Script oracle",
+    "native_node_verified": false,
+    "outcomes": {
+      "authorized": 89,
+      "planted_control": 22,
+      "unspent": 273
+    },
+    "policy_mismatches": 0,
+    "receipt_verifications": 384,
+    "replayed_sessions": 384,
+    "schema": "BA-CPA-03/campaign-v1",
+    "sessions": 384,
+    "unmodified_counterexamples": 0
+  },
+  "outputs": {
+    "sessions.jsonl": "7a0712db3145ca37c33a193f4f1d88a1de406d6c8090ec0bb29b8e16d3074cec",
+    "summary.json": "c020dabf50b923a56a365b8daf27bd0244076a9e3190ed388a497a5d5e830461"
+  },
+  "schema": "BA-CPA-03/evidence-lock-v1"
+}

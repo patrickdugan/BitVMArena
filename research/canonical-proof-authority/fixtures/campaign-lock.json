@@ -1,0 +1,127 @@
+{
+  "expected_summary": {
+    "HF_verifier_run": false,
+    "acceptance_mismatches": 0,
+    "by_permission_function": {
+      "0000": {
+        "accepted": 0,
+        "cases": 536,
+        "programs": 67
+      },
+      "0001": {
+        "accepted": 75,
+        "cases": 600,
+        "programs": 75
+      },
+      "0010": {
+        "accepted": 57,
+        "cases": 456,
+        "programs": 57
+      },
+      "0011": {
+        "accepted": 328,
+        "cases": 1312,
+        "programs": 164
+      },
+      "0100": {
+        "accepted": 57,
+        "cases": 456,
+        "programs": 57
+      },
+      "0101": {
+        "accepted": 328,
+        "cases": 1312,
+        "programs": 164
+      },
+      "0110": {
+        "accepted": 16,
+        "cases": 64,
+        "programs": 8
+      },
+      "0111": {
+        "accepted": 258,
+        "cases": 688,
+        "programs": 86
+      },
+      "1000": {
+        "accepted": 17,
+        "cases": 136,
+        "programs": 17
+      },
+      "1001": {
+        "accepted": 22,
+        "cases": 88,
+        "programs": 11
+      },
+      "1010": {
+        "accepted": 382,
+        "cases": 1528,
+        "programs": 191
+      },
+      "1011": {
+        "accepted": 357,
+        "cases": 952,
+        "programs": 119
+      },
+      "1100": {
+        "accepted": 382,
+        "cases": 1528,
+        "programs": 191
+      },
+      "1101": {
+        "accepted": 357,
+        "cases": 952,
+        "programs": 119
+      },
+      "1110": {
+        "accepted": 720,
+        "cases": 1920,
+        "programs": 240
+      },
+      "1111": {
+        "accepted": 1140,
+        "cases": 2280,
+        "programs": 285
+      }
+    },
+    "coverage": {
+      "accepted": 4496,
+      "cases": 14808,
+      "programs": 1851,
+      "rejected": 10312
+    },
+    "distinct_authority_ids": 1851,
+    "distinct_output_keys": 1851,
+    "episode_outcomes": {
+      "authorized": 4,
+      "planted_counterexample": 1,
+      "script_rejected": 35,
+      "target_mismatch": 4
+    },
+    "episode_replays": 44,
+    "episodes": 44,
+    "interactive_core_adapter_run": false,
+    "lattice": {
+      "directed_triangle_checks": 4096,
+      "directed_triangle_failures": 0,
+      "ordered_pairs": 256,
+      "policies": 16,
+      "safe_refinements": 81,
+      "strict_widenings_or_incomparable_pairs": 175
+    },
+    "native_node_run": false,
+    "planted_counterexamples": 1,
+    "schema": "BA-CPA-02/campaign-v1",
+    "scope": "single-input root CPA Python Script oracle",
+    "targets": 4,
+    "unmodified_counterexamples": 0,
+    "upstream_corpus_sha256": "35ccc2601e705bb5a8de0bc383e571d3ca5bc6eac51848f841ef38f26b0b4614"
+  },
+  "outputs": {
+    "coverage.jsonl": "0d38603477268711a6317e77e49b06af6da04c49bfb41a7bc90d8926af33efa0",
+    "episodes.jsonl": "5c1c1de80d18c5464606aa107179833416d069bd4c38469cbee623497d1712a5",
+    "summary.json": "3967f9e288bc93754ae95cea9cffc3c3c319577179ffa063d0cb855b7e96ebac",
+    "targets.json": "5f36f1c06d6e0e8ff5f1083f87e732a539dc22c51f99ccde3d582f1fad567082"
+  },
+  "schema": "BA-CPA-02/evidence-lock-v1"
+}
