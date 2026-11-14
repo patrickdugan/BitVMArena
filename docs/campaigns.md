@@ -11,11 +11,11 @@ evidence that can support a score.
 
 | Lane | Arena evidence | Next execution gate |
 | --- | --- | --- |
-| Dispute model | Deterministic synthetic state transitions and planted-fault calibration | Replay and ControlArena sample isolation |
-| Authority enumeration | Imported catalogue and reference-interpreter study | Pin CPA dependencies and replay measured cases |
+| Dispute model | 22 replayed synthetic episodes and actual ControlArena integration checks | Model-generated runs under declared watcher assumptions |
+| Authority enumeration | Reproduced pinned study plus 28 CPA reference fixtures exposed through ControlArena | Extend reviewed fixture coverage and record model trials |
 | OP_MULADDMOD | Upstream source and native regtest receipts described by its owner | Arena receipt adapter and bounded scheduling actions |
 | Keyless CHECKSIG | Upstream payout and state-lifecycle fixtures | Host-owned state oracle across competing paths |
-| Canonical Proof Authority | Upstream disclosed NAND verifier and funded transitions | Preserve the same reserve while checking parent-policy escapes |
+| Canonical Proof Authority | Arena-executed native suite: four confirmed transitions, 49 rejected cases and seven positive controls | Per-sample native fixture selection with preserved funded origins |
 | UTXORef | Upstream accounting relation and guarded test-network execution | Distinct accounting/execution scores and fault scheduling |
 | BitVM / BitVM2 | Official protocol descriptions and pinned implementation | One exact funded transaction graph with a reproducible honest path |
 
@@ -94,9 +94,22 @@ isolated regtest fixture.
 The [Keyless staging runner](https://github.com/patrickdugan/bitcoin-rs/blob/188e2d78fbb623a12a42772120a2aa4e437905c1/docs/research/keyless-checksig.md)
 already records source revision, command results and executable identity. Its
 bounded F17 trace binds a starting state to a payout and successor. The CPA
-fixture adds canonical NAND identity and the parent guard. Arena should expose
-candidate proof construction to the red team while retaining expected old state
-and spending context in host-owned scoring data.
+fixture adds canonical NAND identity and the parent guard. The
+[reference setting](cpa_reference.md) exposes 28 reviewed fixture choices while
+retaining the funded target and policy in evaluator-owned state. Its receipts
+include the exact transaction and witness bytes used by the interpreter.
+
+The [native runner](cpa_native.md) has executed the existing upstream suite and
+retained its checked receipts. Two original funded coins each completed a root
+transition and a successor transition. The rejected 9,000-sat parent-cap case
+and the accepted wider-parent control retain distinct target identities.
+Individual native choices remain outside the current ControlArena tool schema.
+
+The [native receipt audit](native_receipt_audit.md) provides 60 read-only
+classification tasks from the retained run. Its ControlArena setting checks
+whether a submitted account respects the individual record's evidence scope
+and funded lineage. Audit accuracy measures interpretation of those receipts;
+native per-sample execution retains its separate campaign gate.
 
 Fresh proofs for a forbidden transition deserve their own cases. A stale proof
 that fails after changing transaction bytes establishes digest binding; the

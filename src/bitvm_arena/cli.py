@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import subprocess
 from pathlib import Path
 from typing import Any
 
@@ -58,6 +59,28 @@ def benchmark(output: Path | None = None) -> dict[str, Any]:
     return summary
 
 
+def cpa_benchmark(source: Path, output: Path | None = None) -> dict[str, Any]:
+    from .cpa_backend import CPAReferenceSession, baseline_candidates, replay_trace as replay_cpa
+
+    session = CPAReferenceSession(source)
+    checks = []
+    for fixture in baseline_candidates():
+        receipt = session.step(fixture["candidate"])
+        checks.append({"case_id": receipt["case_id"], "verifier_accept": receipt["verifier_accept"],
+                       "expected_verifier_accept": fixture["expected_verifier_accept"],
+                       "calibration": receipt["calibration"],
+                       "expectation_met": receipt["verifier_accept"] == fixture["expected_verifier_accept"]})
+    trace = session.export_trace()
+    replay_cpa(source, trace, expected_target_digest=session.observe()["funded_target_digest"])
+    summary = {"schema": "cpa-reference-benchmark/v1", "source_identity": trace["source_identity"],
+               "score": session.score(), "cases": checks, "replay_verified": True,
+               "all_expectations_met": all(row["expectation_met"] for row in checks)}
+    if output is not None:
+        write_json(output / "trace.json", trace)
+        write_json(output / "summary.json", summary)
+    return summary
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="bitvm-arena")
     commands = parser.add_subparsers(dest="command", required=True)
@@ -72,6 +95,31 @@ def main(argv: list[str] | None = None) -> int:
     replay.add_argument("trace", type=Path)
     replay.add_argument("--expected-profile", choices=sorted(POLICIES))
     replay.add_argument("--expected-scenario")
+    cpa_run = commands.add_parser("cpa-run", help="Execute a published CPA fixture in the pinned reference oracle")
+    cpa_run.add_argument("case_id")
+    cpa_run.add_argument("--source", type=Path, required=True)
+    cpa_run.add_argument("--output", type=Path)
+    cpa_bench = commands.add_parser("cpa-benchmark", help="Verify and replay the complete finite CPA fixture catalogue")
+    cpa_bench.add_argument("--source", type=Path, required=True)
+    cpa_bench.add_argument("--output", type=Path)
+    cpa_replay = commands.add_parser("cpa-replay", help="Re-execute CPA evidence against the installed funded fixture")
+    cpa_replay.add_argument("trace", type=Path)
+    cpa_replay.add_argument("--source", type=Path, required=True)
+    cpa_replay.add_argument("--max-attempts", type=int, default=32)
+    audit_list = commands.add_parser("cpa-audit-list", help="List records in the pinned native receipt audit")
+    audit_list.add_argument("--bundle", type=Path, required=True)
+    audit_observe = commands.add_parser("cpa-audit-observe", help="Read one native audit observation")
+    audit_observe.add_argument("case_id")
+    audit_observe.add_argument("--bundle", type=Path, required=True)
+    audit_assess = commands.add_parser("cpa-audit-assess", help="Check a classification against recorded native evidence")
+    audit_assess.add_argument("case_id")
+    audit_assess.add_argument("--bundle", type=Path, required=True)
+    audit_assess.add_argument("--answer", type=Path, required=True)
+    audit_assess.add_argument("--output", type=Path)
+    audit_replay = commands.add_parser("cpa-audit-replay", help="Recheck an audit trace against a host-selected record")
+    audit_replay.add_argument("trace", type=Path)
+    audit_replay.add_argument("--bundle", type=Path, required=True)
+    audit_replay.add_argument("--expected-case", required=True)
     args = parser.parse_args(argv)
     try:
         if args.command == "list":
@@ -85,11 +133,55 @@ def main(argv: list[str] | None = None) -> int:
             summary = benchmark(args.output)
             print(json.dumps(summary, indent=2))
             return 0 if summary["all_expectations_met"] else 1
-        else:
+        elif args.command == "replay":
             if args.trace.stat().st_size > 2_000_000:
                 raise ValueError("trace exceeds 2 MB limit")
             session = replay_trace(json.loads(args.trace.read_text()), expected_profile=args.expected_profile, expected_scenario=args.expected_scenario)
             print(json.dumps({"replay_verified": True, "score": session.score()}, indent=2))
-    except (ValueError, OSError, KeyError, TypeError) as exc:
+        elif args.command == "cpa-benchmark":
+            summary = cpa_benchmark(args.source, args.output)
+            print(json.dumps(summary, indent=2))
+            return 0 if summary["all_expectations_met"] else 1
+        elif args.command.startswith("cpa-audit-"):
+            from .cpa_native_audit import CPANativeAuditDataset
+            dataset = CPANativeAuditDataset(args.bundle)
+            if args.command == "cpa-audit-list":
+                print(json.dumps({**dataset.summary(), "catalogue": [
+                    {"case_id": case_id, "source_name": dataset.observe(case_id)["source_name"]}
+                    for case_id in dataset.case_ids()]}, indent=2))
+            elif args.command == "cpa-audit-observe":
+                print(json.dumps(dataset.observe(args.case_id), indent=2))
+            elif args.command == "cpa-audit-assess":
+                if args.answer.stat().st_size > 4096:
+                    raise ValueError("audit answer exceeds 4 KB limit")
+                trace = dataset.export_trace(args.case_id, json.loads(args.answer.read_text()))
+                if args.output:
+                    write_json(args.output, trace)
+                print(json.dumps(trace["assessment"], indent=2))
+                return 0 if trace["assessment"]["correct"] else 1
+            else:
+                if args.trace.stat().st_size > 32_000:
+                    raise ValueError("audit trace exceeds 32 KB limit")
+                trace = dataset.replay_trace(json.loads(args.trace.read_text()), expected_case_id=args.expected_case)
+                print(json.dumps({"replay_verified": True, "assessment": trace["assessment"]}, indent=2))
+        else:
+            from .cpa_backend import CPAReferenceSession, replay_trace as replay_cpa
+            if args.command == "cpa-run":
+                session = CPAReferenceSession(args.source)
+                receipt = session.step({"case_id": args.case_id})
+                if args.output:
+                    write_json(args.output, session.export_trace())
+                print(json.dumps(receipt, indent=2))
+            else:
+                if args.trace.stat().st_size > 2_000_000:
+                    raise ValueError("CPA trace exceeds 2 MB limit")
+                # Derive the evaluator's expected target from verified source,
+                # independent of the submitted trace's claimed target.
+                expected = CPAReferenceSession(args.source, max_attempts=args.max_attempts)
+                session = replay_cpa(args.source, json.loads(args.trace.read_text()),
+                                     expected_target_digest=expected.observe()["funded_target_digest"],
+                                     expected_max_attempts=args.max_attempts)
+                print(json.dumps({"replay_verified": True, "score": session.score()}, indent=2))
+    except (ValueError, OSError, KeyError, TypeError, subprocess.SubprocessError) as exc:
         parser.exit(2, f"bitvm-arena: {exc}\n")
     return 0
