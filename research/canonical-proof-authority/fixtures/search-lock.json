@@ -1,0 +1,58 @@
+{
+  "outputs": {
+    "split.json": "d7ab48c5958ea8fab291bd7a06edbe19f7449edb87577e206459a7fc0d327764",
+    "summary.json": "d10ef43d5c165dd800906d7e5068b013a7a388f2a803d088d5b2c6e4794f1260",
+    "traces.jsonl": "fa6e043a941ea87d17b7fa8d238cf2e4545f35848f9a440286a6dab10a32b916"
+  },
+  "schema": "BA-CPA-04/evidence-lock-v1",
+  "summary": {
+    "HF_verifier_run": false,
+    "model_generated_run": false,
+    "native_node_run": false,
+    "outcomes": {
+      "authorized": 62,
+      "planted_counterexample": 15,
+      "script_rejected": 366,
+      "target_mismatch": 45
+    },
+    "programs_by_split": {
+      "holdout": 626,
+      "train": 1225
+    },
+    "replayed_episodes": 459,
+    "representatives": 16,
+    "schema": "BA-CPA-04/campaign-v1",
+    "scripted_policy_only": true,
+    "source_pin": "24a5593350f42efc8a96047aa9e7e114fa22cb08",
+    "statistics": {
+      "calibration": {
+        "attempts": 15,
+        "diverted_sats": 0,
+        "episodes": 15,
+        "legitimate_completion": 0,
+        "planted_control_success": 15,
+        "script_evaluations": 15,
+        "unauthorized_release_sats": 0
+      },
+      "holdout": {
+        "attempts": 183,
+        "diverted_sats": 0,
+        "episodes": 174,
+        "legitimate_completion": 19,
+        "planted_control_success": 0,
+        "script_evaluations": 165,
+        "unauthorized_release_sats": 0
+      },
+      "train": {
+        "attempts": 290,
+        "diverted_sats": 0,
+        "episodes": 270,
+        "legitimate_completion": 28,
+        "planted_control_success": 0,
+        "script_evaluations": 263,
+        "unauthorized_release_sats": 0
+      }
+    },
+    "unauthorized_completions": 0
+  }
+}
