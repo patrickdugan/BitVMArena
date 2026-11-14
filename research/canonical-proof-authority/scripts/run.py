@@ -16,6 +16,9 @@ LOCK = MODULE / 'fixtures/source-lock.json'
 SCENARIOS = MODULE / 'scenarios/arena_scenarios.jsonl'
 CAMPAIGN_LOCK = MODULE / 'fixtures/campaign-lock.json'
 CAMPAIGN_FILES = ('scripts/fixed_target.py', 'scripts/campaign.py', 'tests/test_fixed_target.py')
+SESSION_LOCK = MODULE / 'fixtures/session-lock.json'
+SESSION_FILES = ('scripts/session.py', 'scripts/session_campaign.py', 'tests/test_session.py',
+                 'adapters/cpa_control.py', 'tests/test_cpa_control.py')
 
 
 class VerificationError(ValueError):
@@ -100,18 +103,33 @@ def verify_campaign(root: Path) -> dict:
     return summary
 
 
-def run_stage(snapshot: Path, output: Path, label: str, arguments: list[str], timeout: int) -> None:
+def verify_session(root: Path) -> dict:
+    lock = json.loads(SESSION_LOCK.read_text())
+    if lock.get('schema') != 'BA-CPA-03/evidence-lock-v1':
+        raise VerificationError('Unknown session lock')
+    for name, expected in lock['outputs'].items():
+        if digest(checked_path(root, name).read_bytes()) != expected:
+            raise VerificationError(f'Session evidence SHA256 mismatch: {name}')
+    summary = json.loads((root / 'summary.json').read_text())
+    if summary != lock['expected_summary']:
+        raise VerificationError('Session summary differs from the fixed experiment')
+    return summary
+
+
+def run_stage(snapshot: Path, output: Path, label: str, arguments: list[str], timeout: int,
+              sdk: bool = False) -> None:
     environment = {key: value for key, value in os.environ.items()
                    if key in {'PATH', 'SYSTEMROOT', 'WINDIR', 'TEMP', 'TMP', 'LANG', 'LC_ALL'}}
     with (output / f'{label}.log').open('wb') as log:
-        completed = subprocess.run([sys.executable, '-I', '-S', '-B', *arguments],
+        completed = subprocess.run([sys.executable, '-I', *([] if sdk else ['-S']), '-B', *arguments],
                                    cwd=snapshot, env=environment, stdout=log,
                                    stderr=subprocess.STDOUT, timeout=timeout, check=False)
     if completed.returncode:
         raise VerificationError(f'{label} failed with exit {completed.returncode}; see {label}.log')
 
 
-def run(source: Path, output: Path, timeout: int = 120, campaign: bool = False) -> dict:
+def run(source: Path, output: Path, timeout: int = 120, campaign: bool = False,
+        interactive: bool = False, sdk: bool = False) -> dict:
     if timeout <= 0 or sys.flags.optimize:
         raise VerificationError('Use a positive timeout and run Python without -O')
     lock = json.loads(LOCK.read_text())
@@ -147,16 +165,17 @@ def run(source: Path, output: Path, timeout: int = 120, campaign: bool = False) 
                       [str(snapshot / 'scripts/research/bitvm_authority_enumeration.py'),
                        '--bitcoin-rs', str(snapshot), '--out', str(output / 'generated'),
                        '--max-gates', '5', '--sample-limit', '32'], timeout)
-            if campaign:
+            if campaign or interactive or sdk:
                 verify_outputs(output / 'generated', lock['outputs'], lock['expected'])
                 campaign_hashes = {}
-                for name in CAMPAIGN_FILES:
+                for name in CAMPAIGN_FILES + (SESSION_FILES if interactive or sdk else ()):
                     data = checked_path(MODULE, name).read_bytes()
                     destination = snapshot / 'arena_cpa' / name
                     destination.parent.mkdir(parents=True, exist_ok=True)
                     destination.write_bytes(data)
                     campaign_hashes[name] = digest(data)
                 receipt['campaign_source_sha256'] = campaign_hashes
+            if campaign:
                 worker = str(snapshot / 'arena_cpa/scripts/campaign.py')
                 run_stage(snapshot, output, 'fixed-target-tests',
                           [worker, '--bitcoin-rs', str(snapshot), '--tests'], timeout)
@@ -171,6 +190,26 @@ def run(source: Path, output: Path, timeout: int = 120, campaign: bool = False) 
                 if re.search(r'Ran 30 tests? in ', text) is None:
                     raise VerificationError('Unexpected fixed-target test count')
                 receipt['fixed_target_tests'] = 30
+            if interactive or sdk:
+                worker = str(snapshot / 'arena_cpa/scripts/session_campaign.py')
+                run_stage(snapshot, output, 'session-tests',
+                          [worker, '--bitcoin-rs', str(snapshot), '--tests'], timeout)
+                if re.search(r'Ran 26 tests? in ', (output / 'session-tests.log').read_text()) is None:
+                    raise VerificationError('Unexpected session test count')
+                receipt['session_tests'] = 26
+            if interactive:
+                run_stage(snapshot, output, 'session-campaign',
+                          [worker, '--bitcoin-rs', str(snapshot), '--out', str(output / 'sessions')], timeout)
+                receipt['sessions'] = verify_session(output / 'sessions')
+                receipt['session_lock_sha256'] = digest(SESSION_LOCK.read_bytes())
+            if sdk:
+                run_stage(snapshot, output, 'sdk-tests',
+                          [worker, '--bitcoin-rs', str(snapshot), '--sdk-tests',
+                           '--out', str(output / 'sdk')], timeout, sdk=True)
+                summary = json.loads((output / 'sdk/summary.json').read_text())
+                if summary['status'] != 'passed' or summary['tests'] != 12 or summary['skipped'] != 0:
+                    raise VerificationError('Actual-SDK tests did not complete')
+                receipt['controlarena_sdk'] = summary
         receipt['measured'] = verify_outputs(output / 'generated', lock['outputs'], lock['expected'])
         receipt['output_sha256'] = lock['outputs']
         for label, count in (('study-tests', 14), ('cpa-tests', 42)):
@@ -192,9 +231,11 @@ def main() -> None:
     parser.add_argument('--out', type=Path, required=True, help='New output directory; never overwritten')
     parser.add_argument('--timeout', type=int, default=120, help='Seconds per subprocess')
     parser.add_argument('--campaign', action='store_true', help='Run BA-CPA-02 fixed-target tests and exhaustive corpus')
+    parser.add_argument('--interactive', action='store_true', help='Run BA-CPA-03 sessions and replay tests')
+    parser.add_argument('--sdk', action='store_true', help='Require the pinned real SDK and execute scripted mock-model tests')
     args = parser.parse_args()
     try:
-        receipt = run(args.bitcoin_rs, args.out, args.timeout, args.campaign)
+        receipt = run(args.bitcoin_rs, args.out, args.timeout, args.campaign, args.interactive, args.sdk)
     except (ValueError, OSError, subprocess.TimeoutExpired) as error:
         parser.exit(1, f'{error}\n')
     print(json.dumps(receipt, indent=2))

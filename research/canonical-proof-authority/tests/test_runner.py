@@ -91,6 +91,21 @@ class RunnerTests(unittest.TestCase):
         with patch.dict(os.environ, {'CPA_SOURCE': 'untrusted'}):
             runner.run_stage(self.root, self.root, 'isolation', [str(script)], 10)
 
+    def test_sdk_subprocess_retains_site_but_removes_overrides(self):
+        import os
+        from unittest.mock import patch
+        script = self.root / 'sdk-check.py'
+        script.write_text('import os,sys\nassert "CPA_SOURCE" not in os.environ\n'
+                          'assert "PYTHONPATH" not in os.environ\n'
+                          'assert sys.flags.isolated and not sys.flags.no_site\nassert __debug__\n')
+        with patch.dict(os.environ, {'CPA_SOURCE': 'untrusted', 'PYTHONPATH': 'untrusted'}):
+            runner.run_stage(self.root, self.root, 'sdk-isolation', [str(script)], 10, sdk=True)
+
+    def test_changed_session_evidence_is_rejected(self):
+        (self.root / 'summary.json').write_text('{}')
+        with self.assertRaises(runner.VerificationError):
+            runner.verify_session(self.root)
+
     def test_nonzero_subprocess_rejected(self):
         with self.assertRaises(runner.VerificationError):
             runner.run_stage(self.root, self.root, 'failure', ['-c', 'raise SystemExit(7)'], 10)

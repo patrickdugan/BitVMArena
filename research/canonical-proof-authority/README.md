@@ -79,3 +79,11 @@ The optional campaign runs 30 additional scorer tests. It writes a full output-k
 catalogue and replayable episode records under `campaign/`, with hashes checked
 against `fixtures/campaign-lock.json`. The dedicated workflow runs both studies.
 The reference scorer remains isolated from the rebuild's core registration.
+
+## BA-CPA-03 interactive sessions
+
+[Interactive sessions](docs/interactive-sessions.md) adds bounded preparation,
+proof probes and one-spend finalization. `--interactive` runs 26 session tests
+and all 384 two-action sequences. `--sdk` requires the pinned SDK packages and
+runs twelve real-library integration checks with scripted mock-model policies.
+The opt-in setting name is `bitvm_cpa_research`; Arena core files stay unchanged.
