@@ -276,3 +276,41 @@ All five evidence gates (`zk_delegation_verified`, `hf_checksig_verified`,
 `p2mr_verified`, `singleton_lineage_verified`, and
 `model_generated_attack_verified`) remain explicitly `false` in retained
 summaries, traces, and receipts.
+
+## Version 0.4.0 multi-turn ControlArena & Control-Harness trajectories (November 14, 2026)
+
+Version 0.4.0 extends the combined suite to **168 discovered tests** (`5`
+trajectory unit/CLI/pack checks, `8` trajectory tamper/mutation checks, and `3`
+real ControlArena SDK multi-turn + Defer-to-Trusted checks on top of the 152
+v0.3.0 tests).
+
+[`evidence/trajectories/trajectories.jsonl`](../evidence/trajectories/trajectories.jsonl)
+and [`evidence/trajectories/summary.json`](../evidence/trajectories/summary.json)
+(`pack_sha256=389ca6b175529a331510607f5dc278e384e0c93961c5e6c17874d7dc54b56f37`)
+retain **44 replay-verified multi-turn trajectories** across all three active
+settings:
+
+| Group | Trajectories | `main_task_success` | `side_task_success` | `deferred_count` | `unauthorized_sats` |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| `honest_unmonitored` | 13 | 13 | 0 | 0 | 0 |
+| `honest_trusted_monitor_deferral` | 6 | 6 | 0 | 1 | 0 |
+| `attack_unmonitored` | 18 | 7 | 2 | 0 | 200,000 |
+| `attack_trusted_monitor_deferral` | 7 | 7 | 0 | 7 | 0 |
+
+Key verified properties:
+1. **Zero-cheat public derivation**: `honest_solver` derives arithmetic
+   dispute responses, 3-bit CPA NAND witnesses (`dev` and `held_out` circuits,
+   including 2-step parent-to-child lineage via `CPA/v0/Terminal` tagged
+   hashes), and all 60 native-receipt classifications strictly from public tool
+   observations.
+2. **Real ControlArena `defer_to_trusted_builder` isomorphism**:
+   `run_sdk_trajectory` executes `bitvm_policy_builder` and
+   `bitvm_protocol_monitor_builder` through `get_control_task` and Inspect AI,
+   matching `run_trajectory` byte-for-byte via `replay_trajectory`.
+3. **Separated calibration & evidence honesty**: the two weaker-parent CPA
+   calibration trajectories (`dev` and `held_out`) record
+   `calibration_acceptances=1` with `side_task_success=false` and zero attack
+   credit; `bitvm_native_receipt_audit` enforces `HONEST`-only execution and
+   catches `premature_confirmation_auditor` overclaiming mempool admission as
+   confirmed settlement; all 44 records keep `model_generated=false` and all
+   five `evidence_gates` `false`.

@@ -132,6 +132,25 @@ def main(argv: list[str] | None = None) -> int:
     camp_replay.add_argument("--expected-scenario")
     camp_replay.add_argument("--expected-split", choices=("dev", "held_out"))
     camp_replay.add_argument("--max-attempts", type=int)
+    traj_list = commands.add_parser("trajectory-list", help="List deterministic multi-turn control trajectory specs")
+    traj_list.add_argument("--setting", choices=("bitvm_arena", "bitvm_cpa_campaign", "bitvm_native_receipt_audit"))
+    traj_list.add_argument("--bundle", type=Path)
+    traj_gen = commands.add_parser("trajectory-generate", help="Run, replay-verify, and export trajectories.jsonl + summary.json")
+    traj_gen.add_argument("--output", type=Path, required=True)
+    traj_gen.add_argument("--source", type=Path)
+    traj_gen.add_argument("--bundle", type=Path)
+    traj_gen.add_argument("--setting", choices=("bitvm_arena", "bitvm_cpa_campaign", "bitvm_native_receipt_audit"))
+    traj_gen.add_argument("--no-cpa-campaign", action="store_true")
+    traj_replay = commands.add_parser("trajectory-replay", help="Replay and verify a trajectory JSON or trajectories.jsonl pack")
+    traj_replay.add_argument("target", type=Path)
+    traj_replay.add_argument("--source", type=Path)
+    traj_replay.add_argument("--bundle", type=Path)
+    traj_replay.add_argument("--summary", type=Path)
+    traj_replay.add_argument("--expected-setting", choices=("bitvm_arena", "bitvm_cpa_campaign", "bitvm_native_receipt_audit"))
+    traj_replay.add_argument("--expected-scenario")
+    traj_replay.add_argument("--expected-split")
+    traj_replay.add_argument("--expected-mode", choices=("honest", "attack"))
+    traj_replay.add_argument("--expected-policy")
     args = parser.parse_args(argv)
     try:
         if args.command == "list":
@@ -222,6 +241,64 @@ def main(argv: list[str] | None = None) -> int:
                     expected_max_attempts=max_attempts,
                 )
                 print(json.dumps({"replay_verified": True, "score": session.score()}, indent=2))
+        elif args.command in ("trajectory-list", "trajectory-generate", "trajectory-replay"):
+            from .trajectories import (
+                default_trajectory_specs,
+                export_trajectory_pack,
+                list_trajectory_catalogue,
+                replay_trajectory,
+                verify_trajectory_pack,
+            )
+
+            if args.command == "trajectory-list":
+                rows = list_trajectory_catalogue(setting_filter=args.setting, bundle_root=args.bundle)
+                print(json.dumps(rows, indent=2))
+            elif args.command == "trajectory-generate":
+                include_cpa = (
+                    not args.no_cpa_campaign
+                    and (args.source is not None or args.setting == "bitvm_cpa_campaign")
+                )
+                specs = default_trajectory_specs(
+                    bundle_root=args.bundle,
+                    include_cpa_campaign=include_cpa,
+                )
+                if args.setting is not None:
+                    specs = [s for s in specs if s.setting_name == args.setting]
+                _, summary = export_trajectory_pack(
+                    specs,
+                    source_root=args.source,
+                    bundle_root=args.bundle,
+                    output_dir=args.output,
+                )
+                print(json.dumps(summary, indent=2))
+            else:
+                if args.target.suffix == ".jsonl":
+                    report = verify_trajectory_pack(
+                        args.target,
+                        source_root=args.source,
+                        bundle_root=args.bundle,
+                        summary_path=args.summary,
+                    )
+                    print(json.dumps(report, indent=2))
+                else:
+                    if args.target.stat().st_size > 2_000_000:
+                        raise ValueError("trajectory file exceeds 2 MB limit")
+                    record = json.loads(args.target.read_text(encoding="utf-8"))
+                    replayed = replay_trajectory(
+                        record,
+                        source_root=args.source,
+                        bundle_root=args.bundle,
+                        expected_setting=args.expected_setting,
+                        expected_scenario_id=args.expected_scenario,
+                        expected_split=args.expected_split,
+                        expected_eval_mode=args.expected_mode,
+                        expected_policy_family=args.expected_policy,
+                    )
+                    print(json.dumps({
+                        "replay_verified": True,
+                        "trajectory_id": replayed["trajectory_id"],
+                        "outcome": replayed["outcome"],
+                    }, indent=2))
         else:
             from .cpa_backend import CPAReferenceSession, replay_trace as replay_cpa
             if args.command == "cpa-run":

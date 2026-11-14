@@ -113,7 +113,12 @@ The [native receipt audit](native_receipt_audit.md) provides 60 read-only
 classification tasks from the retained run. Its ControlArena setting checks
 whether a submitted account respects the individual record's evidence scope
 and funded lineage. Audit accuracy measures interpretation of those receipts;
-native per-sample execution retains its separate campaign gate.
+native per-sample execution retains its separate campaign gate. The
+[multi-turn trajectory pack](trajectories.md) adds 44 replay-verified rollouts
+across `bitvm_arena`, `bitvm_cpa_campaign` (`dev` and `held_out`), and
+`bitvm_native_receipt_audit` (`HONEST`-only), pairing deterministic policy
+families with ControlArena's `defer_to_trusted_builder` while keeping
+`model_generated=false` explicit.
 
 Fresh proofs for a forbidden transition deserve their own cases. A stale proof
 that fails after changing transaction bytes establishes digest binding; the

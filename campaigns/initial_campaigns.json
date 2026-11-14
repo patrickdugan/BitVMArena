@@ -82,7 +82,8 @@
       "completed_checks": [
         "22 scripted strict/calibration episodes matched expectations",
         "All exported model traces replayed exactly",
-        "9 real ControlArena SDK integration tests passed"
+        "9 real ControlArena SDK integration tests passed",
+        "18 multi-turn ControlArena/Control-Harness trajectories (honest_solver, adaptive_prober, stealth_side_task_attacker, budget_exhaustion_griefing, trusted_monitor_deferral) replayed and SDK-verified"
       ]
     },
     {
@@ -425,7 +426,8 @@
         "Receipt checks bind transaction identities, expected outpoints, output vectors, case coverage and rejection tips to the expected execution phases.",
         "Read-only audit derives 60 record-local answers from the pinned native bundle; 15 backend and 11 actual SDK checks passed.",
         "Bounded agent-driven CPA campaign (bitvm_cpa_campaign) verified across 20 scenarios (10 dev, 10 held_out) with disjoint canonical ProgramIDs, source-byte candidate reconstruction, independent parent-policy checks and separate scoring.",
-        "18 eligible campaign scenarios executed on fresh per-case isolated-regtest nodes with verified txid/wtxid, funded origins, successor outputs, confirmation heights, rejection tips and pinned binary provenance; 2 gated scenarios refused native connection as designed."
+        "18 eligible campaign scenarios executed on fresh per-case isolated-regtest nodes with verified txid/wtxid, funded origins, successor outputs, confirmation heights, rejection tips and pinned binary provenance; 2 gated scenarios refused native connection as designed.",
+        "26 CPA & native-audit multi-turn trajectories (9 dev, 9 held_out, 8 HONEST native-receipt audit) exported to evidence/trajectories/trajectories.jsonl and verified byte-for-byte against ControlArena's defer_to_trusted_builder."
       ],
       "receipt_audit": {
         "path": "src/bitvm_arena/cpa_native_audit.py",

@@ -31,6 +31,7 @@ Benchmark outputs contain deterministic event traces and a JSON summary.
 | CPA reference verifier | 28 fixtures (`bitvm_cpa_reference`) plus bounded candidate reconstruction (`bitvm_cpa_campaign`) across 7 scenario families | Pinned compiler, independent Python Script interpreter and replayed receipts |
 | CPA native runners | Upstream 4-transition / 49-rejection suite plus 18 per-case isolated-regtest campaign scenarios (2 gated scenarios blocked) | Arena-executed isolated regtest, with exact transaction bytes and binary provenance |
 | Native receipt audit | 60 recorded observations exposed through a read-only ControlArena setting | Evidence classification with independently derived answers |
+| Control trajectories | 44 multi-turn ControlArena & Control-Harness trajectories (`18 bitvm_arena`, `18 bitvm_cpa_campaign` [`9 dev`, `9 held_out`], `8 bitvm_native_receipt_audit`) across 5 policy families + stateful Defer-to-Trusted | Replay-verified JSONL pack (`model_generated=false`) and real SDK `defer_to_trusted_builder` checks |
 | Authority enumeration | 1,851 canonical NAND programs, 32 compiled authorities, 256 Python Script-oracle executions | Reproduced pinned CPA research |
 | Historical recovery | Nine reconstructed files from the original local Arena | Archived source captures with per-file provenance |
 | Campaign map | Seven lanes covering the simulator, CPA, Keyless-CHECKSIG, MULADDMOD, UTXORef and BitVM2 | Source-pinned plan; each lane declares its adapter status |
@@ -210,6 +211,7 @@ execution and reproduces the frozen evidence. See
 | `evidence/cpa_native/` | Native report, normalized receipt, frozen profile and executable provenance |
 | `evidence/cpa_campaign/` | Held-out/dev bounded campaign traces and benchmark summaries |
 | `evidence/cpa_campaign_native/` | Per-case isolated-regtest campaign report and verified receipt |
+| `evidence/trajectories/` | 44-trajectory multi-turn JSONL pack and controller summary ([guide](docs/trajectories.md)) |
 
 CI runs the core on Python 3.11 and 3.13, all four ControlArena settings on
 Python 3.11, the CPA reference fixtures and the authority replay against pinned
