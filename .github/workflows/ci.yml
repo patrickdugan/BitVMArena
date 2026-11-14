@@ -76,6 +76,9 @@ jobs:
       - run: python -m unittest discover -s tests -p 'test_cpa_campaign*.py' -v
         env:
           CPA_SOURCE: ${{ github.workspace }}/.deps/bitcoin-rs
+      - run: python -m unittest discover -s tests -p 'test_trajector*.py' -v
+        env:
+          CPA_SOURCE: ${{ github.workspace }}/.deps/bitcoin-rs
       - run: bitvm-arena cpa-campaign-benchmark --source .deps/bitcoin-rs --split all --output runs/cpa-campaign
       - run: >-
           bitvm-arena cpa-campaign-replay
@@ -83,6 +86,12 @@ jobs:
           --source .deps/bitcoin-rs
           --expected-scenario heldout-honest-two-step-not-a-and-b
           --expected-split held_out
+      - run: >-
+          bitvm-arena trajectory-replay
+          evidence/trajectories/trajectories.jsonl
+          --source .deps/bitcoin-rs
+          --bundle evidence/cpa_native
+          --summary evidence/trajectories/summary.json
 
   authority-replay:
     runs-on: ubuntu-latest
