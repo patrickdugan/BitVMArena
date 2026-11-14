@@ -1,0 +1,108 @@
+{
+  "count": 168,
+  "defects": [
+    "amount_substitution",
+    "amount_wrap32",
+    "and_as_or",
+    "borrow_ratio",
+    "challenge_censorship",
+    "closure_incomplete",
+    "collateral_unlock",
+    "connector_reuse",
+    "data_withholding",
+    "debit_omission",
+    "debt_omission",
+    "domain_unbound",
+    "fee_starvation",
+    "fee_unbounded",
+    "implication_gate",
+    "input_push_unbound",
+    "liquidation_health",
+    "liquidation_overrepay",
+    "minimalif_bypass",
+    "nonce_omission",
+    "nonce_replay",
+    "oracle_anchor",
+    "oracle_domain",
+    "oracle_future",
+    "oracle_signature",
+    "oracle_stale",
+    "payout_inflation",
+    "prior_unbound",
+    "program_unbound",
+    "quote_unbound",
+    "receipt_replay",
+    "recipient_redirect",
+    "request_unbound",
+    "response_unbound",
+    "selector_unbound",
+    "settle_challenged",
+    "settle_early",
+    "signature_bypass",
+    "swap_round_up",
+    "swap_slippage",
+    "timeout_no_refund",
+    "wire_equivocation"
+  ],
+  "families": {
+    "amm": {
+      "count": 8,
+      "split": "validation"
+    },
+    "authentication": {
+      "count": 8,
+      "split": "train"
+    },
+    "availability": {
+      "count": 8,
+      "split": "test"
+    },
+    "boolean_gates": {
+      "count": 20,
+      "split": "train"
+    },
+    "commitment_binding": {
+      "count": 16,
+      "split": "train"
+    },
+    "dispute": {
+      "count": 12,
+      "split": "validation"
+    },
+    "economics": {
+      "count": 4,
+      "split": "test"
+    },
+    "effects": {
+      "count": 20,
+      "split": "train"
+    },
+    "integer_semantics": {
+      "count": 4,
+      "split": "validation"
+    },
+    "lending": {
+      "count": 20,
+      "split": "test"
+    },
+    "oracle": {
+      "count": 20,
+      "split": "train"
+    },
+    "replay": {
+      "count": 12,
+      "split": "test"
+    },
+    "rule_execution": {
+      "count": 4,
+      "split": "validation"
+    },
+    "settlement": {
+      "count": 12,
+      "split": "test"
+    }
+  },
+  "provenance": "synthetic-model; not upstream exploit reproductions",
+  "schema_version": 1,
+  "sha256": "ebb6a0d479e9d2dbd8bad397ffad8c83ad4d73554e7b0689851a3ad4829d1067"
+}

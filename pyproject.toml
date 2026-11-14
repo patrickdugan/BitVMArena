@@ -1,0 +1,15 @@
+[build-system]
+requires = []
+build-backend = "build_backend"
+backend-path = ["."]
+
+[project]
+name = "bitvm-arena"
+version = "0.1.0"
+description = "Deterministic corruption trajectories and control evaluations for BitVM DeFi"
+requires-python = ">=3.11"
+dependencies = []
+license = {text = "MIT"}
+
+[project.scripts]
+bitvm-arena = "bitvm_arena.cli:main"
