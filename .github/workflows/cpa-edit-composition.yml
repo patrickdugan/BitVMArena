@@ -1,0 +1,47 @@
+name: CPA paired-edit composition
+
+on:
+  push:
+    branches: ['research/cpa-gate-enumeration', 'research/cpa-edit-composition']
+  pull_request:
+    paths:
+      - 'research/canonical-proof-authority/**'
+      - '.github/workflows/cpa-edit-composition.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cpa-edit-composition-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  reference:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          path: arena
+          persist-credentials: false
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          repository: patrickdugan/bitcoin-rs
+          ref: 24a5593350f42efc8a96047aa9e7e114fa22cb08
+          path: bitcoin-rs
+          persist-credentials: false
+      - name: Record source
+        run: |
+          mkdir -p /tmp/cpa-edit-composition
+          git -C arena rev-parse HEAD > /tmp/cpa-edit-composition/commit.txt
+          git -C arena archive HEAD LICENSE research/canonical-proof-authority .github/workflows/cpa-edit-composition.yml | gzip -n > /tmp/cpa-edit-composition/source.tar.gz
+      - name: Reproduce checked gate corpus
+        run: python3 -I -S -B arena/research/canonical-proof-authority/scripts/run.py --bitcoin-rs bitcoin-rs --out /tmp/cpa-edit-composition/base
+      - name: Check pair composition and replay
+        run: python3 -I -S -B arena/research/canonical-proof-authority/scripts/run_composition.py --bitcoin-rs bitcoin-rs --corpus /tmp/cpa-edit-composition/base/generated/circuits.jsonl --out /tmp/cpa-edit-composition/paired
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        if: always()
+        with:
+          name: cpa-edit-composition-${{ github.run_id }}-${{ github.run_attempt }}
+          path: /tmp/cpa-edit-composition/
+          if-no-files-found: error
