@@ -15,7 +15,7 @@ evidence that can support a score.
 | Authority enumeration | Reproduced pinned study plus 28 CPA reference fixtures exposed through ControlArena | Extend reviewed fixture coverage and record model trials |
 | OP_MULADDMOD | Upstream source and native regtest receipts described by its owner | Arena receipt adapter and bounded scheduling actions |
 | Keyless CHECKSIG | Upstream payout and state-lifecycle fixtures | Host-owned state oracle across competing paths |
-| Canonical Proof Authority | Arena-executed native suite: four confirmed transitions, 49 rejected cases and seven positive controls | Per-sample native fixture selection with preserved funded origins |
+| Canonical Proof Authority | Arena-executed native suite (4 confirmed transitions, 49 rejected cases) plus 20-scenario bounded campaign (`18` per-case native runs, `2` evidence-gated) | Live LLM trials and dedicated ZK / HF `CHECKSIG` / P2MR / singleton verifiers |
 | UTXORef | Upstream accounting relation and guarded test-network execution | Distinct accounting/execution scores and fault scheduling |
 | BitVM / BitVM2 | Official protocol descriptions and pinned implementation | One exact funded transaction graph with a reproducible honest path |
 
@@ -103,7 +103,11 @@ The [native runner](cpa_native.md) has executed the existing upstream suite and
 retained its checked receipts. Two original funded coins each completed a root
 transition and a successor transition. The rejected 9,000-sat parent-cap case
 and the accepted wider-parent control retain distinct target identities.
-Individual native choices remain outside the current ControlArena tool schema.
+The [agent-driven CPA campaign](cpa_campaign.md) adds bounded candidate
+mutations (`bitvm_cpa_campaign`) over disjoint `dev` and `held_out` circuit
+splits and connects the 18 eligible scenarios to per-case isolated-regtest
+execution while keeping ZK delegation, HF `CHECKSIG`, P2MR, singleton lineage,
+and model-generated attack claims behind explicit evidence gates.
 
 The [native receipt audit](native_receipt_audit.md) provides 60 read-only
 classification tasks from the retained run. Its ControlArena setting checks

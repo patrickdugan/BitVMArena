@@ -1,0 +1,62 @@
+{
+  "schema": "bitvm-arena/cpa-campaign-provenance/v1",
+  "source_commit": "29ca519031fcd67f467881e16ba73e0eb1211759",
+  "dependency_commit": "188e2d78fbb623a12a42772120a2aa4e437905c1",
+  "rust_crates_tree": "c9f0f775b4ff5b08376505bb010b63ca731ba726",
+  "cargo_lock_sha256": "3ba8eb30eaee2459df69b007cf47ba419f7d8a4ca81a80727d54808fd1dacd85",
+  "source_sha256": {
+    "canonical_proof_authority.py": "a7dcd6bbad68589247ebc4f5567654d83d0631e18f01911a21f4c00957e16076",
+    "cpa_transition.py": "8cf6cd2eb274ec2c52f9e9f7d7563577977a2d0c61268c07770b6b18a15da761",
+    "cpa_regtest.py": "7be589337b665f91dfd4c6cf9c5aad2b10c1c9e712ba341d98acd79d32d39b09",
+    "keyless_checksig_rpc.py": "2ba2df30bba64476acf1f71e2fb0b9950c0dbf2509a87ef40876a3a78b0d7e9a",
+    "keyless_state_machine.py": "897bec48af6349485fd63bdef8da7ad5b6f8bcafbe61f0737695c20c67e4da2f"
+  },
+  "approved_binaries": [
+    {
+      "provenance_id": "upstream-actions-artifact-14006830303",
+      "binary_sha256": "fe506c638478d173edd267422856b9fb02c8ab424b694b6c81554dce2a48caa6",
+      "source_commit": "188e2d78fbb623a12a42772120a2aa4e437905c1",
+      "build_commit": "2e8f5f1f588ccf3bc85e8c2a8399bd1a05368a98",
+      "rust_crates_tree": "c9f0f775b4ff5b08376505bb010b63ca731ba726",
+      "artifact_id": 14006830303,
+      "artifact_zip_sha256": "5676cc6f044e98b134266c13133f0451339fa371ddb4c3057209847c52d730a4",
+      "features": "fjall,experimental-keyless-checksig-regtest,experimental-op-cat-regtest",
+      "build_command": [
+        "cargo",
+        "build",
+        "--locked",
+        "--jobs",
+        "2",
+        "--profile",
+        "quickstart",
+        "-p",
+        "bitcoin-rs",
+        "--no-default-features",
+        "--features",
+        "fjall,experimental-keyless-checksig-regtest,experimental-op-cat-regtest"
+      ]
+    },
+    {
+      "provenance_id": "local-locked-quickstart-29ca519031fc",
+      "binary_sha256": "c2173c4c0aa33bf1aa80cb8d5e0bf258ac0259035957577989df27ba550c28c3",
+      "source_commit": "29ca519031fcd67f467881e16ba73e0eb1211759",
+      "rust_crates_tree": "c9f0f775b4ff5b08376505bb010b63ca731ba726",
+      "cargo_lock_sha256": "3ba8eb30eaee2459df69b007cf47ba419f7d8a4ca81a80727d54808fd1dacd85",
+      "rustc_version": "rustc 1.99.1 (58cf8f9c3 2026-10-13)",
+      "target_triple": "x86_64-unknown-linux-gnu",
+      "features": "fjall,experimental-keyless-checksig-regtest,experimental-op-cat-regtest",
+      "build_command": [
+        "cargo",
+        "build",
+        "--locked",
+        "--profile",
+        "quickstart",
+        "-p",
+        "bitcoin-rs",
+        "--no-default-features",
+        "--features",
+        "fjall,experimental-keyless-checksig-regtest,experimental-op-cat-regtest"
+      ]
+    }
+  ]
+}

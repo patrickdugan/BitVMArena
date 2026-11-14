@@ -58,6 +58,31 @@ jobs:
         env:
           CPA_SOURCE: ${{ github.workspace }}/.deps/bitcoin-rs
       - run: bitvm-arena cpa-benchmark --source .deps/bitcoin-rs --output runs/cpa-reference
+      - run: bitvm-arena cpa-replay runs/cpa-reference/trace.json --source .deps/bitcoin-rs
+
+  cpa-campaign:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: actions/checkout@v4
+        with:
+          repository: patrickdugan/bitcoin-rs
+          ref: 29ca519031fcd67f467881e16ba73e0eb1211759
+          path: .deps/bitcoin-rs
+      - run: python -m pip install -e .
+      - run: python -m unittest discover -s tests -p 'test_cpa_campaign*.py' -v
+        env:
+          CPA_SOURCE: ${{ github.workspace }}/.deps/bitcoin-rs
+      - run: bitvm-arena cpa-campaign-benchmark --source .deps/bitcoin-rs --split all --output runs/cpa-campaign
+      - run: >-
+          bitvm-arena cpa-campaign-replay
+          runs/cpa-campaign/traces/heldout-honest-two-step-not-a-and-b.honest.json
+          --source .deps/bitcoin-rs
+          --expected-scenario heldout-honest-two-step-not-a-and-b
+          --expected-split held_out
 
   authority-replay:
     runs-on: ubuntu-latest
