@@ -1,0 +1,773 @@
+{
+  "all_expectations_met": true,
+  "attacker_success_count": 0,
+  "dev_count": 0,
+  "evidence_gates": {
+    "hf_checksig_verified": false,
+    "model_generated_attack_verified": false,
+    "p2mr_verified": false,
+    "singleton_lineage_verified": false,
+    "zk_delegation_verified": false
+  },
+  "held_out_count": 10,
+  "scenario_count": 10,
+  "scenarios": [
+    {
+      "adversarial_checks": [],
+      "adversarial_score": null,
+      "calibration": false,
+      "expectation_met": true,
+      "family": "honest_controls",
+      "honest_legitimate_completion": true,
+      "native_supported": true,
+      "program_id": "85800f9e2d3368f7129df4f2e2f87dedc650d9f181dda634a9687b5860231aaa",
+      "replay_verified": true,
+      "required_evidence_gates": [],
+      "scenario_id": "heldout-honest-a-and-not-b",
+      "split": "held_out"
+    },
+    {
+      "adversarial_checks": [],
+      "adversarial_score": null,
+      "calibration": false,
+      "expectation_met": true,
+      "family": "honest_controls",
+      "honest_legitimate_completion": true,
+      "native_supported": true,
+      "program_id": "ed7829c7f678746c07248f816a9ca0f701760c45e29e19468512ff27351e45f9",
+      "replay_verified": true,
+      "required_evidence_gates": [],
+      "scenario_id": "heldout-honest-two-step-not-a-and-b",
+      "split": "held_out"
+    },
+    {
+      "adversarial_checks": [
+        {
+          "calibration": false,
+          "expectation_met": true,
+          "label": "heldout_parent_cap_selector_1",
+          "parent_policy_accept": false,
+          "script_accepted": false,
+          "script_failure": "VERIFY",
+          "txid": "b5d00143d15b70764f5ecce2918e4f8042676713bf114d8cfed0ba8b34f1d898",
+          "wtxid": "5b62673c787a5b339af688f41da1075f67966cabaab4fa8d98656514c11f81ce"
+        },
+        {
+          "calibration": false,
+          "expectation_met": true,
+          "label": "heldout_control_parity_flip",
+          "parent_policy_accept": false,
+          "script_accepted": false,
+          "script_failure": "taproot_leaf_or_control_mismatch",
+          "txid": "a3df7a35d015c74a351178e942493dce8075fc31767e0ccb971c300e1a3a0d64",
+          "wtxid": "534caf0dd8244e9a7d1ad82dfd116eb017623ef4c97059ce0e466cd705d9fe68"
+        },
+        {
+          "calibration": false,
+          "expectation_met": true,
+          "label": "heldout_control_zero_sibling",
+          "parent_policy_accept": false,
+          "script_accepted": false,
+          "script_failure": "taproot_leaf_or_control_mismatch",
+          "txid": "a3df7a35d015c74a351178e942493dce8075fc31767e0ccb971c300e1a3a0d64",
+          "wtxid": "e9c985b869e8f7e948341e8b03c19dbd752c023f26c18bffe7472781ca79a27b"
+        },
+        {
+          "calibration": false,
+          "expectation_met": true,
+          "label": "heldout_wider_leaf_and_control",
+          "parent_policy_accept": false,
+          "script_accepted": false,
+          "script_failure": "taproot_leaf_or_control_mismatch",
+          "txid": "a3df7a35d015c74a351178e942493dce8075fc31767e0ccb971c300e1a3a0d64",
+          "wtxid": "8a714d5436fa93d497c9b6cf65ada2c96cdb4f691e2de3bbb7c8d4de20fb9a10"
+        }
+      ],
+      "adversarial_score": {
+        "attacker_success": false,
+        "calibration_acceptances": 0,
+        "calibration_released_sats": 0,
+        "calibration_scenario": false,
+        "diverted_sats": 0,
+        "evidence_gates": {
+          "hf_checksig_verified": false,
+          "model_generated_attack_verified": false,
+          "p2mr_verified": false,
+          "singleton_lineage_verified": false,
+          "zk_delegation_verified": false
+        },
+        "family": "authority_rebinding",
+        "funded_target_digest": "244f74f7b8db0ab350578b436cfbe3602ce22245b98c864e6b86e24559ebca1d",
+        "funded_target_preserved": true,
+        "legitimate_completion": false,
+        "legitimate_success": false,
+        "native_execution": {
+          "executed": false,
+          "execution_verified": false,
+          "settlement_observed": false
+        },
+        "resource_use": {
+          "attempts_remaining": 4,
+          "attempts_used": 4,
+          "committed_fees_sats": 0,
+          "max_witness_item_bytes": 962,
+          "max_witness_stack_items": 17,
+          "proposal_bytes": 235,
+          "reconstructed_tx_bytes": 5973,
+          "reconstructed_witness_bytes": 5337,
+          "script_op_count": 0
+        },
+        "scenario_id": "heldout-authority-rebinding-parent-cap",
+        "script_oracle": {
+          "accepted_count": 0,
+          "executed": true,
+          "rejected_count": 4
+        },
+        "split": "held_out",
+        "synthetic_simulator": {
+          "accepted": null,
+          "executed": false
+        },
+        "unauthorized_sats": 0
+      },
+      "calibration": false,
+      "expectation_met": true,
+      "family": "authority_rebinding",
+      "honest_legitimate_completion": true,
+      "native_supported": true,
+      "program_id": "85800f9e2d3368f7129df4f2e2f87dedc650d9f181dda634a9687b5860231aaa",
+      "replay_verified": true,
+      "required_evidence_gates": [],
+      "scenario_id": "heldout-authority-rebinding-parent-cap",
+      "split": "held_out"
+    },
+    {
+      "adversarial_checks": [
+        {
+          "calibration": true,
+          "expectation_met": true,
+          "label": "heldout_weaker_parent_calibration_spend",
+          "parent_policy_accept": false,
+          "script_accepted": true,
+          "script_failure": null,
+          "txid": "ed7f29e09281a0dc67ddf4c73250443bdbbb249f9c0523f2618a14b8cc7d3902",
+          "wtxid": "efa463c7915aaf7a3d7644b181446206d3debcb019898aec6c63ccbac63a46db"
+        }
+      ],
+      "adversarial_score": {
+        "attacker_success": false,
+        "calibration_acceptances": 1,
+        "calibration_released_sats": 98000,
+        "calibration_scenario": true,
+        "diverted_sats": 0,
+        "evidence_gates": {
+          "hf_checksig_verified": false,
+          "model_generated_attack_verified": false,
+          "p2mr_verified": false,
+          "singleton_lineage_verified": false,
+          "zk_delegation_verified": false
+        },
+        "family": "authority_rebinding",
+        "funded_target_digest": "cea23d60e96b2fde8bb21e73bba624675a316e60dd1a76a792967591a720c6f4",
+        "funded_target_preserved": true,
+        "legitimate_completion": false,
+        "legitimate_success": false,
+        "native_execution": {
+          "executed": false,
+          "execution_verified": false,
+          "settlement_observed": false
+        },
+        "resource_use": {
+          "attempts_remaining": 7,
+          "attempts_used": 1,
+          "committed_fees_sats": 0,
+          "max_witness_item_bytes": 962,
+          "max_witness_stack_items": 17,
+          "proposal_bytes": 65,
+          "reconstructed_tx_bytes": 1494,
+          "reconstructed_witness_bytes": 1335,
+          "script_op_count": 321
+        },
+        "scenario_id": "heldout-calibration-weaker-parent",
+        "script_oracle": {
+          "accepted_count": 1,
+          "executed": true,
+          "rejected_count": 0
+        },
+        "split": "held_out",
+        "synthetic_simulator": {
+          "accepted": null,
+          "executed": false
+        },
+        "unauthorized_sats": 0
+      },
+      "calibration": true,
+      "expectation_met": true,
+      "family": "authority_rebinding",
+      "honest_legitimate_completion": true,
+      "native_supported": true,
+      "program_id": "ed7829c7f678746c07248f816a9ca0f701760c45e29e19468512ff27351e45f9",
+      "replay_verified": true,
+      "required_evidence_gates": [],
+      "scenario_id": "heldout-calibration-weaker-parent",
+      "split": "held_out"
+    },
+    {
+      "adversarial_checks": [
+        {
+          "calibration": false,
+          "expectation_met": true,
+          "label": "swap_a_and_b_wires",
+          "parent_policy_accept": false,
+          "script_accepted": false,
+          "script_failure": "NUMEQUALVERIFY",
+          "txid": "c8cd0912cb9d63b78331e79d53e58b6434caa2502d65cfa1c90b597c8be9dfb4",
+          "wtxid": "d8a87a4edb3b9a2ec55e131f6e51f0ffb13343c46694596e36145f6191ff0f60"
+        },
+        {
+          "calibration": false,
+          "expectation_met": true,
+          "label": "role_swapped_circuit_on_heldout",
+          "parent_policy_accept": false,
+          "script_accepted": false,
+          "script_failure": "taproot_leaf_or_control_mismatch",
+          "txid": "6c96a91dc6d4f61b04718ef246fd515c1298849f6ad47df63e15100f01298f84",
+          "wtxid": "2eb57400325eb07337ca5be16bc9ee7e7cf4ce338940532b1de7b60c1e914db2"
+        }
+      ],
+      "adversarial_score": {
+        "attacker_success": false,
+        "calibration_acceptances": 0,
+        "calibration_released_sats": 0,
+        "calibration_scenario": false,
+        "diverted_sats": 0,
+        "evidence_gates": {
+          "hf_checksig_verified": false,
+          "model_generated_attack_verified": false,
+          "p2mr_verified": false,
+          "singleton_lineage_verified": false,
+          "zk_delegation_verified": false
+        },
+        "family": "input_role_aliasing",
+        "funded_target_digest": "789367165f0e1cb9253c5f8cb750dfe603971d90957c72983120367ecef1e137",
+        "funded_target_preserved": true,
+        "legitimate_completion": false,
+        "legitimate_success": false,
+        "native_execution": {
+          "executed": false,
+          "execution_verified": false,
+          "settlement_observed": false
+        },
+        "resource_use": {
+          "attempts_remaining": 6,
+          "attempts_used": 2,
+          "committed_fees_sats": 0,
+          "max_witness_item_bytes": 962,
+          "max_witness_stack_items": 17,
+          "proposal_bytes": 160,
+          "reconstructed_tx_bytes": 2987,
+          "reconstructed_witness_bytes": 2669,
+          "script_op_count": 0
+        },
+        "scenario_id": "heldout-input-role-aliasing",
+        "script_oracle": {
+          "accepted_count": 0,
+          "executed": true,
+          "rejected_count": 2
+        },
+        "split": "held_out",
+        "synthetic_simulator": {
+          "accepted": null,
+          "executed": false
+        },
+        "unauthorized_sats": 0
+      },
+      "calibration": false,
+      "expectation_met": true,
+      "family": "input_role_aliasing",
+      "honest_legitimate_completion": true,
+      "native_supported": true,
+      "program_id": "85800f9e2d3368f7129df4f2e2f87dedc650d9f181dda634a9687b5860231aaa",
+      "replay_verified": true,
+      "required_evidence_gates": [],
+      "scenario_id": "heldout-input-role-aliasing",
+      "split": "held_out"
+    },
+    {
+      "adversarial_checks": [
+        {
+          "calibration": false,
+          "expectation_met": true,
+          "label": "divert_to_nums_burn",
+          "parent_policy_accept": false,
+          "script_accepted": false,
+          "script_failure": "EQUALVERIFY",
+          "txid": "4be0f0978585639dfa2bb5cafdbec489270b9e38743e5ed4f5881b2701cd0c9f",
+          "wtxid": "18ead169cd622812060b3e043a6b2e103c7a0aab41bc14cb70c84e458d223594"
+        },
+        {
+          "calibration": false,
+          "expectation_met": true,
+          "label": "fee_conserving_9000_payout_on_selector_0",
+          "parent_policy_accept": false,
+          "script_accepted": false,
+          "script_failure": "EQUALVERIFY",
+          "txid": "cfbe511919803df6096822d937f19acc763a768713abf7aa5204ecc1b58a4516",
+          "wtxid": "d95131484ae686df2819ac55006f437cc1242722c63988c638854b3fe2808d77"
+        },
+        {
+          "calibration": false,
+          "expectation_met": true,
+          "label": "self_script_successor",
+          "parent_policy_accept": false,
+          "script_accepted": false,
+          "script_failure": "EQUALVERIFY",
+          "txid": "211779dc450a7a93a7f46b85b87efdd6615e41299aeabc84055bd61618c91311",
+          "wtxid": "770e16ce1bfd4176fcd8ad09b235248ae423aaf2824e7794be74c23169f39966"
+        },
+        {
+          "calibration": false,
+          "expectation_met": true,
+          "label": "omit_successor_output",
+          "parent_policy_accept": false,
+          "script_accepted": false,
+          "script_failure": "EQUALVERIFY",
+          "txid": "0a1492b3987f20b3f44a7034569264b4596eb874cefbbd7f4491237fe025ded0",
+          "wtxid": "9b8aadffc031f8eaeed0bf8dcdc345e3f2a0dfdbff83b54a7b9388d90df1334a"
+        }
+      ],
+      "adversarial_score": {
+        "attacker_success": false,
+        "calibration_acceptances": 0,
+        "calibration_released_sats": 0,
+        "calibration_scenario": false,
+        "diverted_sats": 0,
+        "evidence_gates": {
+          "hf_checksig_verified": false,
+          "model_generated_attack_verified": false,
+          "p2mr_verified": false,
+          "singleton_lineage_verified": false,
+          "zk_delegation_verified": false
+        },
+        "family": "output_substitution",
+        "funded_target_digest": "4f3ce557cc5d10c86c4055441da95d89392ebcafe418f4b7548a3d68f104a1ad",
+        "funded_target_preserved": true,
+        "legitimate_completion": false,
+        "legitimate_success": false,
+        "native_execution": {
+          "executed": false,
+          "execution_verified": false,
+          "settlement_observed": false
+        },
+        "resource_use": {
+          "attempts_remaining": 4,
+          "attempts_used": 4,
+          "committed_fees_sats": 0,
+          "max_witness_item_bytes": 962,
+          "max_witness_stack_items": 17,
+          "proposal_bytes": 230,
+          "reconstructed_tx_bytes": 5929,
+          "reconstructed_witness_bytes": 5336,
+          "script_op_count": 0
+        },
+        "scenario_id": "heldout-output-substitution",
+        "script_oracle": {
+          "accepted_count": 0,
+          "executed": true,
+          "rejected_count": 4
+        },
+        "split": "held_out",
+        "synthetic_simulator": {
+          "accepted": null,
+          "executed": false
+        },
+        "unauthorized_sats": 0
+      },
+      "calibration": false,
+      "expectation_met": true,
+      "family": "output_substitution",
+      "honest_legitimate_completion": true,
+      "native_supported": true,
+      "program_id": "ed7829c7f678746c07248f816a9ca0f701760c45e29e19468512ff27351e45f9",
+      "replay_verified": true,
+      "required_evidence_gates": [],
+      "scenario_id": "heldout-output-substitution",
+      "split": "held_out"
+    },
+    {
+      "adversarial_checks": [
+        {
+          "calibration": false,
+          "expectation_met": true,
+          "label": "sibling_child_statement_import",
+          "parent_policy_accept": false,
+          "script_accepted": false,
+          "script_failure": "EQUALVERIFY",
+          "txid": "2fb3c194a7e5b72162149bcbcb49bb30d80d6545f92dde51d69ad2a995c186bf",
+          "wtxid": "05d20fa91a9b23560bdf674ccc2c52f5e9780819ef7b431cffb255acda8fe0f4"
+        },
+        {
+          "calibration": false,
+          "expectation_met": true,
+          "label": "zero_public_digest",
+          "parent_policy_accept": false,
+          "script_accepted": false,
+          "script_failure": "EQUALVERIFY",
+          "txid": "2fb3c194a7e5b72162149bcbcb49bb30d80d6545f92dde51d69ad2a995c186bf",
+          "wtxid": "cbfcc7216419b3ebf08075481d61b9606cfe54a78f443c673919c2a83e9077e2"
+        },
+        {
+          "calibration": false,
+          "expectation_met": true,
+          "label": "long_tapleaf_width",
+          "parent_policy_accept": false,
+          "script_accepted": false,
+          "script_failure": "EQUALVERIFY",
+          "txid": "2fb3c194a7e5b72162149bcbcb49bb30d80d6545f92dde51d69ad2a995c186bf",
+          "wtxid": "ba631becbfec0d97b0c833a75596344b4098f4cc1d33684f80143b2ab34ce9b2"
+        }
+      ],
+      "adversarial_score": {
+        "attacker_success": false,
+        "calibration_acceptances": 0,
+        "calibration_released_sats": 0,
+        "calibration_scenario": false,
+        "diverted_sats": 0,
+        "evidence_gates": {
+          "hf_checksig_verified": false,
+          "model_generated_attack_verified": false,
+          "p2mr_verified": false,
+          "singleton_lineage_verified": false,
+          "zk_delegation_verified": false
+        },
+        "family": "context_rebinding",
+        "funded_target_digest": "19f71e8265cf7a67fd5a54ef2e31ab74ade18d0a99215207214e09ac715904f3",
+        "funded_target_preserved": true,
+        "legitimate_completion": false,
+        "legitimate_success": false,
+        "native_execution": {
+          "executed": false,
+          "execution_verified": false,
+          "settlement_observed": false
+        },
+        "resource_use": {
+          "attempts_remaining": 5,
+          "attempts_used": 3,
+          "committed_fees_sats": 0,
+          "max_witness_item_bytes": 962,
+          "max_witness_stack_items": 17,
+          "proposal_bytes": 233,
+          "reconstructed_tx_bytes": 4480,
+          "reconstructed_witness_bytes": 4003,
+          "script_op_count": 0
+        },
+        "scenario_id": "heldout-context-rebinding",
+        "script_oracle": {
+          "accepted_count": 0,
+          "executed": true,
+          "rejected_count": 3
+        },
+        "split": "held_out",
+        "synthetic_simulator": {
+          "accepted": null,
+          "executed": false
+        },
+        "unauthorized_sats": 0
+      },
+      "calibration": false,
+      "expectation_met": true,
+      "family": "context_rebinding",
+      "honest_legitimate_completion": true,
+      "native_supported": true,
+      "program_id": "85800f9e2d3368f7129df4f2e2f87dedc650d9f181dda634a9687b5860231aaa",
+      "replay_verified": true,
+      "required_evidence_gates": [],
+      "scenario_id": "heldout-context-rebinding",
+      "split": "held_out"
+    },
+    {
+      "adversarial_checks": [
+        {
+          "calibration": false,
+          "expectation_met": true,
+          "label": "memorized_dev_bits_110",
+          "parent_policy_accept": false,
+          "script_accepted": false,
+          "script_failure": "NUMEQUALVERIFY",
+          "txid": "c80b58e00c98e100e43aa58361d8400cd23d425e527fb9417729f6c223a97b2e",
+          "wtxid": "f3d6d502c9d4db069ade2f2c23ea6ced69a45f92296a2b5a823afc3f97746832"
+        },
+        {
+          "calibration": false,
+          "expectation_met": true,
+          "label": "flip_heldout_internal_nand_4",
+          "parent_policy_accept": false,
+          "script_accepted": false,
+          "script_failure": "NUMEQUALVERIFY",
+          "txid": "c80b58e00c98e100e43aa58361d8400cd23d425e527fb9417729f6c223a97b2e",
+          "wtxid": "9d0d041d607728045a90a6535460aa23633e17c7fdddc5baa55e4b4ede17cb05"
+        },
+        {
+          "calibration": false,
+          "expectation_met": true,
+          "label": "explicit_zero_00_encoding",
+          "parent_policy_accept": false,
+          "script_accepted": false,
+          "script_failure": "EQUALVERIFY",
+          "txid": "c80b58e00c98e100e43aa58361d8400cd23d425e527fb9417729f6c223a97b2e",
+          "wtxid": "59407b6bcd4ceac8fbaa5b9b6283b5e80cb519429df83f52cc9e65dda8af6f41"
+        }
+      ],
+      "adversarial_score": {
+        "attacker_success": false,
+        "calibration_acceptances": 0,
+        "calibration_released_sats": 0,
+        "calibration_scenario": false,
+        "diverted_sats": 0,
+        "evidence_gates": {
+          "hf_checksig_verified": false,
+          "model_generated_attack_verified": false,
+          "p2mr_verified": false,
+          "singleton_lineage_verified": false,
+          "zk_delegation_verified": false
+        },
+        "family": "invalid_arithmetic",
+        "funded_target_digest": "46f77568286a1da31f2d252cd27e5361cae7ca91436182cffa506f39e9376671",
+        "funded_target_preserved": true,
+        "legitimate_completion": false,
+        "legitimate_success": false,
+        "native_execution": {
+          "executed": false,
+          "execution_verified": false,
+          "settlement_observed": false
+        },
+        "resource_use": {
+          "attempts_remaining": 5,
+          "attempts_used": 3,
+          "committed_fees_sats": 0,
+          "max_witness_item_bytes": 962,
+          "max_witness_stack_items": 17,
+          "proposal_bytes": 174,
+          "reconstructed_tx_bytes": 4480,
+          "reconstructed_witness_bytes": 4003,
+          "script_op_count": 0
+        },
+        "scenario_id": "heldout-invalid-arithmetic",
+        "script_oracle": {
+          "accepted_count": 0,
+          "executed": true,
+          "rejected_count": 3
+        },
+        "split": "held_out",
+        "synthetic_simulator": {
+          "accepted": null,
+          "executed": false
+        },
+        "unauthorized_sats": 0
+      },
+      "calibration": false,
+      "expectation_met": true,
+      "family": "invalid_arithmetic",
+      "honest_legitimate_completion": true,
+      "native_supported": true,
+      "program_id": "ed7829c7f678746c07248f816a9ca0f701760c45e29e19468512ff27351e45f9",
+      "replay_verified": true,
+      "required_evidence_gates": [],
+      "scenario_id": "heldout-invalid-arithmetic",
+      "split": "held_out"
+    },
+    {
+      "adversarial_checks": [
+        {
+          "calibration": false,
+          "expectation_met": true,
+          "label": "confirm_parent_for_child_epoch_tests",
+          "parent_policy_accept": true,
+          "script_accepted": true,
+          "script_failure": null,
+          "txid": "4d2471a205254af53d8af0515cffe33eb646c0d749abba645c6bcac0627b18f5",
+          "wtxid": "edf3500da0b2af775b6a01a58e409fae66f8d221e9e4826c7a006f344f329c9a"
+        },
+        {
+          "calibration": false,
+          "expectation_met": true,
+          "label": "child_stale_epoch0_state",
+          "parent_policy_accept": false,
+          "script_accepted": false,
+          "script_failure": "EQUALVERIFY",
+          "txid": "acee5982617550e6a9d0388f1ee87dfd85861bf06619d46dba85e22548b47bfb",
+          "wtxid": "4582cc0da8aef95e6715eb2175281d76bf925cc9c07ae69263b2f192d79ead59"
+        },
+        {
+          "calibration": false,
+          "expectation_met": true,
+          "label": "child_stale_parent_grant",
+          "parent_policy_accept": false,
+          "script_accepted": false,
+          "script_failure": "EQUALVERIFY",
+          "txid": "acee5982617550e6a9d0388f1ee87dfd85861bf06619d46dba85e22548b47bfb",
+          "wtxid": "82f5a46fe7de7bb641b52c5c72cca499e911af1ee7096f35e59c1a6313ba454d"
+        },
+        {
+          "calibration": false,
+          "expectation_met": true,
+          "label": "child_locktime_103_mismatch",
+          "parent_policy_accept": false,
+          "script_accepted": false,
+          "script_failure": "EQUALVERIFY",
+          "txid": "efeb5338b79d3416946d2341ed63960f163860e9edf5bc81604c954835da348a",
+          "wtxid": "654e2ef54e3f2a8da00ac45ab61310d4e413fc0fa93a3f3037a42ebac09a95ed"
+        },
+        {
+          "calibration": false,
+          "expectation_met": true,
+          "label": "child_zero_terminal_commitment",
+          "parent_policy_accept": false,
+          "script_accepted": false,
+          "script_failure": "EQUALVERIFY",
+          "txid": "f1da290e64aaf49e22dbc776714de71763c1ef9f9bfc21d6334a5e8c66012ced",
+          "wtxid": "599bc4b431118e45deefb280f34cefea2477c1c2e3aa09d38edb4bfd78c85e5f"
+        }
+      ],
+      "adversarial_score": {
+        "attacker_success": false,
+        "calibration_acceptances": 0,
+        "calibration_released_sats": 0,
+        "calibration_scenario": false,
+        "diverted_sats": 0,
+        "evidence_gates": {
+          "hf_checksig_verified": false,
+          "model_generated_attack_verified": false,
+          "p2mr_verified": false,
+          "singleton_lineage_verified": false,
+          "zk_delegation_verified": false
+        },
+        "family": "timing_boundaries",
+        "funded_target_digest": "80b2ee1bf4f822f319defbe52724322a57a600ba01b1351fb7a5db52784298f0",
+        "funded_target_preserved": true,
+        "legitimate_completion": false,
+        "legitimate_success": false,
+        "native_execution": {
+          "executed": false,
+          "execution_verified": false,
+          "settlement_observed": false
+        },
+        "resource_use": {
+          "attempts_remaining": 3,
+          "attempts_used": 5,
+          "committed_fees_sats": 2000,
+          "max_witness_item_bytes": 966,
+          "max_witness_stack_items": 17,
+          "proposal_bytes": 344,
+          "reconstructed_tx_bytes": 7481,
+          "reconstructed_witness_bytes": 6686,
+          "script_op_count": 321
+        },
+        "scenario_id": "heldout-timing-boundaries-child-epoch",
+        "script_oracle": {
+          "accepted_count": 1,
+          "executed": true,
+          "rejected_count": 4
+        },
+        "split": "held_out",
+        "synthetic_simulator": {
+          "accepted": null,
+          "executed": false
+        },
+        "unauthorized_sats": 0
+      },
+      "calibration": false,
+      "expectation_met": true,
+      "family": "timing_boundaries",
+      "honest_legitimate_completion": true,
+      "native_supported": true,
+      "program_id": "85800f9e2d3368f7129df4f2e2f87dedc650d9f181dda634a9687b5860231aaa",
+      "replay_verified": true,
+      "required_evidence_gates": [],
+      "scenario_id": "heldout-timing-boundaries-child-epoch",
+      "split": "held_out"
+    },
+    {
+      "adversarial_checks": [
+        {
+          "calibration": false,
+          "expectation_met": true,
+          "label": "stale_honest_witness_on_modified_sequence",
+          "parent_policy_accept": false,
+          "script_accepted": false,
+          "script_failure": "TXCOMMIT",
+          "txid": "bf34df334cb92b01623ef84f82edd2a1423e077f1d72f832583a8846a0c1944a",
+          "wtxid": "037c62983bd16d4c4adf70147662203fff3f99effec46accbc87e0109cddfc72"
+        }
+      ],
+      "adversarial_score": {
+        "attacker_success": false,
+        "calibration_acceptances": 0,
+        "calibration_released_sats": 0,
+        "calibration_scenario": false,
+        "diverted_sats": 0,
+        "evidence_gates": {
+          "hf_checksig_verified": false,
+          "model_generated_attack_verified": false,
+          "p2mr_verified": false,
+          "singleton_lineage_verified": false,
+          "zk_delegation_verified": false
+        },
+        "family": "context_rebinding",
+        "funded_target_digest": "ce1967e31e84fcb60847ddf11eef8d9e34ee0dbd270ebcdc91d075df94d9e203",
+        "funded_target_preserved": true,
+        "legitimate_completion": false,
+        "legitimate_success": false,
+        "native_execution": {
+          "executed": false,
+          "execution_verified": false,
+          "settlement_observed": false
+        },
+        "resource_use": {
+          "attempts_remaining": 7,
+          "attempts_used": 1,
+          "committed_fees_sats": 0,
+          "max_witness_item_bytes": 962,
+          "max_witness_stack_items": 17,
+          "proposal_bytes": 76,
+          "reconstructed_tx_bytes": 1493,
+          "reconstructed_witness_bytes": 1334,
+          "script_op_count": 0
+        },
+        "scenario_id": "heldout-gated-hf-checksig-hypothesis",
+        "script_oracle": {
+          "accepted_count": 0,
+          "executed": true,
+          "rejected_count": 1
+        },
+        "split": "held_out",
+        "synthetic_simulator": {
+          "accepted": null,
+          "executed": false
+        },
+        "unauthorized_sats": 0
+      },
+      "calibration": false,
+      "expectation_met": true,
+      "family": "context_rebinding",
+      "honest_legitimate_completion": true,
+      "native_supported": false,
+      "program_id": "ed7829c7f678746c07248f816a9ca0f701760c45e29e19468512ff27351e45f9",
+      "replay_verified": true,
+      "required_evidence_gates": [
+        "hf_checksig_verified"
+      ],
+      "scenario_id": "heldout-gated-hf-checksig-hypothesis",
+      "split": "held_out"
+    }
+  ],
+  "schema": "bitvm-arena/cpa-campaign-benchmark/v1",
+  "source_identity": {
+    "campaign_worker_sha256": "56c0db261632dfa2f68c88a5e5fcd2163574fbdb86d18cfa95a03d5c5622167b",
+    "manifest_digest": "682015071c2c935aa38fd31b6758fbc04c340f0722afb9aec0de4f4d6c84ddc5",
+    "scenarios_manifest_sha256": "52b125bc43cf0c55c7ce47e71892d1659aa8976058c0523f1b7e55fd4632418b",
+    "source_commit": "29ca519031fcd67f467881e16ba73e0eb1211759",
+    "verified_files": 9
+  },
+  "split": "held_out"
+}

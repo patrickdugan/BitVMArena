@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "observed_on": "2026-11-13",
+  "observed_on": "2026-11-14",
   "purpose": "Pin the first BitVM Arena campaign targets and distinguish each evidence boundary.",
   "execution_policy": {
     "default_backend": "local_model",
@@ -379,16 +379,16 @@
         }
       ],
       "next_acceptance_gates": [
-        "Connect selected reviewed fixtures to isolated native runs per ControlArena sample and retain their funded-origin chains.",
-        "Declare a model/protocol configuration and execute a native-backed campaign after that interface is verified."
+        "Execute live LLM evaluations under declared model/protocol configs to evaluate model_generated_attack_verified.",
+        "Add dedicated verifiers and native consensus receipts before enabling zk_delegation_verified, hf_checksig_verified, p2mr_verified, or singleton_lineage_verified."
       ],
       "limits": [
         "The current verifier checks disclosed NAND traces.",
         "Cross-coin allowance conservation, private delegate credentials and general revocation remain separate campaigns.",
-        "The native runner executes the fixed upstream suite; native fixtures are not currently selected by the agent.",
-        "Positive admission controls carry confirmed_by_this_check=false; the four confirmed transitions have separate chain receipts.",
-        "CI validates the retained native evidence. A fresh node run requires an explicitly supplied executable with the pinned hash.",
-        "The receipt audit measures evidence classification in HONEST mode. Its records come from the previous fixed suite, and it starts no node or RPC call."
+        "The receipt audit measures evidence classification in HONEST mode. Its records come from the previous fixed suite, and it starts no node or RPC call.",
+        "ZK delegation, HF CHECKSIG digest modes, P2MR, singleton lineage and model-generated attack claims remain explicitly gated false without dedicated receipts.",
+        "Positive admission controls carry confirmed_by_this_check=false; confirmed transitions carry separate block and live-UTXO receipts.",
+        "CI validates source reconstruction, replay, SDK settings and retained native evidence. Fresh node runs require an explicitly supplied executable matching a pinned SHA256."
       ],
       "sources": [
         "https://github.com/patrickdugan/bitcoin-rs/pull/3",
@@ -403,7 +403,18 @@
         "upstream_report": "evidence/cpa_native/upstream_report.json",
         "binary_provenance": "evidence/cpa_native/binary_provenance.json",
         "binary_sha256": "fe506c638478d173edd267422856b9fb02c8ab424b694b6c81554dce2a48caa6",
-        "agent_selected_native_mutations": false
+        "agent_selected_native_mutations": false,
+        "campaign_setting": {
+          "control_arena_setting": "bitvm_cpa_campaign",
+          "backend": "src/bitvm_arena/cpa_campaign.py",
+          "native_runner": "scripts/run_cpa_campaign_regtest.py",
+          "scenarios_manifest": "src/bitvm_arena/data/cpa_campaign_scenarios.json",
+          "provenance_manifest": "src/bitvm_arena/data/cpa_campaign_provenance.json",
+          "reference_evidence": "evidence/cpa_campaign/summary.all.json",
+          "native_receipt": "evidence/cpa_campaign_native/receipt.json",
+          "campaign_binary_sha256": "c2173c4c0aa33bf1aa80cb8d5e0bf258ac0259035957577989df27ba550c28c3",
+          "agent_selected_native_mutations": true
+        }
       },
       "completed_checks": [
         "The Arena wrapper executed five pinned source modules and the exact native binary in isolated regtest.",
@@ -412,7 +423,9 @@
         "The 9000-sat wider-parent case remains a separate calibration target; zero unauthorized or diverted sats were observed.",
         "State persisted across two restarts; the run ended at height 104 with zero peers and three clean daemon exits.",
         "Receipt checks bind transaction identities, expected outpoints, output vectors, case coverage and rejection tips to the expected execution phases.",
-        "Read-only audit derives 60 record-local answers from the pinned native bundle; 15 backend and 11 actual SDK checks passed."
+        "Read-only audit derives 60 record-local answers from the pinned native bundle; 15 backend and 11 actual SDK checks passed.",
+        "Bounded agent-driven CPA campaign (bitvm_cpa_campaign) verified across 20 scenarios (10 dev, 10 held_out) with disjoint canonical ProgramIDs, source-byte candidate reconstruction, independent parent-policy checks and separate scoring.",
+        "18 eligible campaign scenarios executed on fresh per-case isolated-regtest nodes with verified txid/wtxid, funded origins, successor outputs, confirmation heights, rejection tips and pinned binary provenance; 2 gated scenarios refused native connection as designed."
       ],
       "receipt_audit": {
         "path": "src/bitvm_arena/cpa_native_audit.py",

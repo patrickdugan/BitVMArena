@@ -120,6 +120,18 @@ def main(argv: list[str] | None = None) -> int:
     audit_replay.add_argument("trace", type=Path)
     audit_replay.add_argument("--bundle", type=Path, required=True)
     audit_replay.add_argument("--expected-case", required=True)
+    camp_list = commands.add_parser("cpa-campaign-list", help="List bounded CPA campaign scenarios by split")
+    camp_list.add_argument("--split", choices=("dev", "held_out", "all"), default="all")
+    camp_bench = commands.add_parser("cpa-campaign-benchmark", help="Run and replay the bounded CPA campaign benchmark")
+    camp_bench.add_argument("--source", type=Path, required=True)
+    camp_bench.add_argument("--split", choices=("dev", "held_out", "all"), default="all")
+    camp_bench.add_argument("--output", type=Path)
+    camp_replay = commands.add_parser("cpa-campaign-replay", help="Reconstruct and replay a CPA campaign trace from source bytes")
+    camp_replay.add_argument("trace", type=Path)
+    camp_replay.add_argument("--source", type=Path, required=True)
+    camp_replay.add_argument("--expected-scenario")
+    camp_replay.add_argument("--expected-split", choices=("dev", "held_out"))
+    camp_replay.add_argument("--max-attempts", type=int)
     args = parser.parse_args(argv)
     try:
         if args.command == "list":
@@ -164,6 +176,52 @@ def main(argv: list[str] | None = None) -> int:
                     raise ValueError("audit trace exceeds 32 KB limit")
                 trace = dataset.replay_trace(json.loads(args.trace.read_text()), expected_case_id=args.expected_case)
                 print(json.dumps({"replay_verified": True, "assessment": trace["assessment"]}, indent=2))
+        elif args.command in ("cpa-campaign-list", "cpa-campaign-benchmark", "cpa-campaign-replay"):
+            from .cpa_campaign import (
+                CPACampaignSession,
+                load_campaign_scenarios,
+                replay_campaign_trace,
+                run_campaign_benchmark,
+            )
+
+            if args.command == "cpa-campaign-list":
+                rows = [
+                    {
+                        "scenario_id": s.scenario_id,
+                        "split": s.split,
+                        "family": s.family,
+                        "program_id": s.program_id,
+                        "calibration": s.calibration,
+                        "requires_child_completion": s.requires_child_completion,
+                        "native_supported": s.native_supported,
+                        "required_evidence_gates": list(s.required_evidence_gates),
+                        "title": s.title,
+                    }
+                    for s in load_campaign_scenarios(args.split)
+                ]
+                print(json.dumps(rows, indent=2))
+            elif args.command == "cpa-campaign-benchmark":
+                summary = run_campaign_benchmark(args.source, split=args.split, output=args.output)
+                print(json.dumps(summary, indent=2))
+                return 0 if summary["all_expectations_met"] else 1
+            else:
+                if args.trace.stat().st_size > 2_000_000:
+                    raise ValueError("CPA campaign trace exceeds 2 MB limit")
+                loaded = json.loads(args.trace.read_text(encoding="utf-8"))
+                scenario_id = args.expected_scenario or loaded.get("scenario_id")
+                if not isinstance(scenario_id, str):
+                    raise ValueError("CPA campaign trace missing scenario_id")
+                max_attempts = args.max_attempts if args.max_attempts is not None else loaded.get("max_attempts", 8)
+                expected = CPACampaignSession(args.source, scenario_id, max_attempts=max_attempts)
+                session = replay_campaign_trace(
+                    args.source,
+                    loaded,
+                    expected_scenario_id=scenario_id,
+                    expected_split=args.expected_split,
+                    expected_target_digest=expected.observe()["funded_target_digest"],
+                    expected_max_attempts=max_attempts,
+                )
+                print(json.dumps({"replay_verified": True, "score": session.score()}, indent=2))
         else:
             from .cpa_backend import CPAReferenceSession, replay_trace as replay_cpa
             if args.command == "cpa-run":
@@ -185,3 +243,7 @@ def main(argv: list[str] | None = None) -> int:
     except (ValueError, OSError, KeyError, TypeError, subprocess.SubprocessError) as exc:
         parser.exit(2, f"bitvm-arena: {exc}\n")
     return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

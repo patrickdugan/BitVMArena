@@ -195,3 +195,84 @@ a fresh node run requires `CPA_BINARY` with the pinned executable hash.
 The restored baseline's [hosted workflow](https://github.com/patrickdugan/BitVMArena/actions/runs/43450924637)
 passed all four jobs. The repository's [Actions history](https://github.com/patrickdugan/BitVMArena/actions)
 records subsequent results against their published commits.
+
+## Version 0.3.0 CPA agent campaign validation (November 14, 2026)
+
+Version 0.3.0 extends the suite to **152 discovered tests: 151 passed and 1
+optional legacy binary-pin test skipped** when executed with `CPA_SOURCE` and
+`CPA_CAMPAIGN_BINARY` under the pinned ControlArena SDK environment
+(`control-arena==20.1.1`, `inspect-ai==0.3.252`,
+`agent-client-protocol==0.12.0`).
+
+| Test group | Passed | Skipped |
+| --- | ---: | ---: |
+| Dispute engine | 28 | 0 |
+| Imported authority-study boundaries | 13 | 0 |
+| Dispute ControlArena setting | 9 | 0 |
+| CPA reference backend (v0.2.0) | 16 | 0 |
+| CPA ControlArena setting (v0.2.0) | 8 | 0 |
+| CPA native receipt and runner checks (v0.2.0) | 19 | 1 |
+| CPA native receipt audit (v0.2.1) | 15 | 0 |
+| CPA native receipt audit ControlArena setting (v0.2.1) | 11 | 0 |
+| CPA campaign grammar, split and execution | 9 | 0 |
+| CPA campaign ControlArena SDK | 6 | 0 |
+| CPA campaign reference and native mutation tests | 12 | 0 |
+| CPA campaign native provenance, receipt and live regtest | 5 | 0 |
+
+### Bounded candidate benchmark and disjoint split
+
+`bitvm-arena cpa-campaign-benchmark` executed all **20 scenarios** (`10 dev`,
+`10 held_out`) against CPA commit `29ca519031fcd67f467881e16ba73e0eb1211759`
+with strictly disjoint canonical `ProgramID` circuits across `dev` (`a AND b`,
+`a XOR b`) and `held_out` (`a AND NOT b`, `NOT a AND b`). All 20 honest
+baselines achieved `legitimate_completion=true` and replayed byte-for-byte via
+`replay_campaign_trace`. Across the 53 adversarial-sequence steps, 2 honest
+parent transitions materialized UTXOs for subsequent timing/child boundary
+checks, 2 labeled weaker-parent calibration controls (`cap=9,000` vs original
+`cap=8,000`) succeeded with **zero attack credit** (`attacker_success=false`,
+`unauthorized_sats=0`, `diverted_sats=0`), and all 49 adversarial mutations
+against the original target were rejected. See
+[`evidence/cpa_campaign/summary.all.json`](../evidence/cpa_campaign/summary.all.json).
+
+### Per-case native isolated-regtest execution
+
+[`scripts/run_cpa_campaign_regtest.py`](../scripts/run_cpa_campaign_regtest.py)
+staged the verified CPA modules and locked `quickstart` `bitcoin-rs` binary
+(`sha256=c2173c4c0aa33bf1aa80cb8d5e0bf258ac0259035957577989df27ba550c28c3`,
+`Cargo.lock`
+`sha256=3ba8eb30eaee2459df69b007cf47ba419f7d8a4ca81a80727d54808fd1dacd85`) and
+ran **18 isolated regtest cases** (`9 dev`, `9 held_out`, `listen=0`, zero
+peers, unique `OP_RETURN sha256(case_id)` funding tags):
+
+| Native campaign measurement | Result |
+| --- | ---: |
+| Eligible cases verified | 18 (`9 dev`, `9 held_out`) |
+| Evidence-gated scenarios refused | 2 |
+| Confirmed original-target transitions | 21 (`18` root + `3` child) |
+| Legitimate completions | 18 |
+| Labeled weaker-parent calibration spends | 2 (`0` attack credit) |
+| Rejected candidate mutations | 47 (`44` Script, `1` standardness, `1` duplicate, `1` spent) |
+| Unauthorized release / diverted value | 0 sats / 0 sats |
+
+Static verification of
+[`evidence/cpa_campaign_native/raw_report.json`](../evidence/cpa_campaign_native/raw_report.json)
+via `verify_native_campaign_receipt` reconstructs every candidate from pinned
+source bytes and enforces `execution_verified=false` unless produced directly by
+a live staged node run.
+
+### Mutation coverage and explicit evidence gates
+
+Twelve dedicated mutation tests in
+[`tests/test_cpa_campaign_mutations.py`](../tests/test_cpa_campaign_mutations.py)
+exercise both reference traces and native receipts against:
+1. swapped target IDs and mismatched `OP_RETURN` case-funding bindings,
+2. copied step or rejection evidence across steps or scenarios,
+3. wrong funding, confirmation, or tip heights,
+4. forged `native_execution` / `execution_verified` status or unpinned binary hashes,
+5. accepted reference or mempool-only results presented as observed settlement, and
+6. unmet evidence gates asserted without dedicated verifiers.
+
+All five evidence gates (`zk_delegation_verified`, `hf_checksig_verified`,
+`p2mr_verified`, `singleton_lineage_verified`, and
+`model_generated_attack_verified`) remain explicitly `false` in retained
+summaries, traces, and receipts.

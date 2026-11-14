@@ -27,9 +27,9 @@ Benchmark outputs contain deterministic event traces and a JSON summary.
 | Component | Scope | Evidence |
 | --- | --- | --- |
 | Protocol simulator | 13 scenarios and 22 scripted episodes, including nine runs under eight deliberately weakened profiles | Executed synthetic model |
-| ControlArena settings | Dispute actions and 28 published CPA fixtures, with per-sample histories and replay scoring | Actual SDK integration tests with scripted agents |
-| CPA reference verifier | 28 fixtures with fixed-target scoring; 26 rejections and two accepted controls | Pinned compiler, independent Python Script interpreter and replayed receipts |
-| CPA native runner | Four confirmed transitions, 49 rejected adversarial cases and seven positive controls | Arena-executed isolated regtest, with exact transaction bytes and binary provenance |
+| ControlArena settings | Dispute actions, 28 published CPA fixtures, 60 native-receipt audit records, and 20 bounded CPA candidate-mutation scenarios (`10 dev`, `10 held_out`) | Actual SDK integration tests with scripted agents |
+| CPA reference verifier | 28 fixtures (`bitvm_cpa_reference`) plus bounded candidate reconstruction (`bitvm_cpa_campaign`) across 7 scenario families | Pinned compiler, independent Python Script interpreter and replayed receipts |
+| CPA native runners | Upstream 4-transition / 49-rejection suite plus 18 per-case isolated-regtest campaign scenarios (2 gated scenarios blocked) | Arena-executed isolated regtest, with exact transaction bytes and binary provenance |
 | Native receipt audit | 60 recorded observations exposed through a read-only ControlArena setting | Evidence classification with independently derived answers |
 | Authority enumeration | 1,851 canonical NAND programs, 32 compiled authorities, 256 Python Script-oracle executions | Reproduced pinned CPA research |
 | Historical recovery | Nine reconstructed files from the original local Arena | Archived source captures with per-file provenance |
@@ -76,7 +76,34 @@ The native suite confirmed authorized transitions for two original funded
 coins and their committed successors. Its 49 rejected cases produced zero
 unauthorized release in that run. The seven positive controls include
 admission checks whose receipts explicitly record their confirmation scope.
-Model-driven trials and per-sample native fixture selection remain pending.
+
+For bounded candidate mutations rather than fixture-ID selection, run the
+agent-driven CPA campaign ([guide](docs/cpa_campaign.md)):
+
+```sh
+bitvm-arena cpa-campaign-list --split all
+bitvm-arena cpa-campaign-benchmark --source /tmp/bitcoin-rs-cpa --split all --output runs/cpa-campaign
+bitvm-arena cpa-campaign-replay \
+  runs/cpa-campaign/traces/heldout-honest-two-step-not-a-and-b.honest.json \
+  --source /tmp/bitcoin-rs-cpa \
+  --expected-scenario heldout-honest-two-step-not-a-and-b \
+  --expected-split held_out
+```
+
+```python
+from bitvm_arena.cpa_campaign_control_arena import CPACampaignSetting
+
+setting = CPACampaignSetting(
+    source_root="/tmp/bitcoin-rs-cpa",
+    split="held_out",
+    max_attempts=8,
+)
+```
+
+Retained campaign evidence lives in [`evidence/cpa_campaign`](evidence/cpa_campaign)
+and [`evidence/cpa_campaign_native`](evidence/cpa_campaign_native). ZK
+delegation, HF `CHECKSIG`, P2MR, singleton lineage and model-generated attack
+success remain explicitly gated behind dedicated evidence flags.
 
 ## Audit the native receipts
 
@@ -181,8 +208,10 @@ execution and reproduces the frozen evidence. See
 | `docs/architecture.md` | Trust boundaries and transition semantics |
 | `evidence/cpa_reference/` | Complete reference trace and benchmark summary |
 | `evidence/cpa_native/` | Native report, normalized receipt, frozen profile and executable provenance |
+| `evidence/cpa_campaign/` | Held-out/dev bounded campaign traces and benchmark summaries |
+| `evidence/cpa_campaign_native/` | Per-case isolated-regtest campaign report and verified receipt |
 
-CI runs the core on Python 3.11 and 3.13, all three ControlArena settings on
+CI runs the core on Python 3.11 and 3.13, all four ControlArena settings on
 Python 3.11, the CPA reference fixtures and the authority replay against pinned
 `bitcoin-rs` source. Core tests also check the retained native receipt and its
 rejection paths. Running the native node again requires the explicitly selected

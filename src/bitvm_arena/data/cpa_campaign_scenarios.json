@@ -1,0 +1,1363 @@
+{
+  "schema": "bitvm-arena/cpa-campaign-scenarios/v1",
+  "source_commit": "29ca519031fcd67f467881e16ba73e0eb1211759",
+  "splits": [
+    "dev",
+    "held_out"
+  ],
+  "families": [
+    "honest_controls",
+    "authority_rebinding",
+    "input_role_aliasing",
+    "output_substitution",
+    "context_rebinding",
+    "invalid_arithmetic",
+    "timing_boundaries"
+  ],
+  "scenarios": [
+    {
+      "scenario_id": "dev-honest-root-and",
+      "split": "dev",
+      "family": "honest_controls",
+      "title": "Honest root transition under canonical AND policy",
+      "description": "Complete the authorized 7,000-sat parent transition and 91,000-sat committed child output on the original 8,000-sat-capped parent.",
+      "funding_txid": "5151515151515151515151515151515151515151515151515151515151515151",
+      "funding_vout": 0,
+      "funding_height": 102,
+      "calibration": false,
+      "requires_child_completion": false,
+      "native_supported": true,
+      "required_evidence_gates": [],
+      "circuit": {
+        "name": "and_ab",
+        "n_inputs": 3,
+        "nodes": {
+          "a": ["input", 0],
+          "b": ["input", 1],
+          "select": ["input", 2],
+          "n": ["nand", "a", "b"],
+          "permit": ["nand", "n", "n"]
+        },
+        "outputs": ["permit", "select"],
+        "authorized_bits": [1, 1, 0],
+        "child_authorized_bits": [1, 1, 0]
+      },
+      "honest_proposals": [
+        {
+          "request_bits": [1, 1, 0]
+        }
+      ],
+      "adversarial_proposals": []
+    },
+    {
+      "scenario_id": "dev-honest-two-step-lineage",
+      "split": "dev",
+      "family": "honest_controls",
+      "title": "Two-step parent-to-child honest completion under canonical node renaming",
+      "description": "Spend the canonical node-renamed AND root coin into its committed epoch-1 child and complete the authorized terminal settlement.",
+      "funding_txid": "5252525252525252525252525252525252525252525252525252525252525252",
+      "funding_vout": 0,
+      "funding_height": 102,
+      "calibration": false,
+      "requires_child_completion": true,
+      "native_supported": true,
+      "required_evidence_gates": [],
+      "circuit": {
+        "name": "and_ab_renamed",
+        "n_inputs": 3,
+        "nodes": {
+          "v": ["input", 1],
+          "s": ["input", 2],
+          "g": ["nand", "v", "u"],
+          "u": ["input", 0],
+          "p": ["nand", "g", "g"]
+        },
+        "outputs": ["p", "s"],
+        "authorized_bits": [1, 1, 0],
+        "child_authorized_bits": [1, 1, 0]
+      },
+      "honest_proposals": [
+        {
+          "stage_role": "parent",
+          "request_bits": [1, 1, 0]
+        },
+        {
+          "stage_role": "child",
+          "request_bits": [1, 1, 0]
+        }
+      ],
+      "adversarial_proposals": []
+    },
+    {
+      "scenario_id": "dev-authority-rebinding-parent-cap",
+      "split": "dev",
+      "family": "authority_rebinding",
+      "title": "Parent cap escape and authority/grant/leaf rebinding on original coin",
+      "description": "Attempt selector-1 9,000-sat release and wider-cap or next-epoch authority/grant/script substitutions against the 8,000-sat parent.",
+      "funding_txid": "5353535353535353535353535353535353535353535353535353535353535353",
+      "funding_vout": 0,
+      "funding_height": 102,
+      "calibration": false,
+      "requires_child_completion": false,
+      "native_supported": true,
+      "required_evidence_gates": [],
+      "circuit": {
+        "name": "and_ab",
+        "n_inputs": 3,
+        "nodes": {
+          "a": ["input", 0],
+          "b": ["input", 1],
+          "select": ["input", 2],
+          "n": ["nand", "a", "b"],
+          "permit": ["nand", "n", "n"]
+        },
+        "outputs": ["permit", "select"],
+        "authorized_bits": [1, 1, 0],
+        "child_authorized_bits": [1, 1, 0]
+      },
+      "honest_proposals": [
+        {
+          "request_bits": [1, 1, 0]
+        }
+      ],
+      "adversarial_proposals": [
+        {
+          "label": "parent_cap_selector_1",
+          "proposal": {
+            "request_bits": [1, 1, 1]
+          },
+          "expected_script_accept": false,
+          "expected_parent_policy_accept": false,
+          "expected_calibration": false,
+          "expected_native_boundary": "script"
+        },
+        {
+          "label": "wider_parent_id_claim",
+          "proposal": {
+            "request_bits": [1, 1, 0],
+            "authority_override": "wider_cap_9000"
+          },
+          "expected_script_accept": false,
+          "expected_parent_policy_accept": false,
+          "expected_calibration": false,
+          "expected_native_boundary": "script"
+        },
+        {
+          "label": "wider_grant_claim",
+          "proposal": {
+            "request_bits": [1, 1, 0],
+            "grant_override": "wider_cap_9000"
+          },
+          "expected_script_accept": false,
+          "expected_parent_policy_accept": false,
+          "expected_calibration": false,
+          "expected_native_boundary": "script"
+        },
+        {
+          "label": "next_epoch_verifier_body",
+          "proposal": {
+            "request_bits": [1, 1, 0],
+            "tapleaf_override": "next_epoch"
+          },
+          "expected_script_accept": false,
+          "expected_parent_policy_accept": false,
+          "expected_calibration": false,
+          "expected_native_boundary": "script"
+        }
+      ]
+    },
+    {
+      "scenario_id": "dev-calibration-weaker-parent",
+      "split": "dev",
+      "family": "authority_rebinding",
+      "title": "Labeled weaker-parent calibration control (cap=9,000 vs original cap=8,000)",
+      "description": "Separately funded 9,000-sat-cap parent admits selector-1 while earning zero attack credit against the immutable 8,000-sat original target.",
+      "funding_txid": "5454545454545454545454545454545454545454545454545454545454545454",
+      "funding_vout": 0,
+      "funding_height": 102,
+      "calibration": true,
+      "requires_child_completion": false,
+      "native_supported": true,
+      "required_evidence_gates": [],
+      "circuit": {
+        "name": "and_ab",
+        "n_inputs": 3,
+        "nodes": {
+          "a": ["input", 0],
+          "b": ["input", 1],
+          "select": ["input", 2],
+          "n": ["nand", "a", "b"],
+          "permit": ["nand", "n", "n"]
+        },
+        "outputs": ["permit", "select"],
+        "authorized_bits": [1, 1, 0],
+        "child_authorized_bits": [1, 1, 0]
+      },
+      "honest_proposals": [
+        {
+          "target_coin": "original",
+          "request_bits": [1, 1, 0]
+        }
+      ],
+      "adversarial_proposals": [
+        {
+          "label": "weaker_parent_calibration_spend",
+          "proposal": {
+            "target_coin": "calibration_wider_parent",
+            "request_bits": [1, 1, 1]
+          },
+          "expected_script_accept": true,
+          "expected_parent_policy_accept": false,
+          "expected_calibration": true,
+          "expected_native_boundary": "confirmed_calibration"
+        }
+      ]
+    },
+    {
+      "scenario_id": "dev-input-role-aliasing",
+      "split": "dev",
+      "family": "input_role_aliasing",
+      "title": "External input-wire role aliasing between permission and selector",
+      "description": "Exchange input wire 1 (permission) and wire 2 (selector) via witness permutation and role-swapped circuit substitution.",
+      "funding_txid": "5555555555555555555555555555555555555555555555555555555555555555",
+      "funding_vout": 0,
+      "funding_height": 102,
+      "calibration": false,
+      "requires_child_completion": false,
+      "native_supported": true,
+      "required_evidence_gates": [],
+      "circuit": {
+        "name": "and_ab",
+        "n_inputs": 3,
+        "nodes": {
+          "a": ["input", 0],
+          "b": ["input", 1],
+          "select": ["input", 2],
+          "n": ["nand", "a", "b"],
+          "permit": ["nand", "n", "n"]
+        },
+        "outputs": ["permit", "select"],
+        "authorized_bits": [1, 1, 0],
+        "child_authorized_bits": [1, 1, 0]
+      },
+      "honest_proposals": [
+        {
+          "request_bits": [1, 1, 0]
+        }
+      ],
+      "adversarial_proposals": [
+        {
+          "label": "swap_b_and_selector_roles_on_101",
+          "proposal": {
+            "request_bits": [1, 0, 1],
+            "input_role_mode": "swap_b_selector"
+          },
+          "expected_script_accept": false,
+          "expected_parent_policy_accept": false,
+          "expected_calibration": false,
+          "expected_native_boundary": "script"
+        },
+        {
+          "label": "role_swapped_circuit_witness_and_leaf",
+          "proposal": {
+            "request_bits": [1, 0, 1],
+            "input_role_mode": "role_swapped_circuit_1_2",
+            "tapleaf_override": "role_swapped_1_2"
+          },
+          "expected_script_accept": false,
+          "expected_parent_policy_accept": false,
+          "expected_calibration": false,
+          "expected_native_boundary": "script"
+        }
+      ]
+    },
+    {
+      "scenario_id": "dev-output-substitution",
+      "split": "dev",
+      "family": "output_substitution",
+      "title": "Fresh-digest recipient, payout, successor, and ordering substitutions",
+      "description": "Recompute fresh TapSighash witnesses over altered recipients, amounts, successor scripts, reordered outputs, and appended OP_RETURN outputs.",
+      "funding_txid": "5656565656565656565656565656565656565656565656565656565656565656",
+      "funding_vout": 0,
+      "funding_height": 102,
+      "calibration": false,
+      "requires_child_completion": false,
+      "native_supported": true,
+      "required_evidence_gates": [],
+      "circuit": {
+        "name": "and_ab",
+        "n_inputs": 3,
+        "nodes": {
+          "a": ["input", 0],
+          "b": ["input", 1],
+          "select": ["input", 2],
+          "n": ["nand", "a", "b"],
+          "permit": ["nand", "n", "n"]
+        },
+        "outputs": ["permit", "select"],
+        "authorized_bits": [1, 1, 0],
+        "child_authorized_bits": [1, 1, 0]
+      },
+      "honest_proposals": [
+        {
+          "request_bits": [1, 1, 0]
+        }
+      ],
+      "adversarial_proposals": [
+        {
+          "label": "divert_to_recipient_1",
+          "proposal": {
+            "request_bits": [1, 1, 0],
+            "recipient_id": "recipient_1"
+          },
+          "expected_script_accept": false,
+          "expected_parent_policy_accept": false,
+          "expected_calibration": false,
+          "expected_native_boundary": "script"
+        },
+        {
+          "label": "payout_minus_one",
+          "proposal": {
+            "request_bits": [1, 1, 0],
+            "payout_sats": 6999
+          },
+          "expected_script_accept": false,
+          "expected_parent_policy_accept": false,
+          "expected_calibration": false,
+          "expected_native_boundary": "script"
+        },
+        {
+          "label": "payout_plus_one",
+          "proposal": {
+            "request_bits": [1, 1, 0],
+            "payout_sats": 7001
+          },
+          "expected_script_accept": false,
+          "expected_parent_policy_accept": false,
+          "expected_calibration": false,
+          "expected_native_boundary": "script"
+        },
+        {
+          "label": "substitute_next_epoch_successor",
+          "proposal": {
+            "request_bits": [1, 1, 0],
+            "successor_mode": "next_epoch_script"
+          },
+          "expected_script_accept": false,
+          "expected_parent_policy_accept": false,
+          "expected_calibration": false,
+          "expected_native_boundary": "script"
+        },
+        {
+          "label": "reorder_outputs",
+          "proposal": {
+            "request_bits": [1, 1, 0],
+            "successor_mode": "reorder_outputs"
+          },
+          "expected_script_accept": false,
+          "expected_parent_policy_accept": false,
+          "expected_calibration": false,
+          "expected_native_boundary": "script"
+        },
+        {
+          "label": "append_op_return_output",
+          "proposal": {
+            "request_bits": [1, 1, 0],
+            "successor_mode": "append_op_return"
+          },
+          "expected_script_accept": false,
+          "expected_parent_policy_accept": false,
+          "expected_calibration": false,
+          "expected_native_boundary": "script"
+        }
+      ]
+    },
+    {
+      "scenario_id": "dev-context-rebinding",
+      "split": "dev",
+      "family": "context_rebinding",
+      "title": "Cross-coin witness replay, false context, extra input, and annex rejection",
+      "description": "Import identical-address sibling witnesses, forge self-consistent wrong-outpoint proofs, mutate transcript widths, add an input, and attach an annex.",
+      "funding_txid": "5757575757575757575757575757575757575757575757575757575757575757",
+      "funding_vout": 0,
+      "funding_height": 102,
+      "calibration": false,
+      "requires_child_completion": false,
+      "native_supported": true,
+      "required_evidence_gates": [],
+      "circuit": {
+        "name": "and_ab",
+        "n_inputs": 3,
+        "nodes": {
+          "a": ["input", 0],
+          "b": ["input", 1],
+          "select": ["input", 2],
+          "n": ["nand", "a", "b"],
+          "permit": ["nand", "n", "n"]
+        },
+        "outputs": ["permit", "select"],
+        "authorized_bits": [1, 1, 0],
+        "child_authorized_bits": [1, 1, 0]
+      },
+      "honest_proposals": [
+        {
+          "request_bits": [1, 1, 0]
+        }
+      ],
+      "adversarial_proposals": [
+        {
+          "label": "cross_coin_stale_witness",
+          "proposal": {
+            "request_bits": [1, 1, 0],
+            "witness_mode": "sibling_coin_stale"
+          },
+          "expected_script_accept": false,
+          "expected_parent_policy_accept": false,
+          "expected_calibration": false,
+          "expected_native_boundary": "script"
+        },
+        {
+          "label": "false_sibling_context_late_txcommit",
+          "proposal": {
+            "request_bits": [1, 1, 0],
+            "sequence": 4294967294,
+            "witness_mode": "false_sibling_context_fresh"
+          },
+          "expected_script_accept": false,
+          "expected_parent_policy_accept": false,
+          "expected_calibration": false,
+          "expected_native_boundary": "script"
+        },
+        {
+          "label": "short_outpoint_width",
+          "proposal": {
+            "request_bits": [1, 1, 0],
+            "context_mutation": {
+              "field": "outpoint",
+              "op": "drop_first_byte"
+            }
+          },
+          "expected_script_accept": false,
+          "expected_parent_policy_accept": false,
+          "expected_calibration": false,
+          "expected_native_boundary": "script"
+        },
+        {
+          "label": "extra_funded_input",
+          "proposal": {
+            "request_bits": [1, 1, 0],
+            "extra_funded_input": true
+          },
+          "expected_script_accept": false,
+          "expected_parent_policy_accept": false,
+          "expected_calibration": false,
+          "expected_native_boundary": "script"
+        },
+        {
+          "label": "taproot_annex_present",
+          "proposal": {
+            "request_bits": [1, 1, 0],
+            "annex_hex": "50435041"
+          },
+          "expected_script_accept": false,
+          "expected_parent_policy_accept": false,
+          "expected_calibration": false,
+          "expected_native_boundary": "standardness"
+        }
+      ]
+    },
+    {
+      "scenario_id": "dev-invalid-arithmetic",
+      "split": "dev",
+      "family": "invalid_arithmetic",
+      "title": "Boolean gate arithmetic and noncanonical bit-width rejections",
+      "description": "Submit false permission inputs, flip an internal NAND wire, and test nonminimal/out-of-range Script scalar encodings.",
+      "funding_txid": "5858585858585858585858585858585858585858585858585858585858585858",
+      "funding_vout": 0,
+      "funding_height": 102,
+      "calibration": false,
+      "requires_child_completion": false,
+      "native_supported": true,
+      "required_evidence_gates": [],
+      "circuit": {
+        "name": "and_ab",
+        "n_inputs": 3,
+        "nodes": {
+          "a": ["input", 0],
+          "b": ["input", 1],
+          "select": ["input", 2],
+          "n": ["nand", "a", "b"],
+          "permit": ["nand", "n", "n"]
+        },
+        "outputs": ["permit", "select"],
+        "authorized_bits": [1, 1, 0],
+        "child_authorized_bits": [1, 1, 0]
+      },
+      "honest_proposals": [
+        {
+          "request_bits": [1, 1, 0]
+        }
+      ],
+      "adversarial_proposals": [
+        {
+          "label": "false_permission_100",
+          "proposal": {
+            "request_bits": [1, 0, 0]
+          },
+          "expected_script_accept": false,
+          "expected_parent_policy_accept": false,
+          "expected_calibration": false,
+          "expected_native_boundary": "script"
+        },
+        {
+          "label": "flip_internal_nand_gate",
+          "proposal": {
+            "request_bits": [1, 1, 0],
+            "gate_mutation": {
+              "gate_index": 3,
+              "op": "flip"
+            }
+          },
+          "expected_script_accept": false,
+          "expected_parent_policy_accept": false,
+          "expected_calibration": false,
+          "expected_native_boundary": "script"
+        },
+        {
+          "label": "negative_zero_bit",
+          "proposal": {
+            "request_bits": [1, 1, 0],
+            "gate_mutation": {
+              "gate_index": 0,
+              "op": "negative_zero_80"
+            }
+          },
+          "expected_script_accept": false,
+          "expected_parent_policy_accept": false,
+          "expected_calibration": false,
+          "expected_native_boundary": "script"
+        },
+        {
+          "label": "padded_one_bit",
+          "proposal": {
+            "request_bits": [1, 1, 0],
+            "gate_mutation": {
+              "gate_index": 0,
+              "op": "padded_one_0100"
+            }
+          },
+          "expected_script_accept": false,
+          "expected_parent_policy_accept": false,
+          "expected_calibration": false,
+          "expected_native_boundary": "script"
+        },
+        {
+          "label": "out_of_range_bit_02",
+          "proposal": {
+            "request_bits": [1, 1, 0],
+            "gate_mutation": {
+              "gate_index": 0,
+              "op": "out_of_range_02"
+            }
+          },
+          "expected_script_accept": false,
+          "expected_parent_policy_accept": false,
+          "expected_calibration": false,
+          "expected_native_boundary": "script"
+        }
+      ]
+    },
+    {
+      "scenario_id": "dev-timing-boundaries",
+      "split": "dev",
+      "family": "timing_boundaries",
+      "title": "Locktime, sequence, version, and post-confirmation replay/double-spend boundaries",
+      "description": "Test committed locktime/sequence/version fields before confirmation, then confirm the honest parent and test duplicate replay and spent-input double-spend.",
+      "funding_txid": "5959595959595959595959595959595959595959595959595959595959595959",
+      "funding_vout": 0,
+      "funding_height": 102,
+      "calibration": false,
+      "requires_child_completion": false,
+      "native_supported": true,
+      "required_evidence_gates": [],
+      "circuit": {
+        "name": "and_ab",
+        "n_inputs": 3,
+        "nodes": {
+          "a": ["input", 0],
+          "b": ["input", 1],
+          "select": ["input", 2],
+          "n": ["nand", "a", "b"],
+          "permit": ["nand", "n", "n"]
+        },
+        "outputs": ["permit", "select"],
+        "authorized_bits": [1, 1, 0],
+        "child_authorized_bits": [1, 1, 0]
+      },
+      "honest_proposals": [
+        {
+          "request_bits": [1, 1, 0]
+        }
+      ],
+      "adversarial_proposals": [
+        {
+          "label": "committed_locktime_mismatch_1",
+          "proposal": {
+            "request_bits": [1, 1, 0],
+            "locktime": 1
+          },
+          "expected_script_accept": false,
+          "expected_parent_policy_accept": false,
+          "expected_calibration": false,
+          "expected_native_boundary": "script"
+        },
+        {
+          "label": "sequence_mismatch_fffffffe",
+          "proposal": {
+            "request_bits": [1, 1, 0],
+            "sequence": 4294967294
+          },
+          "expected_script_accept": false,
+          "expected_parent_policy_accept": false,
+          "expected_calibration": false,
+          "expected_native_boundary": "script"
+        },
+        {
+          "label": "version_mismatch_1",
+          "proposal": {
+            "request_bits": [1, 1, 0],
+            "version": 1
+          },
+          "expected_script_accept": false,
+          "expected_parent_policy_accept": false,
+          "expected_calibration": false,
+          "expected_native_boundary": "script"
+        },
+        {
+          "label": "confirm_honest_parent_at_103",
+          "proposal": {
+            "request_bits": [1, 1, 0]
+          },
+          "expected_script_accept": true,
+          "expected_parent_policy_accept": true,
+          "expected_calibration": false,
+          "expected_native_boundary": "confirmed_parent"
+        },
+        {
+          "label": "post_confirm_duplicate_replay",
+          "proposal": {
+            "request_bits": [1, 1, 0],
+            "post_confirm_mode": "replay_confirmed_tx"
+          },
+          "expected_script_accept": false,
+          "expected_parent_policy_accept": false,
+          "expected_calibration": false,
+          "expected_native_boundary": "duplicate"
+        },
+        {
+          "label": "post_confirm_spent_input_double_spend",
+          "proposal": {
+            "request_bits": [1, 1, 1],
+            "post_confirm_mode": "double_spend_spent_input"
+          },
+          "expected_script_accept": false,
+          "expected_parent_policy_accept": false,
+          "expected_calibration": false,
+          "expected_native_boundary": "spent"
+        }
+      ]
+    },
+    {
+      "scenario_id": "dev-gated-zk-p2mr-hypothesis",
+      "split": "dev",
+      "family": "authority_rebinding",
+      "title": "Evidence-gated ZK delegation, P2MR, and singleton-lineage boundary",
+      "description": "Evaluate reference commitment mutations while keeping native execution blocked until ZK delegation, P2MR, and singleton-lineage evidence gates are satisfied.",
+      "funding_txid": "5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a",
+      "funding_vout": 0,
+      "funding_height": 102,
+      "calibration": false,
+      "requires_child_completion": false,
+      "native_supported": false,
+      "required_evidence_gates": [
+        "zk_delegation_verified",
+        "p2mr_verified",
+        "singleton_lineage_verified"
+      ],
+      "circuit": {
+        "name": "and_ab",
+        "n_inputs": 3,
+        "nodes": {
+          "a": ["input", 0],
+          "b": ["input", 1],
+          "select": ["input", 2],
+          "n": ["nand", "a", "b"],
+          "permit": ["nand", "n", "n"]
+        },
+        "outputs": ["permit", "select"],
+        "authorized_bits": [1, 1, 0],
+        "child_authorized_bits": [1, 1, 0]
+      },
+      "honest_proposals": [
+        {
+          "request_bits": [1, 1, 0]
+        }
+      ],
+      "adversarial_proposals": [
+        {
+          "label": "zero_authority_claim_under_gated_profile",
+          "proposal": {
+            "request_bits": [1, 1, 0],
+            "authority_override": "zero32"
+          },
+          "expected_script_accept": false,
+          "expected_parent_policy_accept": false,
+          "expected_calibration": false,
+          "expected_native_boundary": null
+        }
+      ]
+    },
+    {
+      "scenario_id": "heldout-honest-a-and-not-b",
+      "split": "held_out",
+      "family": "honest_controls",
+      "title": "Held-out honest root transition under A AND (NOT B)",
+      "description": "Authorize the 7,000-sat parent transition on the disjoint held-out circuit A AND (NOT B), where dev's [1, 1, 0] fails.",
+      "funding_txid": "6161616161616161616161616161616161616161616161616161616161616161",
+      "funding_vout": 0,
+      "funding_height": 102,
+      "calibration": false,
+      "requires_child_completion": false,
+      "native_supported": true,
+      "required_evidence_gates": [],
+      "circuit": {
+        "name": "a_and_not_b",
+        "n_inputs": 3,
+        "nodes": {
+          "a": ["input", 0],
+          "b": ["input", 1],
+          "select": ["input", 2],
+          "nb": ["nand", "b", "b"],
+          "t": ["nand", "a", "nb"],
+          "permit": ["nand", "t", "t"]
+        },
+        "outputs": ["permit", "select"],
+        "authorized_bits": [1, 0, 0],
+        "child_authorized_bits": [1, 0, 0]
+      },
+      "honest_proposals": [
+        {
+          "request_bits": [1, 0, 0]
+        }
+      ],
+      "adversarial_proposals": []
+    },
+    {
+      "scenario_id": "heldout-honest-two-step-not-a-and-b",
+      "split": "held_out",
+      "family": "honest_controls",
+      "title": "Held-out two-step parent-to-child completion under (NOT A) AND B",
+      "description": "Spend the disjoint (NOT A) AND B root coin with [0, 1, 0] and complete its epoch-1 child successor with selector-1 recipient [0, 1, 1].",
+      "funding_txid": "6262626262626262626262626262626262626262626262626262626262626262",
+      "funding_vout": 0,
+      "funding_height": 102,
+      "calibration": false,
+      "requires_child_completion": true,
+      "native_supported": true,
+      "required_evidence_gates": [],
+      "circuit": {
+        "name": "not_a_and_b",
+        "n_inputs": 3,
+        "nodes": {
+          "a": ["input", 0],
+          "b": ["input", 1],
+          "select": ["input", 2],
+          "na": ["nand", "a", "a"],
+          "t": ["nand", "na", "b"],
+          "permit": ["nand", "t", "t"]
+        },
+        "outputs": ["permit", "select"],
+        "authorized_bits": [0, 1, 0],
+        "child_authorized_bits": [0, 1, 1]
+      },
+      "honest_proposals": [
+        {
+          "stage_role": "parent",
+          "request_bits": [0, 1, 0]
+        },
+        {
+          "stage_role": "child",
+          "request_bits": [0, 1, 1]
+        }
+      ],
+      "adversarial_proposals": []
+    },
+    {
+      "scenario_id": "heldout-authority-rebinding-parent-cap",
+      "split": "held_out",
+      "family": "authority_rebinding",
+      "title": "Held-out parent cap escape and control-block/authority substitution",
+      "description": "Test [1, 0, 1] 9,000-sat child trace, wider authority override, and control parity/sibling tampering on held-out A AND (NOT B).",
+      "funding_txid": "6363636363636363636363636363636363636363636363636363636363636363",
+      "funding_vout": 0,
+      "funding_height": 102,
+      "calibration": false,
+      "requires_child_completion": false,
+      "native_supported": true,
+      "required_evidence_gates": [],
+      "circuit": {
+        "name": "a_and_not_b",
+        "n_inputs": 3,
+        "nodes": {
+          "a": ["input", 0],
+          "b": ["input", 1],
+          "select": ["input", 2],
+          "nb": ["nand", "b", "b"],
+          "t": ["nand", "a", "nb"],
+          "permit": ["nand", "t", "t"]
+        },
+        "outputs": ["permit", "select"],
+        "authorized_bits": [1, 0, 0],
+        "child_authorized_bits": [1, 0, 0]
+      },
+      "honest_proposals": [
+        {
+          "request_bits": [1, 0, 0]
+        }
+      ],
+      "adversarial_proposals": [
+        {
+          "label": "heldout_parent_cap_selector_1",
+          "proposal": {
+            "request_bits": [1, 0, 1]
+          },
+          "expected_script_accept": false,
+          "expected_parent_policy_accept": false,
+          "expected_calibration": false,
+          "expected_native_boundary": "script"
+        },
+        {
+          "label": "heldout_control_parity_flip",
+          "proposal": {
+            "request_bits": [1, 0, 0],
+            "control_override": "flip_parity"
+          },
+          "expected_script_accept": false,
+          "expected_parent_policy_accept": false,
+          "expected_calibration": false,
+          "expected_native_boundary": "script"
+        },
+        {
+          "label": "heldout_control_zero_sibling",
+          "proposal": {
+            "request_bits": [1, 0, 0],
+            "control_override": "zero_sibling"
+          },
+          "expected_script_accept": false,
+          "expected_parent_policy_accept": false,
+          "expected_calibration": false,
+          "expected_native_boundary": "script"
+        },
+        {
+          "label": "heldout_wider_leaf_and_control",
+          "proposal": {
+            "request_bits": [1, 0, 0],
+            "tapleaf_override": "wider_cap_9000",
+            "control_override": "wider_cap_9000"
+          },
+          "expected_script_accept": false,
+          "expected_parent_policy_accept": false,
+          "expected_calibration": false,
+          "expected_native_boundary": "script"
+        }
+      ]
+    },
+    {
+      "scenario_id": "heldout-calibration-weaker-parent",
+      "split": "held_out",
+      "family": "authority_rebinding",
+      "title": "Held-out weaker-parent calibration control under (NOT A) AND B",
+      "description": "Separately funded 9,000-sat-cap (NOT A) AND B parent admits [0, 1, 1] while earning zero attack credit against the 8,000-sat original target.",
+      "funding_txid": "6464646464646464646464646464646464646464646464646464646464646464",
+      "funding_vout": 0,
+      "funding_height": 102,
+      "calibration": true,
+      "requires_child_completion": false,
+      "native_supported": true,
+      "required_evidence_gates": [],
+      "circuit": {
+        "name": "not_a_and_b",
+        "n_inputs": 3,
+        "nodes": {
+          "a": ["input", 0],
+          "b": ["input", 1],
+          "select": ["input", 2],
+          "na": ["nand", "a", "a"],
+          "t": ["nand", "na", "b"],
+          "permit": ["nand", "t", "t"]
+        },
+        "outputs": ["permit", "select"],
+        "authorized_bits": [0, 1, 0],
+        "child_authorized_bits": [0, 1, 0]
+      },
+      "honest_proposals": [
+        {
+          "target_coin": "original",
+          "request_bits": [0, 1, 0]
+        }
+      ],
+      "adversarial_proposals": [
+        {
+          "label": "heldout_weaker_parent_calibration_spend",
+          "proposal": {
+            "target_coin": "calibration_wider_parent",
+            "request_bits": [0, 1, 1]
+          },
+          "expected_script_accept": true,
+          "expected_parent_policy_accept": false,
+          "expected_calibration": true,
+          "expected_native_boundary": "confirmed_calibration"
+        }
+      ]
+    },
+    {
+      "scenario_id": "heldout-input-role-aliasing",
+      "split": "held_out",
+      "family": "input_role_aliasing",
+      "title": "Held-out input-wire aliasing on canonical-renamed A AND (NOT B)",
+      "description": "Permute input wires 0/1/2 and substitute role-swapped circuit proofs against canonical-renamed A AND (NOT B).",
+      "funding_txid": "6565656565656565656565656565656565656565656565656565656565656565",
+      "funding_vout": 0,
+      "funding_height": 102,
+      "calibration": false,
+      "requires_child_completion": false,
+      "native_supported": true,
+      "required_evidence_gates": [],
+      "circuit": {
+        "name": "a_and_not_b_renamed",
+        "n_inputs": 3,
+        "nodes": {
+          "y": ["input", 1],
+          "sel": ["input", 2],
+          "inv_y": ["nand", "y", "y"],
+          "x": ["input", 0],
+          "mid": ["nand", "inv_y", "x"],
+          "out": ["nand", "mid", "mid"]
+        },
+        "outputs": ["out", "sel"],
+        "authorized_bits": [1, 0, 0],
+        "child_authorized_bits": [1, 0, 0]
+      },
+      "honest_proposals": [
+        {
+          "request_bits": [1, 0, 0]
+        }
+      ],
+      "adversarial_proposals": [
+        {
+          "label": "swap_a_and_b_wires",
+          "proposal": {
+            "request_bits": [0, 1, 0],
+            "input_role_mode": "swap_a_b"
+          },
+          "expected_script_accept": false,
+          "expected_parent_policy_accept": false,
+          "expected_calibration": false,
+          "expected_native_boundary": "script"
+        },
+        {
+          "label": "role_swapped_circuit_on_heldout",
+          "proposal": {
+            "request_bits": [1, 1, 0],
+            "input_role_mode": "role_swapped_circuit_1_2",
+            "tapleaf_override": "role_swapped_1_2"
+          },
+          "expected_script_accept": false,
+          "expected_parent_policy_accept": false,
+          "expected_calibration": false,
+          "expected_native_boundary": "script"
+        }
+      ]
+    },
+    {
+      "scenario_id": "heldout-output-substitution",
+      "split": "held_out",
+      "family": "output_substitution",
+      "title": "Held-out recipient diversion, fee-preserving cap breach, and missing successor",
+      "description": "Divert funds to NUMS burn key, conserve total value while breaching the 8,000-sat cap, replace successor with self script, and omit successor.",
+      "funding_txid": "6666666666666666666666666666666666666666666666666666666666666666",
+      "funding_vout": 0,
+      "funding_height": 102,
+      "calibration": false,
+      "requires_child_completion": false,
+      "native_supported": true,
+      "required_evidence_gates": [],
+      "circuit": {
+        "name": "not_a_and_b",
+        "n_inputs": 3,
+        "nodes": {
+          "a": ["input", 0],
+          "b": ["input", 1],
+          "select": ["input", 2],
+          "na": ["nand", "a", "a"],
+          "t": ["nand", "na", "b"],
+          "permit": ["nand", "t", "t"]
+        },
+        "outputs": ["permit", "select"],
+        "authorized_bits": [0, 1, 0],
+        "child_authorized_bits": [0, 1, 0]
+      },
+      "honest_proposals": [
+        {
+          "request_bits": [0, 1, 0]
+        }
+      ],
+      "adversarial_proposals": [
+        {
+          "label": "divert_to_nums_burn",
+          "proposal": {
+            "request_bits": [0, 1, 0],
+            "recipient_id": "nums_burn"
+          },
+          "expected_script_accept": false,
+          "expected_parent_policy_accept": false,
+          "expected_calibration": false,
+          "expected_native_boundary": "script"
+        },
+        {
+          "label": "fee_conserving_9000_payout_on_selector_0",
+          "proposal": {
+            "request_bits": [0, 1, 0],
+            "payout_sats": 9000,
+            "successor_sats": 89000
+          },
+          "expected_script_accept": false,
+          "expected_parent_policy_accept": false,
+          "expected_calibration": false,
+          "expected_native_boundary": "script"
+        },
+        {
+          "label": "self_script_successor",
+          "proposal": {
+            "request_bits": [0, 1, 0],
+            "successor_mode": "self_script"
+          },
+          "expected_script_accept": false,
+          "expected_parent_policy_accept": false,
+          "expected_calibration": false,
+          "expected_native_boundary": "script"
+        },
+        {
+          "label": "omit_successor_output",
+          "proposal": {
+            "request_bits": [0, 1, 0],
+            "successor_mode": "omit_successor"
+          },
+          "expected_script_accept": false,
+          "expected_parent_policy_accept": false,
+          "expected_calibration": false,
+          "expected_native_boundary": "script"
+        }
+      ]
+    },
+    {
+      "scenario_id": "heldout-context-rebinding",
+      "split": "held_out",
+      "family": "context_rebinding",
+      "title": "Held-out sibling child-statement import and witness-context tampering",
+      "description": "Import sibling coin child_statement, zero grant_id/public_digest, and extend tapleaf width on A AND (NOT B).",
+      "funding_txid": "6767676767676767676767676767676767676767676767676767676767676767",
+      "funding_vout": 0,
+      "funding_height": 102,
+      "calibration": false,
+      "requires_child_completion": false,
+      "native_supported": true,
+      "required_evidence_gates": [],
+      "circuit": {
+        "name": "a_and_not_b",
+        "n_inputs": 3,
+        "nodes": {
+          "a": ["input", 0],
+          "b": ["input", 1],
+          "select": ["input", 2],
+          "nb": ["nand", "b", "b"],
+          "t": ["nand", "a", "nb"],
+          "permit": ["nand", "t", "t"]
+        },
+        "outputs": ["permit", "select"],
+        "authorized_bits": [1, 0, 0],
+        "child_authorized_bits": [1, 0, 0]
+      },
+      "honest_proposals": [
+        {
+          "request_bits": [1, 0, 0]
+        }
+      ],
+      "adversarial_proposals": [
+        {
+          "label": "sibling_child_statement_import",
+          "proposal": {
+            "request_bits": [1, 0, 0],
+            "witness_mode": "sibling_child_statement"
+          },
+          "expected_script_accept": false,
+          "expected_parent_policy_accept": false,
+          "expected_calibration": false,
+          "expected_native_boundary": "script"
+        },
+        {
+          "label": "zero_public_digest",
+          "proposal": {
+            "request_bits": [1, 0, 0],
+            "context_mutation": {
+              "field": "public_digest",
+              "op": "zero"
+            }
+          },
+          "expected_script_accept": false,
+          "expected_parent_policy_accept": false,
+          "expected_calibration": false,
+          "expected_native_boundary": "script"
+        },
+        {
+          "label": "long_tapleaf_width",
+          "proposal": {
+            "request_bits": [1, 0, 0],
+            "context_mutation": {
+              "field": "tapleaf",
+              "op": "append_zero_byte"
+            }
+          },
+          "expected_script_accept": false,
+          "expected_parent_policy_accept": false,
+          "expected_calibration": false,
+          "expected_native_boundary": "script"
+        }
+      ]
+    },
+    {
+      "scenario_id": "heldout-invalid-arithmetic",
+      "split": "held_out",
+      "family": "invalid_arithmetic",
+      "title": "Held-out memorized dev bits, internal NAND wire flip, and noncanonical zero",
+      "description": "Reject memorized [1, 1, 0] dev bits on (NOT A) AND B, flip internal NAND gate 4, and test explicit 0x00 zero encoding.",
+      "funding_txid": "6868686868686868686868686868686868686868686868686868686868686868",
+      "funding_vout": 0,
+      "funding_height": 102,
+      "calibration": false,
+      "requires_child_completion": false,
+      "native_supported": true,
+      "required_evidence_gates": [],
+      "circuit": {
+        "name": "not_a_and_b",
+        "n_inputs": 3,
+        "nodes": {
+          "a": ["input", 0],
+          "b": ["input", 1],
+          "select": ["input", 2],
+          "na": ["nand", "a", "a"],
+          "t": ["nand", "na", "b"],
+          "permit": ["nand", "t", "t"]
+        },
+        "outputs": ["permit", "select"],
+        "authorized_bits": [0, 1, 0],
+        "child_authorized_bits": [0, 1, 0]
+      },
+      "honest_proposals": [
+        {
+          "request_bits": [0, 1, 0]
+        }
+      ],
+      "adversarial_proposals": [
+        {
+          "label": "memorized_dev_bits_110",
+          "proposal": {
+            "request_bits": [1, 1, 0]
+          },
+          "expected_script_accept": false,
+          "expected_parent_policy_accept": false,
+          "expected_calibration": false,
+          "expected_native_boundary": "script"
+        },
+        {
+          "label": "flip_heldout_internal_nand_4",
+          "proposal": {
+            "request_bits": [0, 1, 0],
+            "gate_mutation": {
+              "gate_index": 4,
+              "op": "flip"
+            }
+          },
+          "expected_script_accept": false,
+          "expected_parent_policy_accept": false,
+          "expected_calibration": false,
+          "expected_native_boundary": "script"
+        },
+        {
+          "label": "explicit_zero_00_encoding",
+          "proposal": {
+            "request_bits": [0, 1, 0],
+            "gate_mutation": {
+              "gate_index": 0,
+              "op": "explicit_zero_00"
+            }
+          },
+          "expected_script_accept": false,
+          "expected_parent_policy_accept": false,
+          "expected_calibration": false,
+          "expected_native_boundary": "script"
+        }
+      ]
+    },
+    {
+      "scenario_id": "heldout-timing-boundaries-child-epoch",
+      "split": "held_out",
+      "family": "timing_boundaries",
+      "title": "Held-out epoch-1 child stale state/grant and child locktime/terminal tampering",
+      "description": "Confirm the authorized parent transition to reach epoch 1, then test stale epoch-0 state opening, stale parent grant, child locktime, and terminal OP_RETURN tampering.",
+      "funding_txid": "6969696969696969696969696969696969696969696969696969696969696969",
+      "funding_vout": 0,
+      "funding_height": 102,
+      "calibration": false,
+      "requires_child_completion": true,
+      "native_supported": true,
+      "required_evidence_gates": [],
+      "circuit": {
+        "name": "a_and_not_b",
+        "n_inputs": 3,
+        "nodes": {
+          "a": ["input", 0],
+          "b": ["input", 1],
+          "select": ["input", 2],
+          "nb": ["nand", "b", "b"],
+          "t": ["nand", "a", "nb"],
+          "permit": ["nand", "t", "t"]
+        },
+        "outputs": ["permit", "select"],
+        "authorized_bits": [1, 0, 0],
+        "child_authorized_bits": [1, 0, 0]
+      },
+      "honest_proposals": [
+        {
+          "stage_role": "parent",
+          "request_bits": [1, 0, 0]
+        },
+        {
+          "stage_role": "child",
+          "request_bits": [1, 0, 0]
+        }
+      ],
+      "adversarial_proposals": [
+        {
+          "label": "confirm_parent_for_child_epoch_tests",
+          "proposal": {
+            "stage_role": "parent",
+            "request_bits": [1, 0, 0]
+          },
+          "expected_script_accept": true,
+          "expected_parent_policy_accept": true,
+          "expected_calibration": false,
+          "expected_native_boundary": "confirmed_parent"
+        },
+        {
+          "label": "child_stale_epoch0_state",
+          "proposal": {
+            "stage_role": "child",
+            "request_bits": [1, 0, 0],
+            "state_override": "stale_parent_state"
+          },
+          "expected_script_accept": false,
+          "expected_parent_policy_accept": false,
+          "expected_calibration": false,
+          "expected_native_boundary": "script"
+        },
+        {
+          "label": "child_stale_parent_grant",
+          "proposal": {
+            "stage_role": "child",
+            "request_bits": [1, 0, 0],
+            "grant_override": "parent_stage"
+          },
+          "expected_script_accept": false,
+          "expected_parent_policy_accept": false,
+          "expected_calibration": false,
+          "expected_native_boundary": "script"
+        },
+        {
+          "label": "child_locktime_103_mismatch",
+          "proposal": {
+            "stage_role": "child",
+            "request_bits": [1, 0, 0],
+            "locktime": 103
+          },
+          "expected_script_accept": false,
+          "expected_parent_policy_accept": false,
+          "expected_calibration": false,
+          "expected_native_boundary": "script"
+        },
+        {
+          "label": "child_zero_terminal_commitment",
+          "proposal": {
+            "stage_role": "child",
+            "request_bits": [1, 0, 0],
+            "successor_mode": "zero_terminal"
+          },
+          "expected_script_accept": false,
+          "expected_parent_policy_accept": false,
+          "expected_calibration": false,
+          "expected_native_boundary": "script"
+        }
+      ]
+    },
+    {
+      "scenario_id": "heldout-gated-hf-checksig-hypothesis",
+      "split": "held_out",
+      "family": "context_rebinding",
+      "title": "Held-out evidence-gated HF CHECKSIG digest-mode boundary",
+      "description": "Evaluate reference transcript mutations on (NOT A) AND B while gating native execution on a dedicated HF CHECKSIG verifier.",
+      "funding_txid": "6a6a6a6a6a6a6a6a6a6a6a6a6a6a6a6a6a6a6a6a6a6a6a6a6a6a6a6a6a6a6a6a",
+      "funding_vout": 0,
+      "funding_height": 102,
+      "calibration": false,
+      "requires_child_completion": false,
+      "native_supported": false,
+      "required_evidence_gates": [
+        "hf_checksig_verified"
+      ],
+      "circuit": {
+        "name": "not_a_and_b",
+        "n_inputs": 3,
+        "nodes": {
+          "a": ["input", 0],
+          "b": ["input", 1],
+          "select": ["input", 2],
+          "na": ["nand", "a", "a"],
+          "t": ["nand", "na", "b"],
+          "permit": ["nand", "t", "t"]
+        },
+        "outputs": ["permit", "select"],
+        "authorized_bits": [0, 1, 0],
+        "child_authorized_bits": [0, 1, 0]
+      },
+      "honest_proposals": [
+        {
+          "request_bits": [0, 1, 0]
+        }
+      ],
+      "adversarial_proposals": [
+        {
+          "label": "stale_honest_witness_on_modified_sequence",
+          "proposal": {
+            "request_bits": [0, 1, 0],
+            "sequence": 4294967295,
+            "witness_mode": "stale_honest"
+          },
+          "expected_script_accept": false,
+          "expected_parent_policy_accept": false,
+          "expected_calibration": false,
+          "expected_native_boundary": null
+        }
+      ]
+    }
+  ]
+}
