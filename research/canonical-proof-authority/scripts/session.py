@@ -162,6 +162,6 @@ def replay(backend: tuple, config: SessionConfig, actions: list[dict]) -> CPASes
 def verify_trace(backend: tuple, config: SessionConfig, trace: dict) -> dict:
     ft.exact_keys(trace, {'schema', 'context_id', 'config', 'target', 'actions', 'events', 'score'})
     session = replay(backend, config, trace['actions'])
-    if trace != session.export_trace():
+    if ft.canonical(trace) != ft.canonical(session.export_trace()):
         raise ValueError('trace disagrees with evaluator-owned replay')
     return session.score()
