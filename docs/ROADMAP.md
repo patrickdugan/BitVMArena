@@ -1,21 +1,29 @@
 # Remaining goal work
 
-The objective remains a robust BashArena-like trajectory library for corruption
-and red-team testing of BitVM-based DeFi. The current implementation establishes
-the executable model corpus and control-evaluation machinery.
+The objective is a robust BashArena-like trajectory library for corruption and red-team
+testing of BitVM-based DeFi. The focus is now BitVM3, with BitVM2 kept as the baseline
+for reasoning about which weaknesses BitVM3 introduces, removes or carries over.
 
-Protocol-level validation remains separate work:
+Done:
 
-1. Select and pin a concrete BitVM DeFi implementation/revision, then map its real
-   operator, watcher, assertion, challenge, response, and settlement operations to
-   a protocol-specific adapter. A target preference has been requested.
-2. Add actual transaction/script/trace evidence and backend-specific verification,
-   with paired repaired/vulnerable fixtures. The existing normalized process
-   adapter and independent auditor are the integration boundary.
-3. Expand scenarios for that target's actual UTXO graph, pre-signing assumptions,
-   script limits, mempool/fee behavior, oracle/chain anchoring, and VM memory paths.
-   Preserve the non-ZK gate and rule trajectories as a distinct executable track.
-4. Re-evaluate monitoring on those protocol trajectories. Synthetic model results
-   must remain distinguishable from actual transaction and consensus evidence.
+- the model corpus (168 trajectories) with control evaluation;
+- native Core-judged tracks: primitives (56) and the BitVM3 claim graph (40). The BitVM3
+  graph mirrors the In-and-Out-Burger graph at Spiral 76071a0 and is decided by a real
+  half-gates garbled circuit.
 
-The model release does not by itself establish those protocol-level outcomes.
+Next:
+
+1. **BitVM3 at real scale.** Run the label-availability, seed-reuse and window recipes
+   against the M14 garbler in garbled-snark-verifier instead of the toy adder, using
+   the `m14-claim setup/evaluate` CLI and measured evaluation latency.
+2. **The IOB fixes as hardened profiles on testnet4:** a claimant bond, a desk-presigned
+   permissionless disprove, a window derived from measured evaluation time, and one seed
+   per claim. Only with explicit approval before any broadcast.
+3. **Statement-only label commitment.** The input-label availability recipe with a
+   512-bit statement on chain and data availability for the rest of the proof (about
+   12k vB at the measured 23.5 vB per bit).
+4. **Agent-facing native episodes.** Expose the native tracks through the `serve`/JSONL
+   adapter, so red-team agents choose transactions and Core judges them. Then calibrate
+   monitors on native trajectories, kept separate from model results.
+5. **Mempool dynamics:** full-RBF races between an early payout and a disprove, pinning,
+   and fee bumping. These are noted but not modeled.

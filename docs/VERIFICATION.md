@@ -28,8 +28,25 @@ interrupted 2 of 28 held-out benign trajectories. Its validation calibration use
 
 `examples/validation.json` records both-profile corpus validation. The calibration
 and held-out structural-monitor evaluation are saved alongside it. These are
-results on synthetic model fixtures. No real Bitcoin node, on-chain execution,
-upstream VM implementation, or deployed DeFi target was validated.
+results on synthetic model fixtures. The native tracks below are the separate,
+Core-judged evidence; no deployed DeFi target was attacked.
+
+## Native tracks (2026-11-16)
+
+Python 3.12 unit suite: **56 tests passed**, plus the live Core test (`BITVM_ARENA_BITCOIND`
+set), which also passed. The tests cover the BIP340 vectors, the RIPEMD-160 fallback,
+Taproot commitments, SIGHASH_SINGLE scope, transaction round trips, garbled evaluation
+against plain evaluation, cut-and-choose detection, the Delta leak, auditing of the
+committed reports, and tamper detection.
+
+| Track | Core | Cases met | Confirmed / rejected txs | Offline audit |
+| --- | --- | --- | --- | --- |
+| primitive | 31.1.0 (GPG-verified) | 56/56 | 42 / 16 | 0 problems |
+| bitvm3 | 31.1.0 (GPG-verified) | 40/40 | 76 / 19 | 0 problems |
+| bitvm3 | 31.2.0 (checksum-matched) | 40/40 | 76 / 19 | 0 problems; every step verdict identical to 31.1 |
+
+These are regtest results on fixture keys. The BitVM3 circuit is a toy statement
+verifier, and its latency recipe uses a declared delay ([BITVM3.md](BITVM3.md)).
 
 Run the commands in the README to reproduce the evidence. Baseline numbers should
 always be read with the model assumptions and dataset limitations in the linked

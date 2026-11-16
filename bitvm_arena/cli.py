@@ -36,6 +36,46 @@ def select(args):
     return rows
 
 
+TRACK_MODULES = {"primitive": "native", "bitvm2": "bitvm2", "bitvm3": "bitvm3"}
+
+
+def track_module(name):
+    import importlib
+    if name not in TRACK_MODULES:
+        raise ValidationError("unknown native track")
+    return importlib.import_module(f"bitvm_arena.{TRACK_MODULES[name]}")
+
+
+def native_command(args):
+    import os
+    import uuid
+    if args.action == "audit":
+        if args.report is None:
+            raise ValidationError("audit needs a report file")
+        report = load_json(args.report)
+        problems = track_module(report.get("track")).audit(report)
+        emit({"track": report.get("track"), "cases": len(report.get("cases", [])),
+              "expectation_failures": report.get("summary", {}).get("expectation_failures"),
+              "problems": problems, "valid": not problems})
+        return 0 if not problems else 1
+    module = track_module(args.track)
+    rows = [r for r in module.catalog() if not args.match or args.match in r["id"]]
+    if not rows:
+        raise ValidationError("no native cases match")
+    if args.action == "list":
+        emit([{key: row.get(key) for key in ("id", "family", "profile", "variant", "expected")} for row in rows],
+             args.output)
+        return 0
+    root = Path(__file__).resolve().parents[1]
+    default = root / "work/toolchains/core-31.2/bitcoind.exe"
+    binary = args.bitcoind or Path(os.environ.get("BITVM_ARENA_BITCOIND", default))
+    report = module.execute(binary, root / "work" / "regtest" / uuid.uuid4().hex, rows)
+    emit(report, args.output)
+    if args.output:
+        print(f"bitvm-arena: {json.dumps(report['summary'])}", file=sys.stderr)
+    return 0 if not report["summary"]["expectation_failures"] else 1
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description="BitVM Arena model trajectories and control evaluations")
     parser.add_argument("--version", action="version", version=__version__)
@@ -77,8 +117,17 @@ def main(argv=None):
     p.add_argument("id")
     p.add_argument("--argv", required=True, help="JSON argv array for a local adapter")
     p.add_argument("--output", type=Path)
+    p = sub.add_parser("native", help="native Bitcoin Core regtest tracks (primitive, bitvm2, bitvm3)")
+    p.add_argument("action", choices=("list", "run", "audit"))
+    p.add_argument("report", nargs="?", type=Path, help="report file for audit")
+    p.add_argument("--track", choices=("primitive", "bitvm2", "bitvm3"), default="bitvm3")
+    p.add_argument("--bitcoind", type=Path, help="bitcoind binary (default: $BITVM_ARENA_BITCOIND or work/toolchains)")
+    p.add_argument("--match", help="only cases whose id contains this text")
+    p.add_argument("--output", type=Path)
     args = parser.parse_args(argv)
     try:
+        if args.command == "native":
+            return native_command(args)
         if args.command == "external":
             from .adapters import external_replay
             case = next((r for r in corpus.load() if r["id"] == args.id), None)

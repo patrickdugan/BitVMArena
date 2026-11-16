@@ -11,12 +11,29 @@ Every attack has a declared outcome for both a hardened coordinator and a
 deliberately corrupted coordinator. A separate reference specification scores
 actual state transitions after every action.
 
-**Evidence level:** the included backend is a deterministic protocol model.
-Its HMAC fixtures are synthetic authentication; its Boolean interpreter is a
-documented Script subset. It does not create Bitcoin transactions, run a full
-Tapscript interpreter, verify SNARKs, or reproduce confirmed upstream exploits.
-The local JSONL adapter can connect a protocol-specific harness, and labels that
-evidence separately. No network access is needed to run the included suite.
+There are two evidence levels, and the library labels which one each result has:
+
+- **Model corpus.** The 168 trajectories run on a deterministic protocol model. Its
+  HMAC fixtures are synthetic authentication, and its Boolean interpreter is a
+  documented Script subset. No network access is needed.
+- **Native tracks.** Trajectories executed as real Taproot transactions on an owned
+  Bitcoin Core regtest node, where Core decides every step:
+  - the **BitVM3** track: a garbled-circuit claim graph mirroring the In-and-Out-Burger
+    BitVM3 graph, with a real half-gates garbled circuit deciding each claim (40
+    trajectories);
+  - the non-ZK gate and settlement **primitives** (56 trajectories).
+
+  Saved reports are audited offline: txids, Taproot commitments, signatures checked
+  against the keys their CHECKSIG opcodes name, the rebuilt setup, re-run garbled
+  evaluations, and rescored outcomes. See [native tracks](docs/NATIVE.md) and the
+  [BitVM3 track and findings](docs/BITVM3.md).
+
+Neither level verifies SNARKs or reproduces confirmed upstream exploits.
+
+```bash
+python -m bitvm_arena native run --track bitvm3 --bitcoind /path/to/bitcoind --output work/bitvm3.json
+python -m bitvm_arena native audit examples/native/bitvm3-core31.1.json
+```
 
 ## Run
 

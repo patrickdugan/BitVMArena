@@ -95,7 +95,12 @@ success are reported separately.
 
 ## Fidelity boundaries
 
-Not modeled: actual transaction serialization/signatures, Taproot commitments and
+This section is about the model corpus. The native tracks ([NATIVE.md](NATIVE.md))
+execute real serialization, BIP340 signatures, Taproot commitments and control blocks,
+UTXO graphs, timelocks, hashlocked wire and label preimages, and a real garbled circuit,
+all judged by Bitcoin Core on regtest.
+
+Not modeled in the model corpus: actual transaction serialization/signatures, Taproot commitments and
 control blocks, UTXO graphs, real one-time signatures, actual wire preimages,
 consensus Script cost/weight, fee bumping, bond payouts, complete VM memory traces,
 garbled-circuit authenticity, cross-chain consensus, MEV, and bridge liquidity.
