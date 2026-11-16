@@ -10,6 +10,7 @@ non-regtest chains, and never attaches to an existing node.
 | --- | --- | --- | --- |
 | `primitive` | [`native.py`](../bitvm_arena/native.py) | 56 = 14 recipes x 4 | Fund one contract, optionally spend a challenge connector or wait out a timelock, then attempt one spend |
 | `bitvm3` | [`bitvm3.py`](../bitvm_arena/bitvm3.py) | 40 = 10 recipes x 4 | A garbled-circuit claim graph: setup, claim, label handover, evaluation, disprove, payout ([BITVM3.md](BITVM3.md)) |
+| `bitvm2` | [`bitvm2.py`](../bitvm_arena/bitvm2.py) + [`wots.py`](../bitvm_arena/wots.py) | 32 = 8 recipes x 4 | The BitVM2 bridge graph at BitVM/BitVM `c620dbfa`: kick-off, challenge, take 1, assert with Winternitz commitments, disprove, take 2. It is the baseline for the comparison in [BITVM3.md](BITVM3.md) |
 
 The four combinations per recipe are `hardened` or `mutant` crossed with `benign` or
 `attack`. Expected outcomes are declared in each track's `catalog()`. Outcomes are
@@ -57,7 +58,8 @@ the whole body.
   hash mismatch`, the local check must fail too;
 - the deterministic setup, rebuilt from the case id: compiled leaves, graph scripts,
   garbling commitments;
-- the garbled evaluations, re-run from the recorded labels (BitVM3);
+- the garbled evaluations, re-run from the recorded labels (BitVM3), and the
+  Winternitz signatures in each assert witness, checked against the recorded claim (BitVM2);
 - the outcome, rescored from the recorded steps.
 
 Tests show that a flipped transaction byte, an altered confirmation flag, a relabeled
@@ -89,6 +91,7 @@ hash.
 | --- | --- | --- |
 | [`examples/native/primitive-core31.1.json`](../examples/native/primitive-core31.1.json) | 31.1.0 | 56/56 met; 42 confirmed, 16 rejected transactions |
 | [`examples/native/bitvm3-core31.1.json`](../examples/native/bitvm3-core31.1.json) | 31.1.0 | 40/40 met; 76 confirmed, 19 rejected transactions |
+| [`examples/native/bitvm2-core31.1.json`](../examples/native/bitvm2-core31.1.json) | 31.1.0 | 32/32 met; 106 confirmed, 27 rejected transactions |
 
 Core 31.1 was installed from bitcoincore.org with its SHA-256 checked against
 SHA256SUMS and five builder GPG signatures verified (binary SHA-256 `f79eeb94…d3db77a`).

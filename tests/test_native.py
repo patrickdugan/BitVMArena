@@ -128,6 +128,24 @@ class GarblingTests(unittest.TestCase):
         self.assertNotIn(fresh.delta, {gc.xor(x, y) for x, y in zip(a, c)})
 
 
+class WinternitzTests(unittest.TestCase):
+    def test_sign_verify_and_hash_forward_forgery(self):
+        from bitvm_arena import wots
+        master, n0 = b"\x01" * 20, 3
+        keys = wots.public_keys(master, n0)
+        pairs = wots.sign(master, 150, n0)
+        self.assertEqual(wots.n1_digits(2), 2)
+        self.assertEqual(wots.n1_digits(3), 2)
+        self.assertTrue(wots.check_pairs(keys, pairs, n0))
+        self.assertEqual(wots.value_of(pairs, n0), 150)
+        forged = list(pairs)
+        forged[n0 - 1] = wots.forward(forged[n0 - 1])
+        self.assertEqual(wots.value_of(forged, n0), 151)
+        # The chains still verify; only the checksum catches the forgery.
+        self.assertTrue(wots.check_pairs(keys, forged, n0, checksum=False))
+        self.assertFalse(wots.check_pairs(keys, forged, n0))
+
+
 class CatalogTests(unittest.TestCase):
     def test_catalog_shape(self):
         for name in TRACKS:

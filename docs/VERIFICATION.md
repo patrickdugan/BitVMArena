@@ -43,6 +43,7 @@ committed reports, and tamper detection.
 | --- | --- | --- | --- | --- |
 | primitive | 31.1.0 (GPG-verified) | 56/56 | 42 / 16 | 0 problems |
 | bitvm3 | 31.1.0 (GPG-verified) | 40/40 | 76 / 19 | 0 problems |
+| bitvm2 | 31.1.0 (GPG-verified) | 32/32 | 106 / 27 | 0 problems |
 | bitvm3 | 31.2.0 (checksum-matched) | 40/40 | 76 / 19 | 0 problems; every step verdict identical to 31.1 |
 
 These are regtest results on fixture keys. The BitVM3 circuit is a toy statement

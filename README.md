@@ -21,6 +21,9 @@ There are two evidence levels, and the library labels which one each result has:
   - the **BitVM3** track: a garbled-circuit claim graph mirroring the In-and-Out-Burger
     BitVM3 graph, with a real half-gates garbled circuit deciding each claim (40
     trajectories);
+  - the **BitVM2** baseline: the BitVM/BitVM bridge graph with Winternitz commitments
+    (32 trajectories), used to see which weaknesses BitVM3 introduces, removes or
+    carries over;
   - the non-ZK gate and settlement **primitives** (56 trajectories).
 
   Saved reports are audited offline: txids, Taproot commitments, signatures checked

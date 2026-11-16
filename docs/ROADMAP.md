@@ -7,9 +7,10 @@ for reasoning about which weaknesses BitVM3 introduces, removes or carries over.
 Done:
 
 - the model corpus (168 trajectories) with control evaluation;
-- native Core-judged tracks: primitives (56) and the BitVM3 claim graph (40). The BitVM3
-  graph mirrors the In-and-Out-Burger graph at Spiral 76071a0 and is decided by a real
-  half-gates garbled circuit.
+- native Core-judged tracks: primitives (56), the BitVM3 claim graph (40) and the BitVM2
+  baseline (32). The BitVM3 graph mirrors the In-and-Out-Burger graph at Spiral 76071a0
+  and is decided by a real half-gates garbled circuit. The BitVM2 baseline mirrors the
+  BitVM/BitVM bridge graph at c620dbfa.
 
 Next:
 

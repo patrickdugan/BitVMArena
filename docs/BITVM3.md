@@ -71,6 +71,36 @@ Every benign trajectory paid the honest claim in both profiles. None of these mu
 costs the honest path anything, which is why they would not show up in happy-path
 tests.
 
+## What BitVM3 changes relative to BitVM2
+
+The BitVM2 baseline track ([`bitvm2.py`](../bitvm_arena/bitvm2.py), 32 trajectories, all
+met; evidence in [`examples/native/bitvm2-core31.1.json`](../examples/native/bitvm2-core31.1.json))
+mirrors the bridge graph in BitVM/BitVM at `c620dbfa`:
+
+- **Graph:** kick-off, a challenge on connector A (presigned SINGLE|ANYONECANPAY),
+  take 1 after connector 3's timelock, assert, and take 2 after connector 4's timelock.
+- **Commitments:** the assert carries Winternitz commitments (HASH160, base 16).
+- **Disprove:** input 0 is presigned SIGHASH_SINGLE, which fixes only the burn output.
+  The connector C chunk re-verifies the WOTS values and checks an adder.
+
+Both tracks run under the same harness, so each weakness class can be lined up on both:
+
+| Weakness class | BitVM2 baseline (mutant attack) | BitVM3 / IOB graph | What changed |
+| --- | --- | --- | --- |
+| Reimbursement before the dispute window | `take1_csv_removed`: take 1 confirms, and the late challenge fails with `missing-inputs` | `payout_csv_removed`, `window_below_latency` | **Carried and widened.** BitVM3's window also has to cover off-chain evaluation (about 60 min for M14). A BitVM2 watcher only needs on-chain data and one transaction build |
+| Reimbursement not bound to the dispute | `take1_unbound_connector_a` and `take2_unbound_disprove`: the operator is paid after a successful challenge or disprove | Payout and disprove are two leaves of the same claim output | **Removed by construction.** Spending one leaf consumes the other |
+| Challenge crowdfunding | `challenge_sighash_all`: the challenger cannot attach funds, and take 1 goes through | No challenge transaction | **Removed** (fewer moving parts, one less presigned policy) |
+| Correctness of the disprove computation | `chunk_carry_dropped`: a buggy on-chain chunk lets a wrapped sum stand and also disproves the honest operator | `garbling_unchecked`, `cut_and_choose_grindable`, `output_polarity_swapped` | **Changed.** Correctness moves off-chain into the garbling. Script only checks a hash, so a bad circuit is invisible on-chain and can be caught only by cut-and-choose, which must use challenger randomness |
+| Commitment to the inputs | `wots_checksum_unchecked`: commitments are on-chain, so availability is guaranteed. Forgery needs a dropped checksum (here it griefs an honest operator) | `labels_offchain_withheld`, `seed_reuse_across_claims` | **Introduced.** Inputs are labels. Off-chain delivery creates a withholding attack, and label secrecy (Δ) becomes a new asset: a Δ leak lets a holder forge the reject label and grief honest claims |
+| Deterrence | `disprove_burn_sighash_none`: a lying operator self-disproves and recovers its stake | `claimant_unbonded` | **Changed.** IOB has no stake to burn, so a false claim costs only fees, and the vault pays those |
+| Disprove reward front-running | `disprove_reward_unbound`: **inherent**, confirmed in both profiles. Input 0's SINGLE commits only the burn output, so a relayer rewrites the reward | `single_watcher_disprove` | **Traded.** IOB requires W's signature, which removes front-running but adds single-watcher liveness. A desk-presigned disprove with a fixed output keeps both properties |
+| Presigned output binding | (presigned ALL in the baseline) | `payout_sighash_none` | **Carried** |
+
+New in BitVM3, with no BitVM2 counterpart: input-label withholding, unchecked garbling
+and grindable cut-and-choose, Δ or seed reuse, and evaluation latency racing the window.
+IOB's simpler graph removes three BitVM2 hazards: crowdfunding, connector binding and
+reward front-running. It removes front-running only by adding a single watcher.
+
 ## Findings for the IOB graph
 
 These are design observations about the concrete target. None of them is an exploit of
