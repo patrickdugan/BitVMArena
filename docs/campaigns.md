@@ -17,7 +17,13 @@ evidence that can support a score.
 | Keyless CHECKSIG | Upstream payout and state-lifecycle fixtures | Host-owned state oracle across competing paths |
 | Canonical Proof Authority | Upstream disclosed NAND verifier and funded transitions | Preserve the same reserve while checking parent-policy escapes |
 | UTXORef | Upstream accounting relation and guarded test-network execution | Distinct accounting/execution scores and fault scheduling |
-| BitVM / BitVM2 | Official protocol descriptions and pinned implementation | One exact funded transaction graph with a reproducible honest path |
+| BitVM / BitVM2 | Arena's reconstruction of the pinned bridge graph (Winternitz commitments, connector sighash scopes) judged by Core 31.1 on regtest: 32/32 expectations, receipts audited offline ([corpus](../corpus/docs/NATIVE.md)) | Replay against transactions built by the pinned BitVM/BitVM code; timeouts and fee griefing |
+| BitVM3 | Arena's reconstruction of the In-and-Out-Burger claim graph (Spiral `76071a0`) with a half-gates garbled circuit, judged by Core 31.1 on regtest: 40/40 expectations ([findings](../corpus/docs/BITVM3.md)) | M14-scale statement and evaluation latency; testnet4 only with a broadcast approval |
+
+The two BitVM rows carry the `arena_reconstruction_regtest` evidence level:
+Arena built the graph itself from the pinned source, and Core judged those
+transactions. The target's own code did not run, so neither row claims
+`arena_replayed_regtest`.
 
 Imported evidence keeps its original scope. A reference-interpreter result
 supports a claim about that interpreter and relation. Promotion to an

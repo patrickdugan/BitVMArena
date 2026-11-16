@@ -25,7 +25,8 @@
     "upstream_recorded_regtest": "The source repository records native regtest evidence; Arena has not independently replayed it.",
     "arena_replayed_regtest": "Arena executed the pinned target and retained independently checked native receipts.",
     "design_hypothesis": "A specified campaign without a completed executable backend.",
-    "synthetic-model": "An executable Arena model with explicitly selected assumptions and planted faults."
+    "synthetic-model": "An executable Arena model with explicitly selected assumptions and planted faults.",
+    "arena_reconstruction_regtest": "Arena executed its own reconstruction of the pinned target's transaction graph on an isolated regtest node and retained independently checked receipts; the target's code did not run."
   },
   "campaigns": [
     {
@@ -460,8 +461,8 @@
         "commit": "c620dbfaacebdf778e765a6681985350389973b1",
         "historical_bitvm1_commit": "1dce989d1963b90c35391b77b451c6823302d503"
       },
-      "arena_execution_status": "adapter_pending",
-      "evidence_level": "design_hypothesis",
+      "arena_execution_status": "reconstruction_regtest_ready",
+      "evidence_level": "arena_reconstruction_regtest",
       "scenario_families": [
         "setup participant honesty and retained signing authority",
         "bit commitment equivocation",
@@ -479,18 +480,78 @@
       ],
       "upstream_commands": [],
       "next_acceptance_gates": [
-        "Select one exact bridge transaction graph and document its roles and trust assumptions.",
-        "Construct a deterministic regtest fixture with funded outputs and a minimal honest run.",
-        "Replay invalid assertions, timeout outcomes and fee griefing against that exact graph."
+        "Replay the reconstruction's honest and invalid-assertion paths against transactions built by the pinned BitVM/BitVM code.",
+        "Add timeout outcomes and fee griefing with separate measurements of lost fees and frozen principal."
       ],
       "limits": [
         "Arena's initial dispute model provides an abstraction of these game families.",
-        "Full BitVM2 bridge execution, Groth16 verification and Winternitz commitments require a native adapter."
+        "The corpus reconstruction builds the bridge graph's connectors, sighash scopes and Winternitz (HASH160, base 16, checksum) commitments itself; the disprove chunk is a 16-bit adder, not a Groth16 verifier chunk."
       ],
       "sources": [
         "https://bitvm.org/bitvm.pdf",
         "https://bitvm.org/bitvm2",
         "https://github.com/BitVM/BitVM/blob/c620dbfaacebdf778e765a6681985350389973b1/README.md"
+      ],
+      "local_reconstruction": {
+        "path": "corpus/bitvm_corpus/bitvm2.py",
+        "track": "bitvm2",
+        "receipts": "corpus/examples/native/bitvm2-core31.1.json"
+      },
+      "completed_checks": [
+        "Kick-off, challenge, take 1, assert, disprove and take 2 built as Taproot transactions and judged by Bitcoin Core 31.1 on regtest",
+        "8 recipes x hardened/mutant x benign/attack: 32/32 expectations met, 106 confirmed and 27 rejected transactions",
+        "Offline audit of the saved report: txids, Taproot commitments, signatures against their CHECKSIG keys, Winternitz witnesses, rescored outcomes; 0 problems"
+      ]
+    },
+    {
+      "id": "BVA-BITVM3",
+      "title": "BitVM3 garbled-circuit claim graph",
+      "target": {
+        "repository": "patrickdugan/Spiral",
+        "ref": "main",
+        "commit": "76071a0195f48961386e46d56df7b5e0276637fc",
+        "path": "in-and-out-burger/iob/bitvm3.py"
+      },
+      "arena_execution_status": "reconstruction_regtest_ready",
+      "evidence_level": "arena_reconstruction_regtest",
+      "scenario_families": [
+        "input labels withheld off-chain",
+        "garbling correctness without cut-and-choose",
+        "grindable Fiat-Shamir cut-and-choose",
+        "garbling seed reuse leaking the free-XOR offset",
+        "output label polarity",
+        "single-watcher disprove liveness",
+        "challenge window shorter than evaluation latency",
+        "presigned payout timelock and sighash scope",
+        "unbonded false claims"
+      ],
+      "invariants": [
+        "A false claim cannot be paid while an honest evaluator can disprove it within the window.",
+        "An honest claim cannot be disproved.",
+        "Claimant loss and payout are measured separately from attacker success."
+      ],
+      "upstream_commands": [],
+      "local_reconstruction": {
+        "path": "corpus/bitvm_corpus/bitvm3.py",
+        "track": "bitvm3",
+        "receipts": "corpus/examples/native/bitvm3-core31.1.json"
+      },
+      "next_acceptance_gates": [
+        "Scale the garbled statement toward the M14 verifier's input size and measure evaluation latency against the window.",
+        "Replay hardened profiles on testnet4 only with an explicit broadcast approval."
+      ],
+      "limits": [
+        "The garbled circuit is a 16-bit adder statement (103 gates, 32 AND) using free-XOR and half-gates, not the M14 verifier circuit.",
+        "Cut-and-choose is modelled with k=4 instances."
+      ],
+      "sources": [
+        "https://github.com/patrickdugan/Spiral/blob/76071a0195f48961386e46d56df7b5e0276637fc/in-and-out-burger/iob/bitvm3.py"
+      ],
+      "completed_checks": [
+        "Vault, claim, label handover, garbled evaluation, disprove and payout judged by Bitcoin Core 31.1 on regtest",
+        "10 recipes x hardened/mutant x benign/attack: 40/40 expectations met, 76 confirmed and 19 rejected transactions",
+        "Same per-step verdicts on Bitcoin Core 31.2",
+        "Offline audit re-runs every garbled evaluation and signature check; 0 problems"
       ]
     }
   ]

@@ -29,13 +29,31 @@ Benchmark outputs contain deterministic event traces and a JSON summary.
 | ControlArena adapter | Typed tools, sample-local state, replay scoring, honest and attack modes | Actual SDK integration tests with scripted agents |
 | Authority enumeration | 1,851 canonical NAND programs, 32 compiled authorities, 256 Python Script-oracle executions | Reproduced pinned CPA research |
 | Historical recovery | Nine reconstructed files from the original local Arena | Archived source captures with per-file provenance |
-| Campaign map | Seven lanes covering the simulator, CPA, Keyless-CHECKSIG, MULADDMOD, UTXORef and BitVM2 | Source-pinned plan; each lane declares its adapter status |
+| [Corruption corpus](corpus/README.md) | 168 model trajectories; Core-judged native tracks: BitVM3 claim graph (40), BitVM2 bridge graph (32), Script and settlement primitives (56) | Bitcoin Core 31.1 regtest receipts, audited offline; CI reruns the tracks on Linux Core |
+| Campaign map | Eight lanes covering the simulator, CPA, Keyless-CHECKSIG, MULADDMOD, UTXORef, BitVM2 and BitVM3 | Source-pinned plan; each lane declares its adapter status |
 
 The active engine executes a bounded optimistic dispute model. Its arithmetic
 witnesses are public fixtures. All balances and block heights are simulated;
 the engine has no network, wallet, node, or private-key interface.
 Native Bitcoin Script and regtest integrations have separate acceptance gates
 in [the campaign map](docs/campaigns.md).
+
+## BitVM3 and BitVM2 on regtest
+
+[`corpus/`](corpus/README.md) is a self-contained, standard-library package
+(`bitvm_corpus`) that builds BitVM transaction graphs as real Taproot
+transactions and lets an owned Bitcoin Core regtest node accept or reject every
+step. The BitVM3 track mirrors the In-and-Out-Burger claim graph and decides
+each claim with a half-gates garbled circuit; the BitVM2 track mirrors the
+BitVM/BitVM bridge graph and is the baseline for
+[the BitVM2-to-BitVM3 comparison](corpus/docs/BITVM3.md).
+
+```sh
+cd corpus
+python -m bitvm_corpus native run --track bitvm3 --bitcoind /path/to/bitcoind --output work/bitvm3.json
+python -m bitvm_corpus native audit examples/native/bitvm3-core31.1.json
+python -m unittest discover -s tests -v
+```
 
 ## Protocol games
 
@@ -116,11 +134,15 @@ execution and reproduces the frozen evidence. See
 | `tests/` | Core invariants, imported-study boundaries and SDK integration |
 | `research/authority_enumeration/` | Pinned imported research, catalogue and replay wrapper |
 | `research/history/` | Reconstructed historical source outside the active package |
+| `corpus/` | Self-contained corruption corpus and native regtest tracks (`bitvm_corpus`), with its own tests and evidence |
 | `campaigns/initial_campaigns.json` | Exact target revisions, commands and acceptance gates |
 | `docs/architecture.md` | Trust boundaries and transition semantics |
 
 CI runs the core on Python 3.11 and 3.13, the real ControlArena adapter on
-Python 3.11, and the authority replay against pinned `bitcoin-rs` source.
-Model-generated red-team results and full Bitcoin integration measurements
-will be added as their campaigns execute. Scripted calibration outcomes carry
-their synthetic evidence label throughout the exported data.
+Python 3.11, and the authority replay against pinned `bitcoin-rs` source. It
+also runs the corpus tests on Python 3.11 and 3.13, audits the saved corpus
+evidence offline, and reruns all three native tracks on a checksum-pinned
+Bitcoin Core 31.1 Linux build, uploading the reports as a workflow artifact.
+Model-generated red-team results will be added as their campaigns execute.
+Scripted calibration outcomes carry their synthetic evidence label throughout
+the exported data.

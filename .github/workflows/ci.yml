@@ -49,3 +49,60 @@ jobs:
       - run: python -m unittest discover -s research/authority_enumeration/upstream/scripts/tests -p test_bitvm_authority_enumeration.py -v
         env:
           CPA_SOURCE: ${{ github.workspace }}/.deps/bitcoin-rs
+
+  corpus:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: ['3.11', '3.13']
+    defaults:
+      run:
+        working-directory: corpus
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - run: python -m unittest discover -s tests -v
+      - run: python -m bitvm_corpus validate
+      - name: Audit the saved Core 31.1 evidence offline
+        run: |
+          for track in primitive bitvm3 bitvm2; do
+            python -m bitvm_corpus native audit "examples/native/$track-core31.1.json"
+          done
+
+  corpus-regtest:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: corpus
+    env:
+      CORE_VERSION: '31.1'
+      # From https://bitcoincore.org/bin/bitcoin-core-31.1/SHA256SUMS
+      CORE_SHA256: b80d9c3e04da78fb6f0569685673418cf686fadba9042d926d13fb87ff503f9e
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Fetch checksum-pinned Bitcoin Core
+        run: |
+          archive="bitcoin-$CORE_VERSION-x86_64-linux-gnu.tar.gz"
+          curl -sSfL -o "$RUNNER_TEMP/$archive" "https://bitcoincore.org/bin/bitcoin-core-$CORE_VERSION/$archive"
+          echo "$CORE_SHA256  $RUNNER_TEMP/$archive" | sha256sum -c -
+          tar -xzf "$RUNNER_TEMP/$archive" -C "$RUNNER_TEMP" "bitcoin-$CORE_VERSION/bin/bitcoind"
+          echo "BITVM_ARENA_BITCOIND=$RUNNER_TEMP/bitcoin-$CORE_VERSION/bin/bitcoind" >> "$GITHUB_ENV"
+      - run: python -m unittest discover -s tests -p test_native.py -v
+      - name: Run every native track on regtest and audit the reports
+        run: |
+          mkdir -p reports
+          for track in primitive bitvm3 bitvm2; do
+            python -m bitvm_corpus native run --track "$track" --output "reports/$track-core$CORE_VERSION-linux.json"
+            python -m bitvm_corpus native audit "reports/$track-core$CORE_VERSION-linux.json"
+          done
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: corpus-native-reports
+          path: corpus/reports/
+          if-no-files-found: ignore
