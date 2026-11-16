@@ -268,7 +268,8 @@ def main(argv=None):
     p = sub.add_parser("testnet4", help="stage bitvm3 trajectories on testnet4 (rehearse on regtest first)")
     p.add_argument("action", choices=("list", "rehearse", "run", "audit"))
     p.add_argument("report", nargs="?", type=Path, help="report file for audit")
-    p.add_argument("--wave", choices=("wave1", "wave2"), help="a predefined set of rows (testnet4.WAVES)")
+    from .testnet4 import WAVES
+    p.add_argument("--wave", choices=tuple(WAVES), help="a predefined set of rows (testnet4.WAVES)")
     p.add_argument("--row", action="append", default=[], help="a row id, or text a row id contains (repeatable)")
     p.add_argument("--bitcoind", type=Path, help="rehearse: bitcoind binary")
     p.add_argument("--interval", type=float, default=1.5, help="rehearse: seconds between the network's blocks")

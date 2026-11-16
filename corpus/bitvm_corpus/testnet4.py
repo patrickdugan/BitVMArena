@@ -96,6 +96,19 @@ WAVES = {
         ("claimant_unbonded", "mutant"),
         ("disprove_unbumpable", "mutant"),
     )],
+    # The third wave: mutant attacks whose outcome turns on public-network timing or on what
+    # anyone watching the mempool can do: an absolute-timelock payout and a window shorter than
+    # the watcher's latency (both race the disprove on real block intervals), the SIGHASH_NONE
+    # claim and payout (rewritable by any relayer), a proof replayed across two vaults, and a
+    # single watcher whose disprove fails. Sized to the 18,812 sats left after wave 2.
+    "wave3": [f"{TRACK}.{recipe}.mutant.attack" for recipe in (
+        "payout_absolute_timelock",
+        "window_below_latency",
+        "claim_sighash_none",
+        "payout_sighash_none",
+        "proof_replay_across_vaults",
+        "single_watcher_disprove",
+    )],
 }
 
 

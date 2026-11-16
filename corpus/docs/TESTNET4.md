@@ -174,6 +174,86 @@ replacement's script refusal into `missing-inputs`, because the watcher's dispro
 meant to replace had already been mined. Testnet4's blocks are minutes apart, and wave 1
 got the regtest outcome.
 
+## Wave 2: the mutant attacks land on testnet4
+
+[`examples/testnet4/wave2.json`](../examples/testnet4/wave2.json), broadcast on
+2026-11-16 from the same node (10 peers):
+- **Rows:** nine mutant attacks, each with the flaw its hardened profile closes, and the
+  hardened `reclaim_preempts_claim` attack that wave 1 lost to a reorg, run again on the
+  reorg-aware session.
+- **Funding:** the 28,489 sats left after wave 1, split into 10 coins in `f69d6724…`
+  (161,737).
+- **Run:** the tip went from 161,735 to 161,759 between 18:35 and 20:59 UTC.
+- **Transactions:** 19 confirmed and 11 refused by mempool policy. None was displaced,
+  dropped or left unconfirmed.
+  - 13 were mined, reorged out and mined again.
+  - None had to be sent again.
+- **Expectations:** 10 of 10 met.
+  - Every attack the mutant profiles allow went through.
+  - The hardened reclaim row paid the honest claim.
+  - Every transaction step matched the regtest catalog.
+- **Audit:**
+  - offline, clean;
+  - against the node's best chain, valid;
+  - one note: the reclaim of `reclaim_preempts_claim` mutant, recorded in 161,743, now
+    sits in 161,745 (below).
+- **Cost:** 9,677 sats of fees, about 970 per row. Nothing was left in contract outputs.
+
+| Row | Outcome | What testnet4 did |
+| --- | --- | --- |
+| `reclaim_preempts_claim` hardened attack | paid | early reclaim refused `non-BIP68-final`; claim 161,745; payout 161,756 |
+| `reclaim_preempts_claim` mutant attack | **attack landed** | desk's early reclaim 161,743 (now 161,745); claim refused `missing-inputs` |
+| `desk_key_retained` mutant attack | **attack landed** | claim 161,745; desk re-signed the payout alone, 161,751; claimant's payout refused `missing-inputs` |
+| `disprove_watcher_redirect` mutant attack | **attack landed** | claim 161,745; watcher's disprove paying itself, 161,745; payout refused |
+| `payout_csv_removed` mutant attack | **attack landed** | false claim and its payout both in 161,745; disprove refused `missing-inputs` |
+| `claim_internal_key_spendable` mutant attack | **attack landed** | claim and its key-path sweep both in 161,745; disprove and payout refused |
+| `disprove_outputs_unbound` mutant attack | **attack landed** | claim and the self-paying disprove both in 161,745; watcher's disprove and payout refused |
+| `labels_offchain_withheld` mutant attack | **attack landed** | false claim 161,745, labels withheld; paid 161,751 |
+| `claimant_unbonded` mutant attack | **attack landed** | false claim 161,745, disproven in 161,745; the claimant had nothing at stake |
+| `disprove_unbumpable` mutant attack | **attack landed** | claim 161,745; zero-fee disprove without an anchor refused `min relay fee not met`; false claim paid 161,751 |
+
+What the public network showed:
+
+1. **The flaws do not depend on regtest.** Each mutant attack landed against real relay
+   and real miners, with the transaction steps and reject reasons of the regtest catalog.
+   In the final chain, three of them have the claim and the attacker's spend in the same
+   block:
+   - `payout_csv_removed`: the payout;
+   - `claim_internal_key_spendable`: the key-path sweep;
+   - `disprove_outputs_unbound`: the self-paying disprove.
+
+   They had been in consecutive blocks before the reorg below, and 161,745 took both.
+   Without the timelock the hardened profile adds, a miner can confirm the spend together
+   with the claim, which leaves the watcher no block in which to answer.
+2. **A real-difficulty block replaced the branch that held the attacks, and the fix held.**
+   - Minimum-difficulty blocks 161,743 (`00000000000db372…`, 33 transactions) and
+     161,744 (`0000000042d712bb…`, 8 transactions) held the claims of eight rows and five
+     follow-up spends.
+   - Real-difficulty block 161,745 (`0000000000000000521b…`) extended a sibling branch.
+     All 13 transactions went back to the node's mempool, and 161,745 mined them with 38
+     others.
+   - The session counted every timelock again from 161,745, so no transaction was sent
+     early and none had to be resent. The hardened reclaim row, which wave 1 lost the
+     same way, paid at 161,756.
+3. **A row can end before its block is replaced.**
+   - The mutant `reclaim_preempts_claim` row was decided once its reclaim had a
+     confirmation in 161,743 and the claim was refused.
+   - The reorg came after that, and the reclaim confirmed again in 161,745. The report
+     keeps the block the row ended on, and the audit's chain re-check notes the move.
+   - The outcome stands, because the reclaim is still the spend of the vault.
+4. **Most minimum-difficulty blocks carry nothing.**
+   - Of the 25 blocks from 161,735 to 161,759, four were real-difficulty blocks: 161,738,
+     161,745, 161,751 and 161,756.
+   - 17 of the 21 minimum-difficulty blocks in the final chain held only their coinbase.
+   - 29 of the wave's 30 transactions (the split, the 10 vault fundings and the 19
+     confirmed steps) are in real-difficulty blocks. In wave 1, by contrast, 27 of 58
+     stayed in minimum-difficulty blocks 161,704 and 161,705, because the next
+     real-difficulty block built on them.
+   - A timelock counts every block, but only 8 of the wave's 25 blocks carried any
+     transaction. On testnet4, a window of N blocks gives a disprove fewer than N blocks
+     that will take it. The window recipes are harder on the watcher here than on
+     regtest, where every block takes the mempool.
+
 ## Running a wave
 
 ```bash

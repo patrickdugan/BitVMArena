@@ -31,6 +31,8 @@ Done:
   - **Wave 1:** 18 hardened rows; 17 met expectations.
   - **The eighteenth** was lost to a testnet4 reorg that the harness had not counted
     for. The session now re-checks depth through reorgs, and the rehearsal can reorganize.
+  - **Wave 2:** nine mutant attacks plus that row; 10 of 10 met. Every flaw landed on the
+    public network, and 13 transactions came through a reorg without a resend.
 
 Next:
 
@@ -38,10 +40,21 @@ Next:
    `m14-claim` does not export; the window and censorship recipes need the evaluation
    time measured on the watcher hardware a deployment expects.
 2. **The rest of the testnet4 catalog.**
-   - Wave 2 covers the mutant attacks, to show the flaws landing on the public network.
-   - Running all 84 rows at once needs about 163k sats of coins. Most of the value comes
-     back to the staging wallet, but outputs whose only spend path is the 144-block
-     reclaim stay locked until a sweep with the stage keys.
+   - Wave 3 runs six mutant attacks whose outcome turns on public-network timing or on what
+     a relayer can rewrite: absolute timelock, short window, SIGHASH_NONE claim and payout,
+     proof replay, single watcher.
+   - Left after wave 3:
+     - the other six mutant attacks;
+     - the six hardened attacks wave 1 left out;
+     - the 39 benign rows.
+   - The cost is fees, about 970–990 sats per row (funding, claim, disprove, payout).
+     - Wave 1 spent 17,740 of its 49,000 sats and left 2,771 in contract outputs (a claim
+       output never paid out, and a bond) until their 144-block reclaim.
+     - Wave 2 spent 9,677 and left nothing locked.
+     - The staging wallet had 18,812 sats before wave 3. The rows after it need about
+       50k more.
+   - Running all 84 rows at once would need about 163k sats of coins in flight. Waves sized
+     to the wallet recycle the same coins.
    - The recipes that need a miner or a topology (`disprove_censored_by_miner`,
      `disprove_anchor_pinned`, `disprove_partitioned`) stay on regtest.
 3. **Statement-only label commitment.** The input-label availability recipe with a
