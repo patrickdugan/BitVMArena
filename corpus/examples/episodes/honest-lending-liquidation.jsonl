@@ -1,0 +1,4 @@
+{"op": "claim", "args": {"proof": [40000, 8400], "labels": "handover", "tables": "honest"}}
+{"op": "wait", "args": {"blocks": 12}}
+{"op": "spend", "args": {"utxo": "claim", "path": "payout"}}
+{"op": "end"}

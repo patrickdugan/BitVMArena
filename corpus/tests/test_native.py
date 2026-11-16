@@ -10,7 +10,7 @@ from pathlib import Path
 
 from bitvm_corpus import bitcoin, bitvm3, gc, native
 from bitvm_corpus.cli import main, track_module
-from bitvm_corpus.canonical import digest
+from bitvm_corpus.canonical import ValidationError, digest
 
 ROOT = Path(__file__).resolve().parents[1]
 EVIDENCE = ROOT / "examples" / "native"
@@ -168,11 +168,105 @@ class CatalogTests(unittest.TestCase):
         for row in bitvm3.catalog():
             a, b = bitvm3.prepare(row), bitvm3.prepare(row)
             self.assertEqual(a.public, b.public)
-            self.assertEqual(bitvm3.Graph(a).V.script_pubkey, bitvm3.Graph(b).V.script_pubkey)
+            cltv = 200 if a.cfg.payout_timelock == "cltv" else None
+            self.assertEqual(bitvm3.Graph(a, cltv).V.script_pubkey, bitvm3.Graph(b, cltv).V.script_pubkey)
+            self.assertEqual(bitvm3.Graph(a, cltv).K.script_pubkey, bitvm3.Graph(b, cltv).K.script_pubkey)
         grind = next(r for r in bitvm3.catalog() if r["id"] == "bitvm3.cut_and_choose_grindable.mutant.attack")
         log = bitvm3.prepare(grind).setup_log
         self.assertGreater(log["grind_attempts"], 0)
         self.assertIn(log["kept"], log["malicious"])
+
+    def test_bitvm3_layers_cover_every_recipe(self):
+        rows = bitvm3.catalog()
+        self.assertEqual(len(rows), 4 * len(bitvm3.RECIPES))
+        self.assertEqual({r["layer"] for r in rows}, set(bitvm3.LAYERS))
+        for row in rows:
+            honest_attack = row["recipe"] in bitvm3.HONEST_ATTACKS
+            self.assertEqual(bitvm3.proof_for(row) == bitvm3.HONEST_PROOF,
+                             row["variant"] == "benign" or honest_attack, row["id"])
+
+    def test_bitvm3_assess_flags_exactly_the_mutant_designs(self):
+        offline_desk = {"desk_online_at_dispute": False}
+        for recipe in bitvm3.RECIPES:
+            with self.subTest(recipe=recipe):
+                mutant = bitvm3.assess(bitvm3.config(recipe, "mutant"), offline_desk)
+                hardened = bitvm3.assess(bitvm3.config(recipe, "hardened"), offline_desk)
+                self.assertIn(recipe, {f["recipe"] for f in mutant["findings"]})
+                self.assertNotIn(recipe, {f["recipe"] for f in hardened["findings"]})
+        as_built = {f["recipe"] for f in bitvm3.assess(bitvm3.Config())["findings"]}
+        self.assertEqual(as_built, {"labels_offchain_withheld", "garbling_unchecked", "disprove_censored_by_miner",
+                                    "single_watcher_disprove", "window_below_latency", "claimant_unbonded"})
+        with self.assertRaises(ValidationError):
+            bitvm3.assess(bitvm3.Config(), {"no_such_assumption": 1})
+
+    def test_bitvm3_profiles_differ_in_one_decision(self):
+        """Hardened and mutant configs differ only in the fields their recipe is about."""
+        for recipe in bitvm3.RECIPES:
+            hardened = bitvm3.config(recipe, "hardened").check().__dict__
+            mutant = bitvm3.config(recipe, "mutant").check().__dict__
+            changed = {k for k in hardened if hardened[k] != mutant[k]}
+            if recipe == "seed_reuse_across_claims":
+                self.assertEqual(changed, {"seed_reuse"})
+            elif recipe in ("garbling_unchecked", "tables_delivered_late", "proof_replay_across_vaults"):
+                self.assertTrue(changed, recipe)
+            self.assertLessEqual(len(changed), 2, (recipe, changed))
+
+    def test_bitvm3_config_rejects_incoherent_designs(self):
+        for bad in ({"disprove_mode": "nobody"}, {"disprove_fee": "zero_anchor"},
+                    {"disprove_fee": "zero_anchor", "disprove_mode": "presigned", "bond": True},
+                    {"claim_hash_type": 7}, {"window": 0}):
+            with self.subTest(bad=bad), self.assertRaises(ValidationError):
+                bitvm3.Config(**bad).check()
+
+    def _graph(self, recipe, profile, variant="attack", index=0):
+        row = next(r for r in bitvm3.catalog() if r["id"] == f"bitvm3.{recipe}.{profile}.{variant}")
+        prep = bitvm3.prepare(row, index=index)
+        return row, prep, bitvm3.Graph(prep, 200 if prep.cfg.payout_timelock == "cltv" else None)
+
+    @staticmethod
+    def _claim(graph):
+        return bitcoin.Transaction([bitcoin.TxInput("11" * 32, 0, 0, b"")], graph.claim_outputs())
+
+    def test_bitvm3_key_path_and_presignature_scope(self):
+        for profile, works in (("hardened", False), ("mutant", True)):
+            _, _, graph = self._graph("claim_internal_key_spendable", profile)
+            sweep = graph.sweep_tx(self._claim(graph), graph.payout_spk)
+            self.assertEqual(bitcoin.check_signature(sweep, 0, None, graph.K.output_key, sweep.inputs[0].witness[0]),
+                             works, profile)
+            _, prep, graph = self._graph("claim_sighash_none", profile)
+            vault = {"txid": "22" * 32, "vout": 0, "amount": bitvm3.VAULT, "script_pubkey": graph.V.script_pubkey.hex()}
+            rewritten = graph.claim_tx({"vault": vault}, [], outputs=[(graph.k_value, graph.payout_spk)])
+            desk_sig = rewritten.inputs[0].witness[1]
+            self.assertEqual(bitcoin.check_signature(rewritten, 0, graph.V.leaf(0), graph.D, desk_sig), works, profile)
+
+    def test_bitvm3_anchor_and_burn_shapes(self):
+        _, _, graph = self._graph("disprove_unbumpable", "hardened")
+        claim = self._claim(graph)
+        parent = graph.disprove_tx(claim, b"\x00" * 16, "watch")
+        self.assertEqual(parent.version, 3)
+        self.assertEqual(sum(v for v, _ in parent.outputs), graph.k_value)       # zero fee
+        self.assertEqual(parent.outputs[1], (0, bitcoin.P2A))
+        child = graph.anchor_child(parent, {"txid": "33" * 32, "vout": 0, "amount": bitvm3.WATCH_FUNDS,
+                                            "script_pubkey": bitvm3.spk_of("watch").hex()})
+        self.assertEqual((child.version, child.inputs[0].txid, child.inputs[0].vout), (3, parent.txid, 1))
+        _, _, graph = self._graph("disprove_unbumpable", "mutant")
+        self.assertEqual(graph.disprove_tx(claim, b"\x00" * 16, "watch").outputs, [(graph.k_value, graph.refund_spk)])
+        _, _, burned = self._graph("bond_self_slash", "hardened")
+        self.assertEqual(burned.disprove_outputs(bitvm3.spk_of("watch"))[1], (bitvm3.BOND, bitvm3.BURN_SPK))
+
+    def test_bitvm3_statement_binding_and_table_corruption(self):
+        for profile, second in (("hardened", "reject"), ("mutant", "accept")):
+            _, prep, graph = self._graph("proof_replay_across_vaults", profile, index=1)
+            out = gc.evaluate(prep.statement, prep.garbling.tables,
+                              prep.garbling.input_labels(gc.proof_bits(*bitvm3.HONEST_PROOF)))
+            self.assertEqual(gc.decode(out, graph.data["accept_label_sha256"], graph.data["reject_label_sha256"]),
+                             second, profile)
+        for row in bitvm3.catalog():
+            prep = bitvm3.prepare(row)
+            out = gc.evaluate(prep.statement, bitvm3.corrupt_tables(prep.garbling.tables),
+                              prep.garbling.input_labels(gc.proof_bits(*bitvm3.FALSE_PROOF)))
+            self.assertEqual(gc.decode(out, prep.public["accept_label_sha256"], prep.public["reject_label_sha256"]),
+                             "invalid", row["id"])
 
 
 class EvidenceTests(unittest.TestCase):
@@ -222,12 +316,36 @@ class EvidenceTests(unittest.TestCase):
         def drop_case(r):
             del r["cases"][index]
 
-        for mutate in (flip_payout, claim_success_never_happened, relabel, drop_case):
+        slash = next(c for c in report["cases"] if c["id"] == "bitvm3.bond_self_slash.mutant.attack")
+        slash_index = report["cases"].index(slash)
+
+        def revive_displaced_disprove(r):
+            # Claim the watcher's replaced disprove confirmed too: a double spend.
+            for s in r["cases"][slash_index]["steps"]:
+                if s.get("displaced"):
+                    s["confirmed"] = True
+                    del s["displaced"]
+
+        for mutate in (flip_payout, claim_success_never_happened, relabel, drop_case, revive_displaced_disprove):
             with self.subTest(mutation=mutate.__name__):
                 self.assertTrue(tampered(mutate))
         unhashed = copy.deepcopy(report)
         unhashed["summary"]["cases"] += 1
         self.assertIn("evidence_hash does not match the report body", bitvm3.audit(unhashed))
+
+    def test_cli_native_assess(self):
+        out = io.StringIO()
+        with redirect_stdout(out):
+            self.assertEqual(main(["native", "assess", "--app", "iob-payout-desk"]), 0)
+        self.assertIn("labels_offchain_withheld", {f["recipe"] for f in json.loads(out.getvalue())["findings"]})
+        out = io.StringIO()
+        with redirect_stdout(out):
+            self.assertEqual(main(["native", "assess", "--config", '{"claim_internal": "claimant"}',
+                                   "--assume", '{"watchers": 2}']), 0)
+        findings = {f["recipe"] for f in json.loads(out.getvalue())["findings"]}
+        self.assertIn("claim_internal_key_spendable", findings)
+        self.assertNotIn("single_watcher_disprove", findings)
+        self.assertEqual(main(["native", "assess", "--config", '{"window": "6"}']), 2)
 
     def test_cli_native_list_and_audit(self):
         out = io.StringIO()
@@ -246,7 +364,8 @@ class EvidenceTests(unittest.TestCase):
 class LiveCoreTests(unittest.TestCase):
     def test_live_subset(self):
         binary = Path(os.environ["BITVM_ARENA_BITCOIND"])
-        for module, match in ((native, "selector_unbound"), (bitvm3, "seed_reuse_across_claims")):
+        for module, match in ((native, "selector_unbound"), (bitvm3, "seed_reuse_across_claims"),
+                              (bitvm3, "disprove_unbumpable"), (bitvm3, "disprove_censored_by_miner")):
             rows = [r for r in module.catalog() if match in r["id"]]
             report = module.execute(binary, ROOT / "work" / "regtest" / uuid.uuid4().hex, rows)
             self.assertEqual(report["summary"]["expectation_failures"], [])

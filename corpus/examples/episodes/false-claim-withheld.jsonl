@@ -1,0 +1,5 @@
+{"op": "garbler_view", "args": {"proof": [40000, 9400]}}
+{"op": "claim", "args": {"proof": [40000, 9400], "labels": "withhold", "tables": "honest"}}
+{"op": "wait", "args": {"blocks": 24}}
+{"op": "spend", "args": {"utxo": "claim", "path": "payout"}}
+{"op": "end"}

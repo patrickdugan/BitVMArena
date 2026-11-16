@@ -33,21 +33,37 @@ Core-judged evidence; no deployed DeFi target was attacked.
 
 ## Native tracks (2026-11-16)
 
-Python 3.12 unit suite: **56 tests passed**, plus the live Core test (`BITVM_ARENA_BITCOIND`
-set), which also passed. The tests cover the BIP340 vectors, the RIPEMD-160 fallback,
-Taproot commitments, SIGHASH_SINGLE scope, transaction round trips, garbled evaluation
-against plain evaluation, cut-and-choose detection, the Delta leak, auditing of the
-committed reports, and tamper detection.
+Python 3.12 unit suite with the live Core tests enabled (`BITVM_ARENA_BITCOIND` set to
+Core 31.1): **76 tests passed**. They cover:
+- primitives: the BIP340 vectors, the RIPEMD-160 fallback, Taproot commitments,
+  SIGHASH_SINGLE scope and transaction round trips;
+- garbling: garbled evaluation against plain evaluation, cut-and-choose detection, the
+  Delta leak, table corruption and per-vault statement binding;
+- graph shape: key-path and presignature scope, and the anchor and burn shapes;
+- the design assessment;
+- the episode presets, actions, scorer, audit and censorship bound;
+- live catalog subsets for package relay and miner censorship, and live episodes;
+- evidence: auditing of the committed reports, and tamper detection including a
+  replaced transaction claimed as confirmed.
 
 | Track | Core | Cases met | Confirmed / rejected txs | Offline audit |
 | --- | --- | --- | --- | --- |
 | primitive | 31.1.0 (GPG-verified) | 56/56 | 42 / 16 | 0 problems |
-| bitvm3 | 31.1.0 (GPG-verified) | 40/40 | 76 / 19 | 0 problems |
+| bitvm3 | 31.1.0 (GPG-verified) | 80/80 | 159 / 43 | 0 problems |
 | bitvm2 | 31.1.0 (GPG-verified) | 32/32 | 106 / 27 | 0 problems |
-| bitvm3 | 31.2.0 (checksum-matched) | 40/40 | 76 / 19 | 0 problems; every step verdict identical to 31.1 |
+| bitvm3 | 31.2.0 (checksum-matched) | 80/80 | 159 / 43 | 0 problems; every step verdict identical to 31.1 |
+
+The BitVM3 rows are the 20-recipe track. Its first ten recipes (40 trajectories) gave
+the same per-step verdicts as the earlier 10-recipe evidence.
+
+**Episodes (2026-11-16).** The 11 example episodes in
+[`examples/episodes/reports/`](../examples/episodes/reports/) ran on Core 31.1 and each
+audits clean. Their outcomes (attack succeeds where the design allows it, fails on the
+bridge preset) are listed in [EPISODES.md](EPISODES.md#examples). The static check
+`native assess` flags each recipe's mutant design and none of the hardened ones.
 
 These are regtest results on fixture keys. The BitVM3 circuit is a toy statement
-verifier, and its latency recipe uses a declared delay ([BITVM3.md](BITVM3.md)).
+verifier, and its latency and censorship recipes use declared bounds ([BITVM3.md](BITVM3.md)).
 
 Run the commands in the README to reproduce the evidence. Baseline numbers should
 always be read with the model assumptions and dataset limitations in the linked

@@ -1,0 +1,721 @@
+{
+  "actions": [
+    {
+      "action": {
+        "args": {
+          "proof": [
+            40000,
+            9400
+          ]
+        },
+        "op": "garbler_view"
+      },
+      "index": 0,
+      "result": {
+        "accept_label": "182146ba71f1cdfebc84233916182d2c",
+        "input_labels": [
+          "95d74254a67063e4fce02863f67c054a",
+          "09e683542d6ff15a4efc9cdf9221819a",
+          "ed2aa18672baf69432fe09a2689d7e85",
+          "604ed6c952c8cba35320bf4956af63e1",
+          "6f355d4aec2ff0a5418277a56488bfe7",
+          "f066829ebcc950b13738c8aae9fd5c7b",
+          "3ccc1cde5cac1a71fb3900fe455e77a2",
+          "390a79b10d1fc1d6549126f25953fef6",
+          "e7b51f3f067d543ce7cab36f74cc9edc",
+          "ba6055fcf606e74f0942fe0097e764d4",
+          "d8eff596250d544bebeecf8994d2a4a2",
+          "a447de966f6af006520784e8daaca3b1",
+          "f72b3c23411c317e53284fd930f0f3ab",
+          "64a42afddeb858e321369f76593aba1c",
+          "5ac930027229b1c2fc3e733c60e52a9d",
+          "01e679cdfb52e2975d3bd2cd84fd9ab8",
+          "377508956f591b8bbe285f56314aa029",
+          "4bf85d763e1bac14ba3d0f0ee0596b6f",
+          "09bee67b5bf1d6e9a8e08d084cb7ade6",
+          "c56fca41b0644c542c5ab2c61f872a18",
+          "cd6de66b4469ce977b4471750789efa4",
+          "7a8695255192a2390ecf9be66936d47a",
+          "a4b205be4e46ca38125db4b1c4ce432e",
+          "6b7c4d87d1af41e1823ddbdf6861514e",
+          "785b2ff0d7bb5b352959c86351d0014a",
+          "aa8266cbf4dd9e7a0f356bd45677134b",
+          "2bb25559f18b25a2bd2fc4c251dc1b32",
+          "55f5019e51e1eec8ef6b480c4c68fedf",
+          "a94393388f716e8506a9a44b52196002",
+          "6f329cc4b18dcfc9b9f8e39762d4d20f",
+          "d1a4b72fc16b20d25766c9315cfc2009",
+          "287b2ec0b40720e295b7766404f75391"
+        ],
+        "ok": true,
+        "proof": [
+          40000,
+          9400
+        ],
+        "reject_label": "f15c39e2e510d0c10ede675a470684e1"
+      }
+    },
+    {
+      "action": {
+        "args": {
+          "labels": "withhold",
+          "proof": [
+            40000,
+            9400
+          ],
+          "tables": "honest"
+        },
+        "op": "claim"
+      },
+      "index": 1,
+      "result": {
+        "allowed": true,
+        "broadcast": true,
+        "hex": "020000000001026791050980941caf2352c9d10e7d0486f766e738e768f0e6648a1a0da92d5d050100000000ffffffff6791050980941caf2352c9d10e7d0486f766e738e768f0e6648a1a0da92d5d050200000000fdffffff0208c9010000000000225120768c6feef075ac55eecdbbadc53a8c5cbac290d99a447d0c750810f2f7fdf0640000000000000000266a24494f42337d6a6d072005b248ed668ef28bd22f83e8ca2a5f410d7dce58cd8a47d4def41e24409b45af2dd83824b589a8642f5e68c9bf1a4ac5ebc7ae62d96c5496d436ac35669f6062aefb08a5ae43d290740868e3c7d944ef5ec5818ba187391769102de44b40514323a7964f1ddc204f49d63c322856acaf34e9efbe32992a8212fe21d77485b4f7f4e73a8cdb889221f829b97e302988a8889717f5d5bc4caf7681047ae83c10287b2ec0b40720e295b7766404f7539110d1a4b72fc16b20d25766c9315cfc2009106f329cc4b18dcfc9b9f8e39762d4d20f10a94393388f716e8506a9a44b521960021055f5019e51e1eec8ef6b480c4c68fedf102bb25559f18b25a2bd2fc4c251dc1b3210aa8266cbf4dd9e7a0f356bd45677134b10785b2ff0d7bb5b352959c86351d0014a106b7c4d87d1af41e1823ddbdf6861514e10a4b205be4e46ca38125db4b1c4ce432e107a8695255192a2390ecf9be66936d47a10cd6de66b4469ce977b4471750789efa410c56fca41b0644c542c5ab2c61f872a181009bee67b5bf1d6e9a8e08d084cb7ade6104bf85d763e1bac14ba3d0f0ee0596b6f10377508956f591b8bbe285f56314aa0291001e679cdfb52e2975d3bd2cd84fd9ab8105ac930027229b1c2fc3e733c60e52a9d1064a42afddeb858e321369f76593aba1c10f72b3c23411c317e53284fd930f0f3ab10a447de966f6af006520784e8daaca3b110d8eff596250d544bebeecf8994d2a4a210ba6055fcf606e74f0942fe0097e764d410e7b51f3f067d543ce7cab36f74cc9edc10390a79b10d1fc1d6549126f25953fef6103ccc1cde5cac1a71fb3900fe455e77a210f066829ebcc950b13738c8aae9fd5c7b106f355d4aec2ff0a5418277a56488bfe710604ed6c952c8cba35320bf4956af63e110ed2aa18672baf69432fe09a2689d7e851009e683542d6ff15a4efc9cdf9221819a1095d74254a67063e4fce02863f67c054afde409a876201cd80487d9a92a13d4ca8297ef63e18baca44e074fe1b17f370492b79f28991c876375006720e8f4ebb32fabf22db90f1222ec2962c9b5be81d063731ad866a8ab8d4f5cccd888516875a87620b9db57d56ee1a9fdf158d15925a0ee809b358313db384de865bdaa2c88a425dc876375006720dc89b7734124fc77692a8ec7394c58322e3580208e4376255d24bc8bf7e1ebdf88516875a876208e4f4230aec4feeff59654de194c0fbf394231d499d2e1793e8b58435cabbafa876375006720fef7fb514f419b3a2a1903f37d26ad6430372bc1cb1e9c255ff69ee51ac103d688516875a87620fc4fbd28c4dfb750e9e0262d58b3192bf719345a0f2147637df83b1c8319b609876375006720f10d8eec259dd2641db4277a7599eace0b5c9a1dc3c765da4d866005523621d088516875a87620a7f792b0c2e0660f9cc2cd70f12399eff241c3f49d5e3ea283420ef3945f03ee876375006720c6857318dc7e515f77f6c9e0621fb160dc0ed9cc796aa1e7d235c54c1f7ea81c88516875a87620a39652f6f499d7d85757e6252b838358b90ba1948beefa73e1bad9745295567b87637500672039b3c19a909e04e53e1c94b15d843df678f0b865ad2333ee5445078cb26d353488516875a87620cd2fe6eb42e8915b7e7f2901c79eb3077ada30f339261aae0ecce99ca82632ee876375006720db5dfdbec8c0f8267d44bc43bb07205ab59ac579afcaf21fe701f59663bacfc388516875a87620c08e38361cd4c4766623820fc9bb567915224e1d1bf7b76b848514806237e28a8763750067207b60a83d7d1560516b62fdb0d7ef74f689de44e0400996a08b965609bb8ccb7d88516875a876206ce16b62b8bb0b6ccfd428095ed251447ae2483b9d6bc6943b2c8fbd3e88c8a78763750067201860bd1729b3937f0b725d73e509a2487e00822b2f3417bb2aab9480b474a73288516875a87620f81f27345014a8924c1d2e8d4d08e0efb76e474566449fbe72f1a72c21eb52dd876375006720152075b784dd659f59a6fb8d6797d55246e7810598e6a77df7e75d877f019d6388516875a876208795980ea623283a1444ca64d0cc992a8106f62b5317758e926d33d1f2167e3c876375006720b7e0d727c8f8a3b6724cfb7149c566c9fc904a6361bff67ac635cf57b11438c588516875a87620702dbbe734442c8ce7be9092b3fd7adac18f16fdd2b57cfad6b9b322197c33118763750067202ad41f6815f31b0da14e8715614ec44168433115a9bd4032fb16d19afbee2cb688516875a87620c421acebc170ef34e117746092aa1ba46eb672e023aa146993205327929d8676876375006720293c9db5c0dc2cbf0183d9e43363739bfe9230eaf9bed4dc4bd25c4295737e8f88516875a87620702b0d9622b3294e02571641679a9c752ea20db17b00afffeadfd62cc8f7ebd9876375006720d19c7902c474d4ea4d4cc70edd11274d275819e024b93c2684bba44c3123e33688516875a876202640e76de771110064c1dc661b016964d912b79431d6b13ea37ad6d6c66b7eef876375006720d27a9f3958cefb233f624cb44b27f10147eedec1b3ce20c6f3013779e125dc7f88516875a8762088e793ad7c3cfe3662df8bf028dcac2f2db123e509784173ca76d395bea9038e876375006720a7c1239a0b45407739942c80fad750d929bc0f577e4e9be89c8f43097dae99ab88516875a87620f399d19041264aa198b58fed6fecf07fc27f4092a4078608eb0edd294e5ec872876375006720d97235cbba542d5594a76935d8449f2cf416090494f27286103aead794592ebd88516875a8762080f10ee8a392616aaa6da4a0c8240a8d1b9dd696a7e3cf628de41b84fed4a2b1876375006720063084a365fae5fad856101a89c4acbaf30a78fc00166a32c85b0fdf48b6184888516875a87620e4b58d4946ffa16d3e80691a94a7b8e79954cde1cef5904ed1893922851bc489876375006720a72f20138786a47db7fe0662711091d2fe98068ee7cc02db0ce4cd5b7e9eeb0f88516875a87620b520f28fed1d5f9033193aaf69464fb72bbc88dd05df124bd20e6b50da73d40a8763750067204146dfb163b3516060f13e6378f216485f54ba30ffd8215ac5960906696e351d88516875a8762004190c7ed35453a2d79ab99f283d94045bab3624e88984702789f4f1c6e9ba8d876375006720acc1a543e0bc4dfd2df9b5784da2937beba0c544702c1fb4e1a7668a91147c1e88516875a87620c01e06c94895a44637a5e04d8d4799b97b25f2dc25e1fb00ce34daa4f3a748e58763750067206a61516b7ba40e401ab909d5aa5dc34549d5c12925f7e89c95820270125a5c8288516875a8762036f7f395ce27b3bd3d279e9e89b23ff15901b01c67e2048379c99efd402b20378763750067201afc589a7f20886f545b56cb96c9922f549ff891991cf3725f235f8610e2c8e688516875a87620bbe4c1a06db268e2a378c2efe708ab9af2515b2b4b3e946e38930df526d0a1a78763750067206f9bfacbb474f9c1af91ccf776e5eee4df212f9c2bb1097ae07a25fd78a46d7288516875a8762089eebf24814b5bde21a1d9389ecc9f966dc3e733072a200bb662e08e03eb08c4876375006720d98ff92ae7033e37a8b6dcf370cd24a7ef94c94c16e8fac55e9ceaa6c4f7136b88516875a87620451f420d51bdf15583b85fccd545f297b73a772cbcf20c8e841dd1ebffe00343876375006720e5feaddb57140a81273a221da7e30de0eeb580f60c4a1d672908a48a241fd53388516875a87620cece7b0575519482faa382481284bf48564f502d84f3bc27eb61deecca33a5c987637500672072c0e1b5f3600652eeeb9e31349f18c925d1a51e3e62c30d3d7994f4cddc525f88516875a87620a44c150a4457902ff6ddd34cf0be7c10d188c6307113ff9a2231847535de94388763750067204a5ed59d7992c86faf648a66a6d82fea0442a77b6fc9b5e2054819c838907f6488516875a87620b9da686d15956737454437213a3a19fccc2330fb7efb7e031d534ce2caf78e33876375006720b14b38fc15bb40685342c7f2af813d9038416456a59edd518a677ac2dc9fea4988516875a8762020c659b842839ef5ecebbbbd0a9632d69a45213b2ac054c5192a16ae2e49ba86876375006720fa1f5041b52ead9e7054df081196b2ace66971cba3ba0f01f5e38e4ef5cb781188516875a8762024eee803d0b039f51244d167d2c313b5166b141289372879173e27e451e05e6a876375006720251dda603bc0a88c0cb6c8d5e20c87ab9a94ce0a696f8efb8ce755855702b84288516875a87620a5b7a718612689d1a02353d3f16f1a8be43d72e101e20f01da23eba2e0cbed68876375006720a7a37ec2a043bd0154120eb9cd750893542c17426e9f1576b7f510d75b0882eb8851687520aeb1f37bd68b70ae51d98f5f5da9981c723ede1a1a6cf4d5a90edb80faf9634aad20fd9190d59557817f29c4c02374351652902785f704a1737f62b39d25d71d898cac41c050929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0a8ecb0e45303149c6a867228e2c7dee89eef353bb8d67011dbf87d80937646fe03407c2b11d51ce4b6f93f0ffb8841c1eff2694655ea5107ef10aba4388073aa2efffc2c4f759913e171e84aadedfb84727c9178461d1e318584eb6045d948f9ec702220fd9190d59557817f29c4c02374351652902785f704a1737f62b39d25d71d898cac21c050929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac000000000",
+        "label": "claim",
+        "ok": true,
+        "reject_reason": null,
+        "txid": "334e27ecc49e883cab4a7bb44d7cafc74f0d1a7966eb95a1a3de396fe0439e31"
+      }
+    },
+    {
+      "action": {
+        "args": {
+          "blocks": 24
+        },
+        "op": "wait"
+      },
+      "index": 2,
+      "result": {
+        "height": 126,
+        "ok": true
+      }
+    },
+    {
+      "action": {
+        "args": {
+          "path": "payout",
+          "utxo": "claim"
+        },
+        "op": "spend"
+      },
+      "index": 3,
+      "result": {
+        "allowed": false,
+        "broadcast": false,
+        "hex": "02000000000101319e43e06f39dea3a195eb66791a0d4fc7af7c4db47b4aab3c889ec4ec274e330000000000180000000150bd0100000000002251201f445e10bbf30bfe3c8cc482364185201c40d5c169c748b49c77e9c407e8b169034092ddab2f1069bb6396a55ebbd02f034691bf9484a68cece8537572fcc61954588487744e8ad9b05c7d04106b183f39fc7db2bbd3a62b98b72564e823727e3b8c260118b27520aeb1f37bd68b70ae51d98f5f5da9981c723ede1a1a6cf4d5a90edb80faf9634aac41c050929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0730e8e6e462920cb26482c2e245c462935738ef413b562d342e8bc28c279b13900000000",
+        "label": "claim:payout",
+        "ok": true,
+        "reject_reason": "missing-inputs",
+        "txid": "b7d14cdd8d9d38571a83c875c4e138245d78b987be26cb32ac47f88cdcfb474f"
+      }
+    },
+    {
+      "action": {
+        "op": "end"
+      },
+      "index": 4,
+      "result": {
+        "ok": true
+      }
+    }
+  ],
+  "app": "bridge-pegout",
+  "assumptions": {
+    "censorship_blocks": 8,
+    "desk_online": true,
+    "watcher_latency": 1,
+    "watcher_online": true
+  },
+  "attacker": "claimant",
+  "capabilities": {
+    "miner": false
+  },
+  "config": {
+    "bond": true,
+    "bond_burn": true,
+    "claim_hash_type": 0,
+    "claim_internal": "nums",
+    "cut_and_choose": "interactive",
+    "disprove_fee": "included",
+    "disprove_mode": "presigned",
+    "labels_onchain": true,
+    "payout_csv": true,
+    "payout_hash_type": 0,
+    "payout_timelock": "csv",
+    "polarity": "reject",
+    "reclaim": 144,
+    "seed_reuse": false,
+    "statement_binding": "instance",
+    "tables_at": "setup",
+    "window": 24
+  },
+  "evidence_hash": "f1d9f26a56b3ad4f767ec9255507fdad736ab1c0c50280209b3ffd8c6a433ead",
+  "kind": "bitvm3-episode",
+  "outcome": {
+    "attack_success": false,
+    "blocks_elapsed": 24,
+    "claim_confirmed": true,
+    "claimant_loss": 20000,
+    "fees": 6000,
+    "honest": false,
+    "honest_claim_paid": false,
+    "nets": {
+      "burn": 20000,
+      "claimant": -20000,
+      "other": 0,
+      "protocol": -100000,
+      "refund": 94000,
+      "relayer": 0,
+      "watch": 0
+    },
+    "sats_burned": 20000,
+    "vault_value_to_outsiders": 0
+  },
+  "overrides": {},
+  "provenance": {
+    "binary_sha256": "f79eeb94e1379986df9f7be4c78c8fc8e18dc9be64a31cbaa8acad249d3db77a",
+    "chain": "regtest",
+    "p2p_network_active": false,
+    "subversion": "/Satoshi:31.1.0/",
+    "version": 310100
+  },
+  "schema_version": 1,
+  "steps": [
+    {
+      "accept_label_sha256": "608f26ea9d5b49094fa3a794368d94b5b5c6697bd25907c933aca89f8eacbd37",
+      "actor": "claimant",
+      "cltv_height": null,
+      "config": {
+        "bond": true,
+        "bond_burn": true,
+        "claim_hash_type": 0,
+        "claim_internal": "nums",
+        "cut_and_choose": "interactive",
+        "disprove_fee": "included",
+        "disprove_mode": "presigned",
+        "labels_onchain": true,
+        "payout_csv": true,
+        "payout_hash_type": 0,
+        "payout_timelock": "csv",
+        "polarity": "reject",
+        "reclaim": 144,
+        "seed_reuse": false,
+        "statement_binding": "instance",
+        "tables_at": "setup",
+        "window": 24
+      },
+      "desk_presigns": true,
+      "disprove_leaf_hash": "a19ccb0d58ce7a4ee91adf153469c8cee753a7a6f2244eb9c5b73d8fb54fd5ee",
+      "height": 101,
+      "index": 0,
+      "kind": "offchain",
+      "label": "setup",
+      "log": {
+        "challenge": "challenger randomness drawn after the commitments",
+        "challenger_nonce": 0,
+        "commitments": [
+          "4319b942972cd490c6f553574436fd8ab99231b0a4b87184d340c7f3f90980b0",
+          "6691827945596a9ed0e8e291c144d9d0f2698a8602d8b993da9f5b818ddfcaef",
+          "424bd926b01bcb25bec846b508b5c1e64489e67da536ce2afbfeff55413f1bde",
+          "ffd8d4aeefb969dc0e2153d183426a3a1f5028b58a41ffac415519ece35f9482"
+        ],
+        "grind_attempts": 0,
+        "k": 4,
+        "kept": 3,
+        "malicious": [],
+        "opened_checks": {
+          "0": true,
+          "1": true,
+          "2": true
+        }
+      },
+      "registered": "01694a7673edad580006a82d2977556a59455baf3ef88ee8f681500694af3832",
+      "reject_label_sha256": "a19ccb0d58ce7a4ee91adf153469c8cee753a7a6f2244eb9c5b73d8fb54fd5ee",
+      "statement": 48400
+    },
+    {
+      "actor": "evaluator",
+      "height": 102,
+      "index": 1,
+      "kind": "fund",
+      "label": "fund",
+      "outputs": {
+        "bond": {
+          "amount": 20000,
+          "script_pubkey": "5120c02a160c8035a50e497402466cd1521fd9ad0da7ca0951aa418e9d23770eea88",
+          "txid": "055d2da90d1a8a64e6f068e738e766f786047d0ed1c95223af1c948009059167",
+          "vout": 2
+        },
+        "vault": {
+          "amount": 100000,
+          "script_pubkey": "51209c1d7b1bea8390b34df2408400cf159230bd2d66e4a1d2b7b290530c691ab8cb",
+          "txid": "055d2da90d1a8a64e6f068e738e766f786047d0ed1c95223af1c948009059167",
+          "vout": 1
+        }
+      },
+      "raw_transaction": "0200000000010110bba6aea4cdc8f3733a1eb42b9e5f3c05552a7ccc16053f8b30210e9a29905a0000000000fdffffff038415042a01000000225120ff33ffa1660c631046af0676f7406739228b01ff0007736c1faf58d8a0d6741ca0860100000000002251209c1d7b1bea8390b34df2408400cf159230bd2d66e4a1d2b7b290530c691ab8cb204e000000000000225120c02a160c8035a50e497402466cd1521fd9ad0da7ca0951aa418e9d23770eea880140eebf51dbd4c3ad9fd492f7cd1d1e41f8cf9ecd2b039e8dfac2072d3775a88f7576e209f8e9883b041f29765492e94980471252fd88ca2f7c5bcf6fcc77da555a65000000",
+      "txid": "055d2da90d1a8a64e6f068e738e766f786047d0ed1c95223af1c948009059167"
+    },
+    {
+      "actor": "claimant",
+      "height": 102,
+      "index": 2,
+      "kind": "offchain",
+      "label": "claim proof",
+      "labels_mode": "withhold",
+      "proof": [
+        40000,
+        9400
+      ],
+      "statement": 48400,
+      "tables": "honest"
+    },
+    {
+      "actor": "claimant",
+      "allowed": true,
+      "blockhash": "31bf58fb9cf77740e6fe0501f8036e31cafea658c5e8d2251beed3bec7b15e1d",
+      "broadcast": true,
+      "confirmed": true,
+      "height": 102,
+      "index": 3,
+      "kind": "tx",
+      "label": "claim",
+      "mempool_result": {
+        "allowed": true,
+        "fees": {
+          "base": "0.00003000",
+          "effective-feerate": "0.00002895",
+          "effective-includes": [
+            "904c00e1b973f6a1bfc99f0e7dcaa1e29ba827699fed8570180f6cacad7a7f26"
+          ]
+        },
+        "txid": "334e27ecc49e883cab4a7bb44d7cafc74f0d1a7966eb95a1a3de396fe0439e31",
+        "vsize": 1036,
+        "wtxid": "904c00e1b973f6a1bfc99f0e7dcaa1e29ba827699fed8570180f6cacad7a7f26"
+      },
+      "note": null,
+      "prevouts": [
+        {
+          "amount": 100000,
+          "script_pubkey": "51209c1d7b1bea8390b34df2408400cf159230bd2d66e4a1d2b7b290530c691ab8cb",
+          "txid": "055d2da90d1a8a64e6f068e738e766f786047d0ed1c95223af1c948009059167",
+          "vout": 1
+        },
+        {
+          "amount": 20000,
+          "script_pubkey": "5120c02a160c8035a50e497402466cd1521fd9ad0da7ca0951aa418e9d23770eea88",
+          "txid": "055d2da90d1a8a64e6f068e738e766f786047d0ed1c95223af1c948009059167",
+          "vout": 2
+        }
+      ],
+      "proof": [
+        40000,
+        9400
+      ],
+      "raw_transaction": "020000000001026791050980941caf2352c9d10e7d0486f766e738e768f0e6648a1a0da92d5d050100000000ffffffff6791050980941caf2352c9d10e7d0486f766e738e768f0e6648a1a0da92d5d050200000000fdffffff0208c9010000000000225120768c6feef075ac55eecdbbadc53a8c5cbac290d99a447d0c750810f2f7fdf0640000000000000000266a24494f42337d6a6d072005b248ed668ef28bd22f83e8ca2a5f410d7dce58cd8a47d4def41e24409b45af2dd83824b589a8642f5e68c9bf1a4ac5ebc7ae62d96c5496d436ac35669f6062aefb08a5ae43d290740868e3c7d944ef5ec5818ba187391769102de44b40514323a7964f1ddc204f49d63c322856acaf34e9efbe32992a8212fe21d77485b4f7f4e73a8cdb889221f829b97e302988a8889717f5d5bc4caf7681047ae83c10287b2ec0b40720e295b7766404f7539110d1a4b72fc16b20d25766c9315cfc2009106f329cc4b18dcfc9b9f8e39762d4d20f10a94393388f716e8506a9a44b521960021055f5019e51e1eec8ef6b480c4c68fedf102bb25559f18b25a2bd2fc4c251dc1b3210aa8266cbf4dd9e7a0f356bd45677134b10785b2ff0d7bb5b352959c86351d0014a106b7c4d87d1af41e1823ddbdf6861514e10a4b205be4e46ca38125db4b1c4ce432e107a8695255192a2390ecf9be66936d47a10cd6de66b4469ce977b4471750789efa410c56fca41b0644c542c5ab2c61f872a181009bee67b5bf1d6e9a8e08d084cb7ade6104bf85d763e1bac14ba3d0f0ee0596b6f10377508956f591b8bbe285f56314aa0291001e679cdfb52e2975d3bd2cd84fd9ab8105ac930027229b1c2fc3e733c60e52a9d1064a42afddeb858e321369f76593aba1c10f72b3c23411c317e53284fd930f0f3ab10a447de966f6af006520784e8daaca3b110d8eff596250d544bebeecf8994d2a4a210ba6055fcf606e74f0942fe0097e764d410e7b51f3f067d543ce7cab36f74cc9edc10390a79b10d1fc1d6549126f25953fef6103ccc1cde5cac1a71fb3900fe455e77a210f066829ebcc950b13738c8aae9fd5c7b106f355d4aec2ff0a5418277a56488bfe710604ed6c952c8cba35320bf4956af63e110ed2aa18672baf69432fe09a2689d7e851009e683542d6ff15a4efc9cdf9221819a1095d74254a67063e4fce02863f67c054afde409a876201cd80487d9a92a13d4ca8297ef63e18baca44e074fe1b17f370492b79f28991c876375006720e8f4ebb32fabf22db90f1222ec2962c9b5be81d063731ad866a8ab8d4f5cccd888516875a87620b9db57d56ee1a9fdf158d15925a0ee809b358313db384de865bdaa2c88a425dc876375006720dc89b7734124fc77692a8ec7394c58322e3580208e4376255d24bc8bf7e1ebdf88516875a876208e4f4230aec4feeff59654de194c0fbf394231d499d2e1793e8b58435cabbafa876375006720fef7fb514f419b3a2a1903f37d26ad6430372bc1cb1e9c255ff69ee51ac103d688516875a87620fc4fbd28c4dfb750e9e0262d58b3192bf719345a0f2147637df83b1c8319b609876375006720f10d8eec259dd2641db4277a7599eace0b5c9a1dc3c765da4d866005523621d088516875a87620a7f792b0c2e0660f9cc2cd70f12399eff241c3f49d5e3ea283420ef3945f03ee876375006720c6857318dc7e515f77f6c9e0621fb160dc0ed9cc796aa1e7d235c54c1f7ea81c88516875a87620a39652f6f499d7d85757e6252b838358b90ba1948beefa73e1bad9745295567b87637500672039b3c19a909e04e53e1c94b15d843df678f0b865ad2333ee5445078cb26d353488516875a87620cd2fe6eb42e8915b7e7f2901c79eb3077ada30f339261aae0ecce99ca82632ee876375006720db5dfdbec8c0f8267d44bc43bb07205ab59ac579afcaf21fe701f59663bacfc388516875a87620c08e38361cd4c4766623820fc9bb567915224e1d1bf7b76b848514806237e28a8763750067207b60a83d7d1560516b62fdb0d7ef74f689de44e0400996a08b965609bb8ccb7d88516875a876206ce16b62b8bb0b6ccfd428095ed251447ae2483b9d6bc6943b2c8fbd3e88c8a78763750067201860bd1729b3937f0b725d73e509a2487e00822b2f3417bb2aab9480b474a73288516875a87620f81f27345014a8924c1d2e8d4d08e0efb76e474566449fbe72f1a72c21eb52dd876375006720152075b784dd659f59a6fb8d6797d55246e7810598e6a77df7e75d877f019d6388516875a876208795980ea623283a1444ca64d0cc992a8106f62b5317758e926d33d1f2167e3c876375006720b7e0d727c8f8a3b6724cfb7149c566c9fc904a6361bff67ac635cf57b11438c588516875a87620702dbbe734442c8ce7be9092b3fd7adac18f16fdd2b57cfad6b9b322197c33118763750067202ad41f6815f31b0da14e8715614ec44168433115a9bd4032fb16d19afbee2cb688516875a87620c421acebc170ef34e117746092aa1ba46eb672e023aa146993205327929d8676876375006720293c9db5c0dc2cbf0183d9e43363739bfe9230eaf9bed4dc4bd25c4295737e8f88516875a87620702b0d9622b3294e02571641679a9c752ea20db17b00afffeadfd62cc8f7ebd9876375006720d19c7902c474d4ea4d4cc70edd11274d275819e024b93c2684bba44c3123e33688516875a876202640e76de771110064c1dc661b016964d912b79431d6b13ea37ad6d6c66b7eef876375006720d27a9f3958cefb233f624cb44b27f10147eedec1b3ce20c6f3013779e125dc7f88516875a8762088e793ad7c3cfe3662df8bf028dcac2f2db123e509784173ca76d395bea9038e876375006720a7c1239a0b45407739942c80fad750d929bc0f577e4e9be89c8f43097dae99ab88516875a87620f399d19041264aa198b58fed6fecf07fc27f4092a4078608eb0edd294e5ec872876375006720d97235cbba542d5594a76935d8449f2cf416090494f27286103aead794592ebd88516875a8762080f10ee8a392616aaa6da4a0c8240a8d1b9dd696a7e3cf628de41b84fed4a2b1876375006720063084a365fae5fad856101a89c4acbaf30a78fc00166a32c85b0fdf48b6184888516875a87620e4b58d4946ffa16d3e80691a94a7b8e79954cde1cef5904ed1893922851bc489876375006720a72f20138786a47db7fe0662711091d2fe98068ee7cc02db0ce4cd5b7e9eeb0f88516875a87620b520f28fed1d5f9033193aaf69464fb72bbc88dd05df124bd20e6b50da73d40a8763750067204146dfb163b3516060f13e6378f216485f54ba30ffd8215ac5960906696e351d88516875a8762004190c7ed35453a2d79ab99f283d94045bab3624e88984702789f4f1c6e9ba8d876375006720acc1a543e0bc4dfd2df9b5784da2937beba0c544702c1fb4e1a7668a91147c1e88516875a87620c01e06c94895a44637a5e04d8d4799b97b25f2dc25e1fb00ce34daa4f3a748e58763750067206a61516b7ba40e401ab909d5aa5dc34549d5c12925f7e89c95820270125a5c8288516875a8762036f7f395ce27b3bd3d279e9e89b23ff15901b01c67e2048379c99efd402b20378763750067201afc589a7f20886f545b56cb96c9922f549ff891991cf3725f235f8610e2c8e688516875a87620bbe4c1a06db268e2a378c2efe708ab9af2515b2b4b3e946e38930df526d0a1a78763750067206f9bfacbb474f9c1af91ccf776e5eee4df212f9c2bb1097ae07a25fd78a46d7288516875a8762089eebf24814b5bde21a1d9389ecc9f966dc3e733072a200bb662e08e03eb08c4876375006720d98ff92ae7033e37a8b6dcf370cd24a7ef94c94c16e8fac55e9ceaa6c4f7136b88516875a87620451f420d51bdf15583b85fccd545f297b73a772cbcf20c8e841dd1ebffe00343876375006720e5feaddb57140a81273a221da7e30de0eeb580f60c4a1d672908a48a241fd53388516875a87620cece7b0575519482faa382481284bf48564f502d84f3bc27eb61deecca33a5c987637500672072c0e1b5f3600652eeeb9e31349f18c925d1a51e3e62c30d3d7994f4cddc525f88516875a87620a44c150a4457902ff6ddd34cf0be7c10d188c6307113ff9a2231847535de94388763750067204a5ed59d7992c86faf648a66a6d82fea0442a77b6fc9b5e2054819c838907f6488516875a87620b9da686d15956737454437213a3a19fccc2330fb7efb7e031d534ce2caf78e33876375006720b14b38fc15bb40685342c7f2af813d9038416456a59edd518a677ac2dc9fea4988516875a8762020c659b842839ef5ecebbbbd0a9632d69a45213b2ac054c5192a16ae2e49ba86876375006720fa1f5041b52ead9e7054df081196b2ace66971cba3ba0f01f5e38e4ef5cb781188516875a8762024eee803d0b039f51244d167d2c313b5166b141289372879173e27e451e05e6a876375006720251dda603bc0a88c0cb6c8d5e20c87ab9a94ce0a696f8efb8ce755855702b84288516875a87620a5b7a718612689d1a02353d3f16f1a8be43d72e101e20f01da23eba2e0cbed68876375006720a7a37ec2a043bd0154120eb9cd750893542c17426e9f1576b7f510d75b0882eb8851687520aeb1f37bd68b70ae51d98f5f5da9981c723ede1a1a6cf4d5a90edb80faf9634aad20fd9190d59557817f29c4c02374351652902785f704a1737f62b39d25d71d898cac41c050929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0a8ecb0e45303149c6a867228e2c7dee89eef353bb8d67011dbf87d80937646fe03407c2b11d51ce4b6f93f0ffb8841c1eff2694655ea5107ef10aba4388073aa2efffc2c4f759913e171e84aadedfb84727c9178461d1e318584eb6045d948f9ec702220fd9190d59557817f29c4c02374351652902785f704a1737f62b39d25d71d898cac21c050929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac000000000",
+      "reject_reason": null,
+      "role": "claim",
+      "txid": "334e27ecc49e883cab4a7bb44d7cafc74f0d1a7966eb95a1a3de396fe0439e31"
+    },
+    {
+      "actor": "claimant",
+      "height": 102,
+      "index": 4,
+      "kind": "offchain",
+      "label": "labels withheld",
+      "labels": null
+    },
+    {
+      "actor": "environment",
+      "blocks": 1,
+      "from_height": 102,
+      "height": 103,
+      "index": 5,
+      "kind": "mine",
+      "label": "mine 1",
+      "note": null
+    },
+    {
+      "actor": "environment",
+      "blocks": 1,
+      "from_height": 103,
+      "height": 104,
+      "index": 6,
+      "kind": "mine",
+      "label": "mine 1",
+      "note": null
+    },
+    {
+      "actor": "watch",
+      "height": 104,
+      "index": 7,
+      "kind": "offchain",
+      "label": "labels from chain",
+      "labels": [
+        "95d74254a67063e4fce02863f67c054a",
+        "09e683542d6ff15a4efc9cdf9221819a",
+        "ed2aa18672baf69432fe09a2689d7e85",
+        "604ed6c952c8cba35320bf4956af63e1",
+        "6f355d4aec2ff0a5418277a56488bfe7",
+        "f066829ebcc950b13738c8aae9fd5c7b",
+        "3ccc1cde5cac1a71fb3900fe455e77a2",
+        "390a79b10d1fc1d6549126f25953fef6",
+        "e7b51f3f067d543ce7cab36f74cc9edc",
+        "ba6055fcf606e74f0942fe0097e764d4",
+        "d8eff596250d544bebeecf8994d2a4a2",
+        "a447de966f6af006520784e8daaca3b1",
+        "f72b3c23411c317e53284fd930f0f3ab",
+        "64a42afddeb858e321369f76593aba1c",
+        "5ac930027229b1c2fc3e733c60e52a9d",
+        "01e679cdfb52e2975d3bd2cd84fd9ab8",
+        "377508956f591b8bbe285f56314aa029",
+        "4bf85d763e1bac14ba3d0f0ee0596b6f",
+        "09bee67b5bf1d6e9a8e08d084cb7ade6",
+        "c56fca41b0644c542c5ab2c61f872a18",
+        "cd6de66b4469ce977b4471750789efa4",
+        "7a8695255192a2390ecf9be66936d47a",
+        "a4b205be4e46ca38125db4b1c4ce432e",
+        "6b7c4d87d1af41e1823ddbdf6861514e",
+        "785b2ff0d7bb5b352959c86351d0014a",
+        "aa8266cbf4dd9e7a0f356bd45677134b",
+        "2bb25559f18b25a2bd2fc4c251dc1b32",
+        "55f5019e51e1eec8ef6b480c4c68fedf",
+        "a94393388f716e8506a9a44b52196002",
+        "6f329cc4b18dcfc9b9f8e39762d4d20f",
+        "d1a4b72fc16b20d25766c9315cfc2009",
+        "287b2ec0b40720e295b7766404f75391"
+      ]
+    },
+    {
+      "actor": "watch",
+      "height": 104,
+      "index": 8,
+      "kind": "offchain",
+      "label": "evaluate",
+      "labels": [
+        "95d74254a67063e4fce02863f67c054a",
+        "09e683542d6ff15a4efc9cdf9221819a",
+        "ed2aa18672baf69432fe09a2689d7e85",
+        "604ed6c952c8cba35320bf4956af63e1",
+        "6f355d4aec2ff0a5418277a56488bfe7",
+        "f066829ebcc950b13738c8aae9fd5c7b",
+        "3ccc1cde5cac1a71fb3900fe455e77a2",
+        "390a79b10d1fc1d6549126f25953fef6",
+        "e7b51f3f067d543ce7cab36f74cc9edc",
+        "ba6055fcf606e74f0942fe0097e764d4",
+        "d8eff596250d544bebeecf8994d2a4a2",
+        "a447de966f6af006520784e8daaca3b1",
+        "f72b3c23411c317e53284fd930f0f3ab",
+        "64a42afddeb858e321369f76593aba1c",
+        "5ac930027229b1c2fc3e733c60e52a9d",
+        "01e679cdfb52e2975d3bd2cd84fd9ab8",
+        "377508956f591b8bbe285f56314aa029",
+        "4bf85d763e1bac14ba3d0f0ee0596b6f",
+        "09bee67b5bf1d6e9a8e08d084cb7ade6",
+        "c56fca41b0644c542c5ab2c61f872a18",
+        "cd6de66b4469ce977b4471750789efa4",
+        "7a8695255192a2390ecf9be66936d47a",
+        "a4b205be4e46ca38125db4b1c4ce432e",
+        "6b7c4d87d1af41e1823ddbdf6861514e",
+        "785b2ff0d7bb5b352959c86351d0014a",
+        "aa8266cbf4dd9e7a0f356bd45677134b",
+        "2bb25559f18b25a2bd2fc4c251dc1b32",
+        "55f5019e51e1eec8ef6b480c4c68fedf",
+        "a94393388f716e8506a9a44b52196002",
+        "6f329cc4b18dcfc9b9f8e39762d4d20f",
+        "d1a4b72fc16b20d25766c9315cfc2009",
+        "287b2ec0b40720e295b7766404f75391"
+      ],
+      "output_label": "f15c39e2e510d0c10ede675a470684e1",
+      "tables_commitment": "01694a7673edad580006a82d2977556a59455baf3ef88ee8f681500694af3832",
+      "tables_source": "setup",
+      "verdict": "reject"
+    },
+    {
+      "actor": "watch",
+      "allowed": true,
+      "blockhash": "1c1689458215dcece1a920bc80d4c6e83ad491427106bfa0e53fa7ae2672ce5a",
+      "broadcast": true,
+      "confirmed": true,
+      "height": 104,
+      "index": 9,
+      "kind": "tx",
+      "label": "disprove",
+      "mempool_result": {
+        "allowed": true,
+        "fees": {
+          "base": "0.00003000",
+          "effective-feerate": "0.00015544",
+          "effective-includes": [
+            "990f4b16aa105bd1bea2f8f0e15a7ad476f89359f98721a3720b2f0819ce7a2c"
+          ]
+        },
+        "txid": "898370d26ad6cb72f469b437a23019f605abe60c01ebd0a9fb1bb980b6fb1e21",
+        "vsize": 193,
+        "wtxid": "990f4b16aa105bd1bea2f8f0e15a7ad476f89359f98721a3720b2f0819ce7a2c"
+      },
+      "note": null,
+      "prevouts": [
+        {
+          "amount": 117000,
+          "script_pubkey": "5120768c6feef075ac55eecdbbadc53a8c5cbac290d99a447d0c750810f2f7fdf064",
+          "txid": "334e27ecc49e883cab4a7bb44d7cafc74f0d1a7966eb95a1a3de396fe0439e31",
+          "vout": 0
+        }
+      ],
+      "raw_transaction": "02000000000101319e43e06f39dea3a195eb66791a0d4fc7af7c4db47b4aab3c889ec4ec274e330000000000fdffffff02306f010000000000225120725e7f9afc4ca0e3184ddc3535c0d7085f2e2536676405405f6f8dc422638186204e000000000000225120192c2a30cbd7d0352f94d4c31a43f767f1ef43d7ff6438839880ec075d81a9f60440c35084e6e07db97273927c67cdd3c2d7c78529b8f986d649e3447a545fff28577fe16687fc512bfac507daa06785b20cc89c8a30077b94ff9a66e63dff57897910f15c39e2e510d0c10ede675a470684e145a820a19ccb0d58ce7a4ee91adf153469c8cee753a7a6f2244eb9c5b73d8fb54fd5ee8820aeb1f37bd68b70ae51d98f5f5da9981c723ede1a1a6cf4d5a90edb80faf9634aac41c050929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac06ad375ca6f429eb5ab9541e0120c31ac03baee0df573b722ce515e642751080600000000",
+      "reject_reason": null,
+      "txid": "898370d26ad6cb72f469b437a23019f605abe60c01ebd0a9fb1bb980b6fb1e21"
+    },
+    {
+      "actor": "environment",
+      "blocks": 1,
+      "from_height": 104,
+      "height": 105,
+      "index": 10,
+      "kind": "mine",
+      "label": "mine 1",
+      "note": null
+    },
+    {
+      "actor": "environment",
+      "blocks": 1,
+      "from_height": 105,
+      "height": 106,
+      "index": 11,
+      "kind": "mine",
+      "label": "mine 1",
+      "note": null
+    },
+    {
+      "actor": "environment",
+      "blocks": 1,
+      "from_height": 106,
+      "height": 107,
+      "index": 12,
+      "kind": "mine",
+      "label": "mine 1",
+      "note": null
+    },
+    {
+      "actor": "environment",
+      "blocks": 1,
+      "from_height": 107,
+      "height": 108,
+      "index": 13,
+      "kind": "mine",
+      "label": "mine 1",
+      "note": null
+    },
+    {
+      "actor": "environment",
+      "blocks": 1,
+      "from_height": 108,
+      "height": 109,
+      "index": 14,
+      "kind": "mine",
+      "label": "mine 1",
+      "note": null
+    },
+    {
+      "actor": "environment",
+      "blocks": 1,
+      "from_height": 109,
+      "height": 110,
+      "index": 15,
+      "kind": "mine",
+      "label": "mine 1",
+      "note": null
+    },
+    {
+      "actor": "environment",
+      "blocks": 1,
+      "from_height": 110,
+      "height": 111,
+      "index": 16,
+      "kind": "mine",
+      "label": "mine 1",
+      "note": null
+    },
+    {
+      "actor": "environment",
+      "blocks": 1,
+      "from_height": 111,
+      "height": 112,
+      "index": 17,
+      "kind": "mine",
+      "label": "mine 1",
+      "note": null
+    },
+    {
+      "actor": "environment",
+      "blocks": 1,
+      "from_height": 112,
+      "height": 113,
+      "index": 18,
+      "kind": "mine",
+      "label": "mine 1",
+      "note": null
+    },
+    {
+      "actor": "environment",
+      "blocks": 1,
+      "from_height": 113,
+      "height": 114,
+      "index": 19,
+      "kind": "mine",
+      "label": "mine 1",
+      "note": null
+    },
+    {
+      "actor": "environment",
+      "blocks": 1,
+      "from_height": 114,
+      "height": 115,
+      "index": 20,
+      "kind": "mine",
+      "label": "mine 1",
+      "note": null
+    },
+    {
+      "actor": "environment",
+      "blocks": 1,
+      "from_height": 115,
+      "height": 116,
+      "index": 21,
+      "kind": "mine",
+      "label": "mine 1",
+      "note": null
+    },
+    {
+      "actor": "environment",
+      "blocks": 1,
+      "from_height": 116,
+      "height": 117,
+      "index": 22,
+      "kind": "mine",
+      "label": "mine 1",
+      "note": null
+    },
+    {
+      "actor": "environment",
+      "blocks": 1,
+      "from_height": 117,
+      "height": 118,
+      "index": 23,
+      "kind": "mine",
+      "label": "mine 1",
+      "note": null
+    },
+    {
+      "actor": "environment",
+      "blocks": 1,
+      "from_height": 118,
+      "height": 119,
+      "index": 24,
+      "kind": "mine",
+      "label": "mine 1",
+      "note": null
+    },
+    {
+      "actor": "environment",
+      "blocks": 1,
+      "from_height": 119,
+      "height": 120,
+      "index": 25,
+      "kind": "mine",
+      "label": "mine 1",
+      "note": null
+    },
+    {
+      "actor": "environment",
+      "blocks": 1,
+      "from_height": 120,
+      "height": 121,
+      "index": 26,
+      "kind": "mine",
+      "label": "mine 1",
+      "note": null
+    },
+    {
+      "actor": "environment",
+      "blocks": 1,
+      "from_height": 121,
+      "height": 122,
+      "index": 27,
+      "kind": "mine",
+      "label": "mine 1",
+      "note": null
+    },
+    {
+      "actor": "environment",
+      "blocks": 1,
+      "from_height": 122,
+      "height": 123,
+      "index": 28,
+      "kind": "mine",
+      "label": "mine 1",
+      "note": null
+    },
+    {
+      "actor": "environment",
+      "blocks": 1,
+      "from_height": 123,
+      "height": 124,
+      "index": 29,
+      "kind": "mine",
+      "label": "mine 1",
+      "note": null
+    },
+    {
+      "actor": "environment",
+      "blocks": 1,
+      "from_height": 124,
+      "height": 125,
+      "index": 30,
+      "kind": "mine",
+      "label": "mine 1",
+      "note": null
+    },
+    {
+      "actor": "environment",
+      "blocks": 1,
+      "from_height": 125,
+      "height": 126,
+      "index": 31,
+      "kind": "mine",
+      "label": "mine 1",
+      "note": null
+    },
+    {
+      "actor": "claimant",
+      "allowed": false,
+      "broadcast": false,
+      "confirmed": false,
+      "height": 126,
+      "index": 32,
+      "kind": "tx",
+      "label": "claim:payout",
+      "mempool_result": {
+        "allowed": false,
+        "reject-reason": "missing-inputs",
+        "txid": "b7d14cdd8d9d38571a83c875c4e138245d78b987be26cb32ac47f88cdcfb474f",
+        "wtxid": "31f4c2919b1be40d8cca4794339bd9d8a3f8ea54e78b5e7b7018a2decd01ae4c"
+      },
+      "note": null,
+      "prevouts": [
+        {
+          "amount": 117000,
+          "script_pubkey": "5120768c6feef075ac55eecdbbadc53a8c5cbac290d99a447d0c750810f2f7fdf064",
+          "txid": "334e27ecc49e883cab4a7bb44d7cafc74f0d1a7966eb95a1a3de396fe0439e31",
+          "vout": 0
+        }
+      ],
+      "raw_transaction": "02000000000101319e43e06f39dea3a195eb66791a0d4fc7af7c4db47b4aab3c889ec4ec274e330000000000180000000150bd0100000000002251201f445e10bbf30bfe3c8cc482364185201c40d5c169c748b49c77e9c407e8b169034092ddab2f1069bb6396a55ebbd02f034691bf9484a68cece8537572fcc61954588487744e8ad9b05c7d04106b183f39fc7db2bbd3a62b98b72564e823727e3b8c260118b27520aeb1f37bd68b70ae51d98f5f5da9981c723ede1a1a6cf4d5a90edb80faf9634aac41c050929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0730e8e6e462920cb26482c2e245c462935738ef413b562d342e8bc28c279b13900000000",
+      "reject_reason": "missing-inputs",
+      "txid": "b7d14cdd8d9d38571a83c875c4e138245d78b987be26cb32ac47f88cdcfb474f"
+    }
+  ],
+  "tag": "1"
+}

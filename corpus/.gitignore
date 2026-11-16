@@ -6,3 +6,4 @@ dist/
 .venv/
 reports/
 work/
+!examples/episodes/reports/

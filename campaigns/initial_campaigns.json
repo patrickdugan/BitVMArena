@@ -522,8 +522,18 @@
         "output label polarity",
         "single-watcher disprove liveness",
         "challenge window shorter than evaluation latency",
-        "presigned payout timelock and sighash scope",
-        "unbonded false claims"
+        "unbonded false claims",
+        "garbled tables delivered late",
+        "one proof replayed across vaults",
+        "spendable Taproot internal key on the claim output",
+        "claim presigned without output commitment",
+        "absolute instead of relative payout timelock",
+        "vault reclaim racing the claim",
+        "disprove outputs left to the garbler",
+        "zero-fee disprove without an anchor",
+        "miner censorship of the disprove",
+        "bond recovered by self-disprove",
+        "presigned payout timelock and sighash scope"
       ],
       "invariants": [
         "A false claim cannot be paid while an honest evaluator can disprove it within the window.",
@@ -548,10 +558,10 @@
         "https://github.com/patrickdugan/Spiral/blob/76071a0195f48961386e46d56df7b5e0276637fc/in-and-out-burger/iob/bitvm3.py"
       ],
       "completed_checks": [
-        "Vault, claim, label handover, garbled evaluation, disprove and payout judged by Bitcoin Core 31.1 on regtest",
-        "10 recipes x hardened/mutant x benign/attack: 40/40 expectations met, 76 confirmed and 19 rejected transactions",
-        "Same per-step verdicts on Bitcoin Core 31.2",
-        "Offline audit re-runs every garbled evaluation and signature check; 0 problems"
+        "Vault, claim, label handover, garbled evaluation, disprove and payout judged by Bitcoin Core 31.1 on regtest, including submitpackage (P2A/TRUC), full-RBF replacement and miner-built blocks",
+        "20 recipes x hardened/mutant x benign/attack: 80/80 expectations met, 159 confirmed and 43 rejected transactions",
+        "Same per-step verdicts on Bitcoin Core 31.2 for all 80 trajectories",
+        "Offline audit re-runs every garbled evaluation, script-path and key-path signature check and double-spend check; 0 problems"
       ]
     }
   ]

@@ -39,7 +39,7 @@ class Session:
         self.steps.append(step)
         return step
 
-    def fund(self, outputs):
+    def fund(self, outputs, label="fund"):
         """outputs: {name: (TapTree-like with output_key/script_pubkey, sats)} -> {name: utxo}."""
         payments, wanted = {}, {}
         for name, (tree, sats) in outputs.items():
@@ -55,7 +55,7 @@ class Session:
         for name, (spk, sats) in wanted.items():
             output = next(v for v in funding["vout"] if v["scriptPubKey"]["hex"] == spk.hex())
             utxos[name] = {"txid": txid, "vout": output["n"], "amount": sats, "script_pubkey": spk.hex()}
-        self._record(kind="fund", label="fund", actor="evaluator", txid=txid,
+        self._record(kind="fund", label=label, actor="evaluator", txid=txid,
                      raw_transaction=funding["hex"], outputs=utxos)
         return utxos
 
@@ -75,11 +75,73 @@ class Session:
                      mempool_result=safe_json(result), broadcast=sent, note=note)
         return allowed
 
+    def submit_package(self, entries, actor, *, note=None):
+        """Relay a parent+child package with `submitpackage` (CPFP through an anchor).
+
+        entries: [(label, tx), ...] in topological order. Each transaction is first tried
+        alone with testmempoolaccept (recorded), then the package is submitted; a step is
+        allowed when Core's package result for it carries no error.
+        """
+        raws = [tx.serialize().hex() for _, tx in entries]
+        alone = [self.node.rpc("testmempoolaccept", [raw])[0] for raw in raws]
+        try:
+            result = self.node.rpc("submitpackage", raws)
+            message = result.get("package_msg")
+            by_txid = {r.get("txid"): r for r in result.get("tx-results", {}).values()}
+        except CoreError as exc:
+            message, by_txid = str(exc), {}
+        allowed_all = True
+        for (label, tx), raw, solo in zip(entries, raws, alone):
+            entry = by_txid.get(tx.txid)
+            allowed = entry is not None and not entry.get("error")
+            allowed_all &= allowed
+            self._record(kind="tx", label=label, actor=actor, raw_transaction=raw, txid=tx.txid,
+                         prevouts=[{"txid": i.txid, "vout": i.vout, "amount": i.amount,
+                                    "script_pubkey": i.script_pubkey.hex()} for i in tx.inputs],
+                         allowed=allowed, reject_reason=(entry or {}).get("error") or
+                         (None if allowed else message),
+                         mempool_result=safe_json(entry or {}), alone_result=safe_json(solo),
+                         package_msg=message, broadcast=allowed, note=note)
+        return allowed_all
+
+    def submit_in_block(self, label, actor, tx, *, note=None):
+        """A miner puts `tx` in a block of its own (`generateblock`), bypassing the mempool.
+
+        Mempool policy is still recorded (testmempoolaccept); the block itself is judged by
+        Core's consensus checks. Only the listed transaction is included, so anything else
+        waiting in the mempool is censored from that block.
+        """
+        raw = tx.serialize().hex()
+        result = self.node.rpc("testmempoolaccept", [raw])[0]
+        try:
+            self.node.rpc("generateblock", self.node.miner, [raw])
+            accepted, reason = True, None
+        except CoreError as exc:
+            accepted, reason = False, str(exc)
+        self._record(kind="tx", label=label, actor=actor, raw_transaction=raw, txid=tx.txid,
+                     prevouts=[{"txid": i.txid, "vout": i.vout, "amount": i.amount,
+                                "script_pubkey": i.script_pubkey.hex()} for i in tx.inputs],
+                     allowed=bool(result["allowed"]), reject_reason=result.get("reject-reason"),
+                     mempool_result=safe_json(result), mined_directly=True, block_accepted=accepted,
+                     block_reject_reason=reason, broadcast=accepted, note=note)
+        return accepted
+
     def mine(self, count, note=None):
         start = self.height()
         self.node.mine(count)
         self._record(kind="mine", label=f"mine {count}", actor="environment", blocks=count,
                      from_height=start, note=note)
+
+    def mine_empty(self, count, actor, note=None):
+        """A censoring miner produces `count` blocks that include no mempool transaction."""
+        start = self.height()
+        for _ in range(count):
+            self.node.rpc("generateblock", self.node.miner, [])
+        self._record(kind="mine", label=f"mine {count} empty", actor=actor, blocks=count,
+                     from_height=start, censored=True, note=note)
+
+    def mempool(self):
+        return self.node.rpc("getrawmempool")
 
     def offchain(self, label, actor, **data):
         self._record(kind="offchain", label=label, actor=actor, **data)
@@ -90,13 +152,29 @@ class Session:
     def raw(self, txid):
         return self.node.rpc("getrawtransaction", txid)
 
+    def _displaced(self, step):
+        """True when a broadcast transaction lost its inputs to a confirmed conflict."""
+        try:
+            self.node.rpc("getrawtransaction", step["txid"], True)
+            return False
+        except CoreError:
+            pass
+        return any(self.node.rpc("gettxout", p["txid"], p["vout"]) is None for p in step["prevouts"])
+
     def finish(self):
-        """Mine a block and attach confirmation evidence to every broadcast transaction."""
+        """Mine a block and attach confirmation evidence to every broadcast transaction.
+
+        A broadcast transaction that was replaced (RBF) or evicted by a conflicting block
+        is recorded as displaced; any other unconfirmed broadcast is an error.
+        """
         self.node.mine()
         for step in self.steps:
             if step["kind"] == "tx":
                 step["confirmed"] = False
                 if step["broadcast"]:
+                    if self._displaced(step):
+                        step["displaced"] = True
+                        continue
                     info = self.node.rpc("getrawtransaction", step["txid"], True)
                     confirmations = info.get("confirmations", 0)
                     if confirmations < 1:
@@ -124,7 +202,8 @@ def finalize_report(track, provenance, rows, cases):
                           "confirmed_transactions": sum(1 for c in cases for s in c["steps"]
                                                         if s["kind"] == "tx" and s.get("confirmed")),
                           "rejected_transactions": sum(1 for c in cases for s in c["steps"]
-                                                       if s["kind"] == "tx" and not s["allowed"]),
+                                                       if s["kind"] == "tx" and not s["allowed"]
+                                                       and not s.get("block_accepted")),
                           "expectation_failures": [c["id"] for c in cases if not c["expectation_met"]]}}
     report["evidence_hash"] = digest(report)
     return report
@@ -157,6 +236,17 @@ def audit_transactions(case, keys=None):
     (bottom to top) are consumed by those opcodes in reverse script order.
     """
     problems = []
+    spent = {}
+    for s in case["steps"]:
+        if s["kind"] == "tx" and s.get("confirmed"):
+            if s.get("displaced"):
+                problems.append(f"{s['label']}: recorded as both displaced and confirmed")
+            for p in s["prevouts"]:
+                outpoint = (p["txid"], p["vout"])
+                if outpoint in spent and spent[outpoint] != s["txid"]:
+                    problems.append(f"{s['label']}: confirmed double spend of an outpoint "
+                                    f"already spent by {spent[outpoint][:16]}")
+                spent[outpoint] = s["txid"]
     for s in case["steps"]:
         if s["kind"] != "tx":
             continue
@@ -176,6 +266,12 @@ def audit_transactions(case, keys=None):
             txin.amount, txin.script_pubkey = prev["amount"], bytes.fromhex(prev["script_pubkey"])
         signature_failure = commitment_failure = False
         for index, txin in enumerate(tx.inputs):
+            if len(txin.witness) == 1 and len(txin.witness[0]) in (64, 65) \
+                    and txin.script_pubkey[:2] == b"\x51\x20":
+                # Taproot key path: the signature must verify against the output key.
+                if not check_signature(tx, index, None, txin.script_pubkey[2:], txin.witness[0]):
+                    signature_failure = True
+                continue
             if len(txin.witness) < 2:
                 continue
             script, control = txin.witness[-2], txin.witness[-1]
@@ -193,7 +289,7 @@ def audit_transactions(case, keys=None):
                     signature_failure = True
         reason = s.get("reject_reason") or ""
         s_label = s["label"]
-        if s["allowed"] and (signature_failure or commitment_failure):
+        if (s["allowed"] or s.get("block_accepted")) and (signature_failure or commitment_failure):
             problems.append(f"{s_label}: Core accepted but a local signature/commitment check failed")
         if not s["allowed"] and "Invalid Schnorr signature" in reason and not signature_failure:
             problems.append(f"{s_label}: Core reported a bad signature that verifies locally")

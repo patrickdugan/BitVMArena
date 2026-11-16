@@ -21,6 +21,7 @@ G = (0x79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798,
      0x483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8)
 # Bitcoin Core functional-test H_POINT; no known secret key.
 NUMS = bytes.fromhex("50929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0")
+P2A = bytes.fromhex("51024e73")     # pay-to-anchor: keyless, spent with an empty witness
 LEAF_VERSION = 0xC0
 OP = {"0": 0x00, "1NEGATE": 0x4f, "1": 0x51, "IF": 0x63, "NOTIF": 0x64, "ELSE": 0x67, "ENDIF": 0x68,
       "VERIFY": 0x69, "RETURN": 0x6a, "TOALT": 0x6b, "FROMALT": 0x6c, "2DROP": 0x6d, "2DUP": 0x6e,
@@ -501,6 +502,10 @@ class Transaction:
     @property
     def txid(self):
         return sha(sha(self.serialize(False)))[::-1].hex()
+
+    @property
+    def wtxid(self):
+        return sha(sha(self.serialize()))[::-1].hex()
 
     @property
     def vsize(self):

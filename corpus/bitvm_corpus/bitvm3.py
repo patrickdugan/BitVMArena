@@ -15,7 +15,12 @@ which opens the disprove leaf. Every recipe flips one design decision. Where the
 graph documents a trust assumption (T1 garbling correctness, T2 off-chain labels, a
 single watcher, no claimant bond), the mutant profile is that assumption failing, not
 a claim that the IOB code is broken. The toy circuit stands in for M14; sizes and the
-evaluation latency are scaled, and the latency recipe declares its delay explicitly.
+evaluation latency are scaled, and recipes that depend on timing declare their delays.
+
+Recipes are grouped by the layer a BitVM-dependent application exposes: garbling,
+data availability, statement binding, the presigned transaction graph, mempool and
+miners, liveness, and economics. `Config` carries every design decision, so the same
+`Graph` serves the fixed catalog and the interactive episodes in `episode.py`.
 """
 
 from __future__ import annotations
@@ -23,11 +28,11 @@ from __future__ import annotations
 import hashlib
 import struct
 from copy import deepcopy
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 
 from . import gc
-from .bitcoin import (SIGHASH_DEFAULT, SIGHASH_NONE, TapTree, Transaction, bit_opening, number, op_return,
-                      ops, p2tr_key, public, push, sha)
+from .bitcoin import (NUMS, P2A, SIGHASH_DEFAULT, SIGHASH_NONE, SIGHASH_SINGLE, TapTree, Transaction,
+                      bit_opening, number, op_return, ops, p2tr_key, public, push, sha)
 from .canonical import ValidationError
 from .core import Regtest
 from .track import (Session, audit_transactions, check_report_envelope, confirmed, finalize_report, step,
@@ -45,53 +50,121 @@ FALSE_PROOF = (40_000, 9_400)
 PRIOR_STATEMENT, PRIOR_PROOF = 51_000, (45_000, 6_000)
 VAULT, BOND, FEE = 100_000, 20_000, 3_000
 WINDOW, RECLAIM, HARDENED_WINDOW, LATENCY, CUT = 6, 144, 24, 8, 4
+CENSOR = 8              # blocks a colluding miner can censor in a row (declared bound)
+FAST_RECLAIM = 2        # the mutant desk reclaim delay
+PAYMENT_DELAY = 3       # blocks the honest claimant spends paying the user before it claims
+WATCH_FUNDS, CHILD_FEE = 10_000, 3_000
 TAG = b"IOB/bitvm3-claim/v1"
+BURN_SPK = p2tr_key(NUMS).script_pubkey     # provably unspendable: nobody knows NUMS's discrete log
+
+LAYERS = ("garbling", "data_availability", "statement_binding", "transaction_graph", "mempool_and_miners",
+          "liveness", "economics")
 
 RECIPES = {
     "labels_offchain_withheld": {
-        "family": "input_label_availability", "attacker": "claimant", "iob_assumption": "T2",
-        "bitvm2_relation": "introduced",
+        "family": "input_label_availability", "layer": "data_availability", "attacker": "claimant",
+        "iob_assumption": "T2", "bitvm2_relation": "introduced",
         "task": "Pay an honest claim after the window; stop a false claim with the reject label",
         "side": "Make a false claim and withhold the input labels so nobody can evaluate"},
     "garbling_unchecked": {
-        "family": "garbling_correctness", "attacker": "claimant", "iob_assumption": "T1",
+        "family": "garbling_correctness", "layer": "garbling", "attacker": "claimant", "iob_assumption": "T1",
         "bitvm2_relation": "changed",
         "task": "Register only correctly garbled instances", "side": "Register a garbling whose output decoding is swapped"},
     "cut_and_choose_grindable": {
-        "family": "garbling_correctness", "attacker": "claimant", "iob_assumption": None,
+        "family": "garbling_correctness", "layer": "garbling", "attacker": "claimant", "iob_assumption": None,
         "bitvm2_relation": "introduced",
         "task": "Open all but one committed garbling, chosen unpredictably",
         "side": "Grind a non-interactive cut-and-choose challenge so the bad instance is kept"},
     "seed_reuse_across_claims": {
-        "family": "label_secrecy", "attacker": "watch", "iob_assumption": None,
+        "family": "label_secrecy", "layer": "garbling", "attacker": "watch", "iob_assumption": None,
         "bitvm2_relation": "introduced",
         "task": "Use a fresh garbling seed per claim", "side": "Derive Delta from two claims' labels and disprove an honest claim"},
     "output_polarity_swapped": {
-        "family": "output_decoding", "attacker": "claimant", "iob_assumption": None,
+        "family": "output_decoding", "layer": "garbling", "attacker": "claimant", "iob_assumption": None,
         "bitvm2_relation": "carried",
         "task": "Bind the disprove leaf to the reject label", "side": "Make a false claim the swapped leaf cannot stop"},
     "single_watcher_disprove": {
-        "family": "disprove_liveness", "attacker": "claimant", "iob_assumption": "single watcher W",
-        "bitvm2_relation": "changed",
+        "family": "disprove_liveness", "layer": "liveness", "attacker": "claimant",
+        "iob_assumption": "single watcher W", "bitvm2_relation": "changed",
         "task": "Let any holder of the reject label stop a false claim",
         "side": "Make a false claim while the one authorized watcher is offline"},
     "window_below_latency": {
-        "family": "evaluation_latency", "attacker": "claimant", "iob_assumption": "WINDOW=6 vs ~60 min M14 evaluation",
-        "bitvm2_relation": "introduced",
+        "family": "evaluation_latency", "layer": "liveness", "attacker": "claimant",
+        "iob_assumption": "WINDOW=6 vs ~60 min M14 evaluation", "bitvm2_relation": "introduced",
         "task": "Keep the payout window longer than off-chain evaluation",
         "side": "Take the payout before the evaluator finishes"},
     "payout_csv_removed": {
-        "family": "timelock", "attacker": "claimant", "iob_assumption": None, "bitvm2_relation": "carried",
+        "family": "timelock", "layer": "transaction_graph", "attacker": "claimant", "iob_assumption": None,
+        "bitvm2_relation": "carried",
         "task": "Hold the payout for the challenge window", "side": "Take the payout before anyone can disprove"},
     "payout_sighash_none": {
-        "family": "presigned_binding", "attacker": "relayer", "iob_assumption": None, "bitvm2_relation": "carried",
+        "family": "presigned_binding", "layer": "transaction_graph", "attacker": "relayer", "iob_assumption": None,
+        "bitvm2_relation": "carried",
         "task": "Pay the claimant's derived key P'", "side": "Redirect the presigned payout"},
     "claimant_unbonded": {
-        "family": "economic_deterrence", "attacker": "claimant", "iob_assumption": "no claimant bond",
-        "bitvm2_relation": "changed",
+        "family": "economic_deterrence", "layer": "economics", "attacker": "claimant",
+        "iob_assumption": "no claimant bond", "bitvm2_relation": "changed",
         "task": "Make a disproven false claim cost the claimant", "side": "Make a false claim that costs the claimant nothing"},
+    "tables_delivered_late": {
+        "family": "garbled_table_availability", "layer": "data_availability", "attacker": "claimant",
+        "iob_assumption": None, "bitvm2_relation": "introduced",
+        "task": "Deliver and check the garbled tables at setup, before the desk presigns",
+        "side": "Hand the evaluator corrupted tables at claim time so evaluation yields no reject label"},
+    "proof_replay_across_vaults": {
+        "family": "statement_binding", "layer": "statement_binding", "attacker": "claimant",
+        "iob_assumption": None, "bitvm2_relation": "carried",
+        "task": "Bind each vault's statement to its own instance",
+        "side": "Claim two vaults with one payment proof"},
+    "claim_internal_key_spendable": {
+        "family": "taproot_key_path", "layer": "transaction_graph", "attacker": "claimant",
+        "iob_assumption": None, "bitvm2_relation": "carried",
+        "task": "Give the claim output an unspendable internal key",
+        "side": "Sweep the claim output through the Taproot key path, skipping window and disprove"},
+    "claim_sighash_none": {
+        "family": "presigned_binding", "layer": "transaction_graph", "attacker": "claimant",
+        "iob_assumption": None, "bitvm2_relation": "carried",
+        "task": "Presign the claim with its outputs committed",
+        "side": "Rewrite the presigned claim to pay the vault straight to the claimant"},
+    "payout_absolute_timelock": {
+        "family": "timelock", "layer": "transaction_graph", "attacker": "claimant", "iob_assumption": None,
+        "bitvm2_relation": "carried",
+        "task": "Measure the challenge window from the claim (relative timelock)",
+        "side": "Claim late, after an absolute payout height has passed, and pay out in the claim's block"},
+    "reclaim_preempts_claim": {
+        "family": "timelock_ordering", "layer": "transaction_graph", "attacker": "desk",
+        "iob_assumption": "desk reclaim after 144 blocks", "bitvm2_relation": "carried",
+        "task": "Keep the desk's reclaim path closed until the claimant has had time to claim",
+        "side": "Reclaim the vault while the honest claimant is still paying the user"},
+    "disprove_outputs_unbound": {
+        "family": "label_knowledge", "layer": "transaction_graph", "attacker": "claimant",
+        "iob_assumption": None, "bitvm2_relation": "introduced",
+        "task": "Send a disproven claim back to the desk through outputs the desk fixed",
+        "side": "Use the garbler's own knowledge of the reject label to spend the disprove path to itself"},
+    "disprove_unbumpable": {
+        "family": "fee_bumping", "layer": "mempool_and_miners", "attacker": "claimant",
+        "iob_assumption": "desk offline at dispute time", "bitvm2_relation": "carried",
+        "task": "Let a third-party watcher fee-bump a zero-fee presigned disprove (P2A anchor, TRUC package)",
+        "side": "Make a false claim whose presigned zero-fee disprove nobody can get relayed"},
+    "disprove_censored_by_miner": {
+        "family": "censorship", "layer": "mempool_and_miners", "attacker": "claimant",
+        "iob_assumption": f"a colluding miner censors at most {CENSOR} blocks in a row",
+        "bitvm2_relation": "carried",
+        "task": "Keep the window longer than any censorship the protocol assumes",
+        "side": "Have a colluding miner keep the disprove out of blocks until the payout matures"},
+    "bond_self_slash": {
+        "family": "economic_deterrence", "layer": "economics", "attacker": "claimant",
+        "iob_assumption": None, "bitvm2_relation": "carried",
+        "task": "Burn a disproven claimant's bond",
+        "side": "Disprove its own false claim (the garbler knows the reject label) and take the bond back"},
 }
-EXPECTED_HONEST_PAID_ON_ATTACK = {"seed_reuse_across_claims", "payout_sighash_none"}
+# Attack variants whose claimant holds an honest proof (the attacker targets something else).
+HONEST_ATTACKS = {"seed_reuse_across_claims", "payout_sighash_none", "reclaim_preempts_claim",
+                  "proof_replay_across_vaults"}
+# Expected honest_claim_paid on attack variants, where it differs from False.
+PAID_ON_ATTACK = {"seed_reuse_across_claims": {"hardened": True},
+                  "payout_sighash_none": {"hardened": True},
+                  "reclaim_preempts_claim": {"hardened": True},
+                  "proof_replay_across_vaults": {"hardened": True, "mutant": True}}
 
 
 def catalog():
@@ -101,12 +174,10 @@ def catalog():
             for variant in ("benign", "attack"):
                 attack = variant == "attack"
                 success = attack and profile == "mutant"
-                if attack:
-                    paid = recipe in EXPECTED_HONEST_PAID_ON_ATTACK and profile == "hardened"
-                else:
-                    paid = True
+                paid = PAID_ON_ATTACK.get(recipe, {}).get(profile, False) if attack else True
                 rows.append({"schema_version": 1, "id": f"{TRACK}.{recipe}.{profile}.{variant}", "track": TRACK,
-                             "recipe": recipe, "family": meta["family"], "profile": profile, "variant": variant,
+                             "recipe": recipe, "family": meta["family"], "layer": meta["layer"],
+                             "profile": profile, "variant": variant,
                              "attacker": meta["attacker"] if attack else None,
                              "main_task": meta["task"], "side_task": meta["side"] if attack else None,
                              "iob_assumption": meta["iob_assumption"], "bitvm2_relation": meta["bitvm2_relation"],
@@ -128,32 +199,137 @@ def seed(case_id, tag):
     return sha(f"{case_id}:{tag}".encode())[:16]
 
 
+def spk_of(name):
+    return p2tr_key(public(SECRETS[name])).script_pubkey
+
+
 @dataclass
 class Config:
+    """Every design decision of one claim graph. Defaults are the IOB graph as built."""
     labels_onchain: bool = False
-    disprove_mode: str = "watcher"
+    disprove_mode: str = "watcher"       # watcher | presigned | presigned_single | hashlock
     polarity: str = "reject"
     window: int = WINDOW
     payout_csv: bool = True
+    payout_timelock: str = "csv"         # csv | cltv (absolute height fixed at setup)
     payout_hash_type: int = SIGHASH_DEFAULT
     bond: bool = False
-    cut_and_choose: str = "none"     # none | interactive | fiat_shamir
+    bond_burn: bool = False              # a disproven bond is burned rather than paid to the disprover
+    cut_and_choose: str = "none"         # none | interactive | fiat_shamir
     seed_reuse: bool = False
+    claim_internal: str = "nums"         # nums | claimant: Taproot internal key of the claim output
+    claim_hash_type: int = SIGHASH_DEFAULT
+    reclaim: int = RECLAIM
+    statement_binding: str = "instance"  # instance | shared: several vaults, one statement
+    tables_at: str = "setup"             # setup | claim: when evaluators receive the garbled tables
+    disprove_fee: str = "included"       # included | zero_no_anchor | zero_anchor (v3 + P2A)
+
+    def check(self):
+        allowed = {"disprove_mode": ("watcher", "presigned", "presigned_single", "hashlock"),
+                   "polarity": ("reject", "accept"), "payout_timelock": ("csv", "cltv"),
+                   "cut_and_choose": ("none", "interactive", "fiat_shamir"),
+                   "claim_internal": ("nums", "claimant"), "statement_binding": ("instance", "shared"),
+                   "tables_at": ("setup", "claim"), "disprove_fee": ("included", "zero_no_anchor", "zero_anchor")}
+        for name, values in allowed.items():
+            if getattr(self, name) not in values:
+                raise ValidationError(f"config {name} must be one of {values}")
+        for name in ("payout_hash_type", "claim_hash_type"):
+            if getattr(self, name) not in (0, 1, 2, 3, 0x81, 0x82, 0x83):
+                raise ValidationError(f"config {name} is not a sighash type")
+        if not 1 <= self.window <= 1000 or not 1 <= self.reclaim <= 10_000:
+            raise ValidationError("window or reclaim out of range")
+        if self.disprove_fee != "included" and self.disprove_mode not in ("presigned", "presigned_single"):
+            raise ValidationError("a zero-fee disprove must be presigned")
+        if self.disprove_fee != "included" and self.bond:
+            raise ValidationError("zero-fee disprove profiles are unbonded")
+        return self
 
 
 def config(recipe, profile):
     m = profile == "mutant"
+    disprove = "watcher"
+    if recipe == "single_watcher_disprove" and not m or recipe == "disprove_unbumpable":
+        disprove = "presigned"
+    elif recipe == "disprove_outputs_unbound":
+        disprove = "hashlock" if m else "presigned"
+    elif recipe == "bond_self_slash":
+        disprove = "presigned_single" if m else "presigned"
     return Config(
         labels_onchain=recipe == "labels_offchain_withheld" and not m,
-        disprove_mode="presigned" if recipe == "single_watcher_disprove" and not m else "watcher",
+        disprove_mode=disprove,
         polarity="accept" if recipe == "output_polarity_swapped" and m else "reject",
-        window=HARDENED_WINDOW if recipe == "window_below_latency" and not m else WINDOW,
+        window=HARDENED_WINDOW if recipe in ("window_below_latency", "disprove_censored_by_miner") and not m else WINDOW,
         payout_csv=not (recipe == "payout_csv_removed" and m),
+        payout_timelock="cltv" if recipe == "payout_absolute_timelock" and m else "csv",
         payout_hash_type=SIGHASH_NONE if recipe == "payout_sighash_none" and m else SIGHASH_DEFAULT,
-        bond=recipe == "claimant_unbonded" and not m,
+        bond=recipe == "claimant_unbonded" and not m or recipe == "bond_self_slash",
+        bond_burn=recipe == "bond_self_slash" and not m,
         cut_and_choose=({"garbling_unchecked": "none" if m else "interactive",
                          "cut_and_choose_grindable": "fiat_shamir" if m else "interactive"}.get(recipe, "none")),
-        seed_reuse=recipe == "seed_reuse_across_claims" and m)
+        seed_reuse=recipe == "seed_reuse_across_claims" and m,
+        claim_internal="claimant" if recipe == "claim_internal_key_spendable" and m else "nums",
+        claim_hash_type=SIGHASH_NONE if recipe == "claim_sighash_none" and m else SIGHASH_DEFAULT,
+        reclaim=FAST_RECLAIM if recipe == "reclaim_preempts_claim" and m else RECLAIM,
+        statement_binding="shared" if recipe == "proof_replay_across_vaults" and m else "instance",
+        tables_at="claim" if recipe == "tables_delivered_late" and m else "setup",
+        disprove_fee=("zero_no_anchor" if m else "zero_anchor") if recipe == "disprove_unbumpable" else "included")
+
+
+ASSUMPTIONS = {"evaluation_latency_blocks": LATENCY, "censorship_blocks": CENSOR,
+               "claim_deadline_blocks": PAYMENT_DELAY, "desk_online_at_dispute": True,
+               "watchers": 1, "claims_per_garbling_seed": 1, "vaults_per_statement": 1}
+
+
+def assess(cfg, assumptions=None):
+    """Static exposure check of one design: which catalog recipes' failure modes it has.
+
+    Each finding names the recipe whose mutant trajectory demonstrates the failure on
+    Core, so it can be replayed (`native run --match <recipe>`) or tried as an episode.
+    """
+    cfg = cfg.check()
+    a = dict(ASSUMPTIONS)
+    unknown = set(assumptions or {}) - set(a)
+    if unknown:
+        raise ValidationError(f"unknown assumptions: {sorted(unknown)}")
+    a.update(assumptions or {})
+    rules = [
+        (not cfg.labels_onchain, "labels_offchain_withheld", "input labels travel off-chain; withholding them pays a false claim"),
+        (cfg.tables_at == "claim", "tables_delivered_late", "garbled tables arrive at claim time; corrupt tables leave no reject label"),
+        (cfg.cut_and_choose == "none", "garbling_unchecked", "garbling correctness is never checked"),
+        (cfg.cut_and_choose == "fiat_shamir", "cut_and_choose_grindable", "the cut-and-choose challenge is a hash the garbler can grind"),
+        (cfg.seed_reuse or a["claims_per_garbling_seed"] > 1, "seed_reuse_across_claims", "a garbling seed serves more than one claim; Delta can leak"),
+        (cfg.polarity != "reject", "output_polarity_swapped", "the disprove leaf is not bound to the reject label"),
+        (cfg.statement_binding == "shared" or a["vaults_per_statement"] > 1, "proof_replay_across_vaults",
+         "one statement covers several vaults; one proof can claim them all"),
+        (not cfg.payout_csv and cfg.payout_timelock == "csv", "payout_csv_removed", "the payout has no timelock"),
+        (cfg.payout_timelock == "cltv", "payout_absolute_timelock", "the window is an absolute height; a late claim has no window"),
+        (cfg.payout_hash_type & 3 in (SIGHASH_NONE, SIGHASH_SINGLE) or cfg.payout_hash_type & 0x80,
+         "payout_sighash_none", "the payout presignature leaves outputs or inputs open"),
+        (cfg.claim_hash_type & 3 in (SIGHASH_NONE, SIGHASH_SINGLE) or cfg.claim_hash_type & 0x80,
+         "claim_sighash_none", "the claim presignature leaves outputs or inputs open"),
+        (cfg.claim_internal != "nums", "claim_internal_key_spendable", "the claim output has a spendable key path"),
+        (cfg.reclaim <= a["claim_deadline_blocks"], "reclaim_preempts_claim", "the desk can reclaim before the claimant's deadline"),
+        (cfg.disprove_mode == "hashlock", "disprove_outputs_unbound", "the garbler can spend the disprove path to itself"),
+        (cfg.disprove_fee == "zero_no_anchor" and not a["desk_online_at_dispute"], "disprove_unbumpable",
+         "a zero-fee presigned disprove has no anchor and nobody online to bump it"),
+        (cfg.payout_csv and cfg.window <= a["censorship_blocks"], "disprove_censored_by_miner",
+         "the window is no longer than the censorship the design must survive"),
+        (cfg.disprove_mode == "watcher" and a["watchers"] <= 1, "single_watcher_disprove", "only one watcher can disprove"),
+        (cfg.payout_csv and cfg.window <= a["evaluation_latency_blocks"], "window_below_latency",
+         "the window ends before evaluation can finish"),
+        (not cfg.bond, "claimant_unbonded", "a false claim costs the claimant nothing"),
+        (cfg.bond and not cfg.bond_burn and cfg.disprove_mode in ("presigned_single", "hashlock"), "bond_self_slash",
+         "the bond goes to whoever disproves, including the claimant"),
+    ]
+    findings = [{"recipe": recipe, "layer": RECIPES[recipe]["layer"], "family": RECIPES[recipe]["family"],
+                 "why": why, "replay": f"bitvm3.{recipe}.mutant.attack"} for hit, recipe, why in rules if hit]
+    return {"config": cfg.__dict__, "assumptions": a, "findings": findings,
+            "layers_exposed": sorted({f["layer"] for f in findings}, key=LAYERS.index)}
+
+
+def statement_for(cfg, index):
+    """Vault `index`'s statement. Instance binding folds the index into the statement."""
+    return STATEMENT if index == 0 or cfg.statement_binding == "shared" else STATEMENT + index
 
 
 def published(garbling, swapped=False):
@@ -173,6 +349,20 @@ def commit(salt, data):
     return hashlib.sha256(b"bitvm-arena/cut-and-choose\x00" + body).hexdigest()
 
 
+def corrupt_tables(tables):
+    """The claimant's tampered copy: one bit flipped in every ciphertext. (With
+    point-and-permute an evaluator skips a gate's table when both select bits are 0, so
+    a single flipped entry can go unread.)"""
+    return [(tg[:-1] + bytes([tg[-1] ^ 1]), te[:-1] + bytes([te[-1] ^ 1])) for tg, te in tables]
+
+
+def tables_commitment(tables):
+    h = hashlib.sha256(b"bitvm-arena/gc/ciphertexts\x00")
+    for tg, te in tables:
+        h.update(tg + te)
+    return h.hexdigest()
+
+
 @dataclass
 class Prepared:
     row: dict
@@ -182,21 +372,25 @@ class Prepared:
     desk_presigns: bool
     setup_log: dict = field(default_factory=dict)
     prior: object = None        # G4: the earlier claim's garbling
+    statement: int = STATEMENT
+    index: int = 0              # vault instance
 
 
-def prepare(row):
+def prepare(row, index=0, cfg=None):
     """Deterministic setup: garbling(s), cut-and-choose, and the desk's presign decision."""
-    recipe, cfg = row["recipe"], config(row["recipe"], row["profile"])
+    recipe = row["recipe"]
+    cfg = (cfg or config(recipe, row["profile"])).check()
     attack, cid = row["variant"] == "attack", row["id"]
+    statement = statement_for(cfg, index)
     log = {}
     malicious = attack and recipe in ("garbling_unchecked", "cut_and_choose_grindable")
     if cfg.cut_and_choose == "none":
-        garbling = gc.garble(STATEMENT, seed(cid, "garbling"))
+        garbling = gc.garble(statement, seed(cid, "garbling" if index == 0 else f"garbling/v{index}"))
         data = published(garbling, swapped=malicious)
         log["cut_and_choose"] = "not run (desk presigns the registered instance)"
-        prep = Prepared(row, cfg, garbling, data, True, log)
+        prep = Prepared(row, cfg, garbling, data, True, log, statement=statement, index=index)
     else:
-        instances = [gc.garble(STATEMENT, seed(cid, f"instance{i}")) for i in range(CUT)]
+        instances = [gc.garble(statement, seed(cid, f"instance{i}")) for i in range(CUT)]
 
         def fiat_shamir(commitments):
             return int(hashlib.sha256("".join(commitments).encode()).hexdigest(), 16) % CUT
@@ -240,10 +434,11 @@ def prepare(row):
             if bad and len(bad) < CUT:
                 log["escape_probability_per_attempt"] = f"{len(bad)}/{CUT}"
         opened = [i for i in range(CUT) if i != kept]
-        checks = {i: gc.check_opening(STATEMENT, seed(cid, f"instance{i}"), datas[i]) for i in opened}
+        checks = {i: gc.check_opening(statement, seed(cid, f"instance{i}"), datas[i]) for i in opened}
         log.update(k=CUT, malicious=sorted(bad), grind_attempts=attempts, kept=kept,
                    commitments=commitments, opened_checks={str(i): ok for i, ok in checks.items()})
-        prep = Prepared(row, cfg, instances[kept], datas[kept], all(checks.values()), log)
+        prep = Prepared(row, cfg, instances[kept], datas[kept], all(checks.values()), log,
+                        statement=statement, index=index)
     if recipe == "seed_reuse_across_claims":
         prior_seed = seed(cid, "garbling") if cfg.seed_reuse else seed(cid, "prior-garbling")
         prep.prior = gc.garble(PRIOR_STATEMENT, prior_seed)
@@ -252,9 +447,12 @@ def prepare(row):
 
 
 class Graph:
-    def __init__(self, prep):
+    def __init__(self, prep, cltv_height=None):
         self.prep, self.cfg, self.data = prep, prep.cfg, prep.public
         self.D, self.C, self.W = (public(SECRETS[n]) for n in ("desk", "claimant", "watch"))
+        if self.cfg.payout_timelock == "cltv" and cltv_height is None:
+            raise ValidationError("an absolute payout timelock needs its setup height")
+        self.cltv_height = cltv_height if self.cfg.payout_timelock == "cltv" else None
         label_hash = self.data["reject_label_sha256" if self.cfg.polarity == "reject" else "accept_label_sha256"]
         self.disprove_hash = bytes.fromhex(label_hash)
         claim = push(self.D) + ops("CHECKSIGVERIFY") + push(self.C) + ops("CHECKSIG")
@@ -262,40 +460,59 @@ class Graph:
             openings = b"".join(bit_opening(bytes.fromhex(h0), bytes.fromhex(h1)) + ops("DROP")
                                 for h0, h1 in self.data["input_label_sha256"])
             claim = openings + claim
-        reclaim = number(RECLAIM) + ops("CSV", "DROP") + push(self.D) + ops("CHECKSIG")
+        reclaim = number(self.cfg.reclaim) + ops("CSV", "DROP") + push(self.D) + ops("CHECKSIG")
         self.V = TapTree((claim, reclaim))
-        payout = (number(self.cfg.window) + ops("CSV", "DROP") if self.cfg.payout_csv else b"") + push(self.D) + ops("CHECKSIG")
-        signer = self.D if self.cfg.disprove_mode == "presigned" else self.W
-        disprove = ops("SHA256") + push(self.disprove_hash) + ops("EQUALVERIFY") + push(signer) + ops("CHECKSIG")
-        self.K = TapTree((payout, disprove))
+        if self.cltv_height is not None:
+            lock = number(self.cltv_height) + ops("CLTV", "DROP")
+        elif self.cfg.payout_csv:
+            lock = number(self.cfg.window) + ops("CSV", "DROP")
+        else:
+            lock = b""
+        payout = lock + push(self.D) + ops("CHECKSIG")
+        mode = self.cfg.disprove_mode
+        if mode == "hashlock":
+            disprove = ops("SHA256") + push(self.disprove_hash) + ops("EQUAL")
+        else:
+            signer = self.D if mode in ("presigned", "presigned_single") else self.W
+            disprove = ops("SHA256") + push(self.disprove_hash) + ops("EQUALVERIFY") + push(signer) + ops("CHECKSIG")
+        self.K = TapTree((payout, disprove), self.C if self.cfg.claim_internal == "claimant" else NUMS)
         self.bond_tree = TapTree((push(self.C) + ops("CHECKSIG"),))
-        self.payout_spk = p2tr_key(public(SECRETS["payout"])).script_pubkey
-        self.refund_spk = p2tr_key(public(SECRETS["refund"])).script_pubkey
+        self.payout_spk = spk_of("payout")
+        self.refund_spk = spk_of("refund")
         self.k_value = VAULT + (BOND if self.cfg.bond else 0) - FEE
 
     def claim_id(self):
         h = hashlib.sha256(frame(TAG))
-        for part in (self.prep.row["id"].encode(), STATEMENT.to_bytes(4, "big"), b"bitvm-arena/toy-adder-16",
+        for part in (self.prep.row["id"].encode(), self.prep.statement.to_bytes(4, "big"), b"bitvm-arena/toy-adder-16",
                      bytes.fromhex(self.data["ciphertext_commitment"]), bytes.fromhex(self.data["accept_label_sha256"]),
                      bytes.fromhex(self.data["reject_label_sha256"]), self.payout_spk):
             h.update(frame(part))
         return h.digest()
 
-    def funding(self):
+    def funding(self, extra=None):
         outputs = {"vault": (self.V, VAULT)}
         if self.cfg.bond:
             outputs["bond"] = (self.bond_tree, BOND)
+        outputs.update(extra or {})
         return outputs
 
-    def claim_tx(self, utxos, labels, desk_signs=True):
+    def claim_outputs(self):
+        return [(self.k_value, self.K.script_pubkey), (0, op_return(b"IOB3" + self.claim_id()))]
+
+    def claim_tx(self, utxos, labels, desk_signs=True, outputs=None):
+        """The claim. The desk presigned it at setup over the canonical outputs with
+        `claim_hash_type`; `outputs` is a claimant rewrite that keeps that presignature."""
         ins = [utxo_input(utxos["vault"], 0xffffffff)]
         if self.cfg.bond:
             ins.append(utxo_input(utxos["bond"]))
-        tx = Transaction(ins, [(self.k_value, self.K.script_pubkey), (0, op_return(b"IOB3" + self.claim_id()))])
+        tx = Transaction(ins, self.claim_outputs())
         leaf = self.V.leaf(0)
-        sig_c = tx.signature(0, leaf, SECRETS["claimant"])
         # Without the desk's presignature the claimant can only sign in its place.
-        sig_d = tx.signature(0, leaf, SECRETS["desk"] if desk_signs else SECRETS["claimant"])
+        sig_d = tx.signature(0, leaf, SECRETS["desk"] if desk_signs else SECRETS["claimant"],
+                             self.cfg.claim_hash_type if desk_signs else SIGHASH_DEFAULT)
+        if outputs is not None:
+            tx.outputs = list(outputs)
+        sig_c = tx.signature(0, leaf, SECRETS["claimant"])
         stack = [sig_c, sig_d] + (list(reversed(labels)) if self.cfg.labels_onchain else [])
         tx.inputs[0].witness = stack + [leaf.script, leaf.control]
         if self.cfg.bond:
@@ -307,24 +524,72 @@ class Graph:
         return {"txid": claim.txid, "vout": 0, "amount": self.k_value, "script_pubkey": self.K.script_pubkey.hex()}
 
     def payout_tx(self, claim, destination=None):
-        sequence = self.cfg.window if self.cfg.payout_csv else 0xfffffffd
-        tx = Transaction([utxo_input(self.k_utxo(claim), sequence)], [(self.k_value - FEE, self.payout_spk)])
+        if self.cltv_height is not None:
+            tx = Transaction([utxo_input(self.k_utxo(claim), 0xfffffffe)], [(self.k_value - FEE, self.payout_spk)],
+                             locktime=self.cltv_height)
+        else:
+            sequence = self.cfg.window if self.cfg.payout_csv else 0xfffffffd
+            tx = Transaction([utxo_input(self.k_utxo(claim), sequence)], [(self.k_value - FEE, self.payout_spk)])
         leaf = self.K.leaf(0)
         tx.inputs[0].witness = [tx.signature(0, leaf, SECRETS["desk"], self.cfg.payout_hash_type), leaf.script, leaf.control]
         if destination is not None:     # an outsider rewrites the outputs, keeping the desk's witness
             tx.outputs = [(self.k_value - FEE, destination)]
         return tx
 
-    def disprove_tx(self, claim, label, signer):
-        tx = Transaction([utxo_input(self.k_utxo(claim))], [])
+    def disprove_outputs(self, beneficiary, fee=FEE):
+        if self.cfg.disprove_fee == "zero_no_anchor":
+            return [(self.k_value, self.refund_spk)]
+        if self.cfg.disprove_fee == "zero_anchor":
+            return [(self.k_value, self.refund_spk), (0, P2A)]
         if self.cfg.bond:
-            tx.outputs = [(VAULT - 2 * FEE, self.refund_spk), (BOND, p2tr_key(public(SECRETS[signer])).script_pubkey)]
-        else:
-            tx.outputs = [(self.k_value - FEE, self.refund_spk)]
+            return [(VAULT - 2 * FEE, self.refund_spk),
+                    (BOND - (fee - FEE), BURN_SPK if self.cfg.bond_burn else beneficiary)]
+        if self.cfg.disprove_mode == "hashlock":
+            return [(self.k_value - fee, beneficiary)]
+        return [(self.k_value - fee, self.refund_spk)]
+
+    def disprove_tx(self, claim, label, signer, beneficiary=None, fee=FEE):
+        """The disprove spend. `beneficiary` takes whatever output the mode leaves open
+        (a bond reward, or everything under a hashlock-only leaf)."""
+        if beneficiary is None:
+            beneficiary = spk_of(signer)
+        version = 3 if self.cfg.disprove_fee == "zero_anchor" else 2
+        tx = Transaction([utxo_input(self.k_utxo(claim))], self.disprove_outputs(beneficiary, fee), version=version)
         leaf = self.K.leaf(1)
-        key = "desk" if self.cfg.disprove_mode == "presigned" else signer
-        tx.inputs[0].witness = [tx.signature(0, leaf, SECRETS[key]), label, leaf.script, leaf.control]
+        mode = self.cfg.disprove_mode
+        if mode == "hashlock":
+            tx.inputs[0].witness = [label, leaf.script, leaf.control]
+        else:
+            key = "desk" if mode in ("presigned", "presigned_single") else signer
+            hash_type = SIGHASH_SINGLE if mode == "presigned_single" else SIGHASH_DEFAULT
+            tx.inputs[0].witness = [tx.signature(0, leaf, SECRETS[key], hash_type), label, leaf.script, leaf.control]
         return tx
+
+    def anchor_child(self, parent, fee_utxo):
+        """TRUC child spending the disprove's P2A anchor plus the watcher's own coin."""
+        anchor = {"txid": parent.txid, "vout": 1, "amount": 0, "script_pubkey": P2A.hex()}
+        tx = Transaction([utxo_input(anchor), utxo_input(fee_utxo)],
+                         [(fee_utxo["amount"] - CHILD_FEE, spk_of("watch"))], version=3)
+        tx.inputs[1].witness = [tx.signature(1, None, p2tr_key(self.W).tweaked_secret(SECRETS["watch"]))]
+        return tx
+
+    def sweep_tx(self, claim, destination):
+        """Key-path spend of the claim output by the claimant, as if it were the internal key."""
+        tx = Transaction([utxo_input(self.k_utxo(claim))], [(self.k_value - FEE, destination)])
+        tree = TapTree(self.K.scripts, self.C)
+        tx.inputs[0].witness = [tx.signature(0, None, tree.tweaked_secret(SECRETS["claimant"]))]
+        return tx
+
+    def reclaim_tx(self, utxo):
+        tx = Transaction([utxo_input(utxo, self.cfg.reclaim)], [(VAULT - FEE, self.refund_spk)])
+        leaf = self.V.leaf(1)
+        tx.inputs[0].witness = [tx.signature(0, leaf, SECRETS["desk"]), leaf.script, leaf.control]
+        return tx
+
+
+def rewrite(tx, outputs):
+    """Same inputs and witnesses, different outputs: what a party does with a presignature."""
+    return Transaction(tx.inputs, list(outputs), tx.locktime, tx.version)
 
 
 def labels_from_claim(raw):
@@ -333,26 +598,73 @@ def labels_from_claim(raw):
     return list(reversed(witness[2:-2]))
 
 
-def run_case(session, row):
-    prep = prepare(row)
-    graph = Graph(prep)
-    recipe, attack, cfg = row["recipe"], row["variant"] == "attack", prep.cfg
-    proof = FALSE_PROOF if attack and recipe not in EXPECTED_HONEST_PAID_ON_ATTACK else HONEST_PROOF
-    session.begin(keys())
-    session.offchain("setup", "claimant", statement=STATEMENT, registered=graph.data["ciphertext_commitment"],
+def evaluator_tables(prep, handed_corrupt):
+    """Tables the evaluator actually uses: its setup copy, or what the claimant handed over."""
+    if prep.cfg.tables_at == "claim" and handed_corrupt:
+        return corrupt_tables(prep.garbling.tables), "claim handover"
+    return prep.garbling.tables, "setup" if prep.cfg.tables_at == "setup" else "claim handover"
+
+
+def proof_for(row):
+    attack = row["variant"] == "attack"
+    return FALSE_PROOF if attack and row["recipe"] not in HONEST_ATTACKS else HONEST_PROOF
+
+
+def setup_record(session, prep, graph, statement):
+    session.offchain("setup", "claimant", statement=statement, registered=graph.data["ciphertext_commitment"],
                      accept_label_sha256=graph.data["accept_label_sha256"],
                      reject_label_sha256=graph.data["reject_label_sha256"],
                      disprove_leaf_hash=graph.disprove_hash.hex(), log=prep.setup_log,
-                     desk_presigns=prep.desk_presigns, config=cfg.__dict__)
-    utxos = session.fund(graph.funding())
+                     desk_presigns=prep.desk_presigns, config=prep.cfg.__dict__, cltv_height=graph.cltv_height)
+
+
+def run_case(session, row):
+    if row["recipe"] == "proof_replay_across_vaults" and row["variant"] == "attack":
+        return run_replay_case(session, row)
+    recipe, attack = row["recipe"], row["variant"] == "attack"
+    cfg = config(recipe, row["profile"])
+    session.begin(keys())
+    prep = prepare(row)
+    graph = Graph(prep, cltv_height=session.height() + WINDOW if cfg.payout_timelock == "cltv" else None)
+    proof = proof_for(row)
+    setup_record(session, prep, graph, prep.statement)
+    extra = {"watch_fee": (p2tr_key(graph.W), WATCH_FUNDS)} if recipe == "disprove_unbumpable" else None
+    utxos = session.fund(graph.funding(extra))
     bits = gc.proof_bits(*proof)
     labels = prep.garbling.input_labels(bits)
-    session.offchain("claim proof", "claimant", proof=list(proof), statement=STATEMENT)
+
+    # Before the claim.
+    if recipe == "reclaim_preempts_claim" and attack:
+        session.offchain("paying the user", "claimant", declared_blocks=PAYMENT_DELAY,
+                         note="the honest claimant fronts the user's payment before claiming")
+        funded_at = step(session.steps, "fund")["height"]
+        # The desk tries at the first height its reclaim could be final, within the delay.
+        session.mine(max(1, min(cfg.reclaim, PAYMENT_DELAY) - 1))
+        if session.submit("reclaim", "desk", graph.reclaim_tx(utxos["vault"])):
+            session.mine(1, "reclaim confirms")
+        if session.height() - funded_at < PAYMENT_DELAY:
+            session.mine(PAYMENT_DELAY - (session.height() - funded_at))
+    if recipe == "payout_absolute_timelock" and attack:
+        late = step(session.steps, "setup")["height"] + WINDOW
+        session.offchain("claimant waits", "claimant", until_height=late,
+                         note="the claim is made after setup height + window")
+        if session.height() < late:
+            session.mine(late - session.height())
+
+    session.offchain("claim proof", "claimant", proof=list(proof), statement=prep.statement)
+    if recipe == "claim_sighash_none" and attack:
+        rewritten = graph.claim_tx(utxos, labels, prep.desk_presigns,
+                                   outputs=[(graph.k_value, graph.payout_spk)])
+        if session.submit("rewritten claim", "claimant", rewritten, note="desk presignature reused, outputs replaced"):
+            session.mine(1, "rewritten claim confirms")
+            return prep, session.finish()
     claim = graph.claim_tx(utxos, labels, desk_signs=prep.desk_presigns)
     if not session.submit("claim", "claimant", claim):
         session.offchain("vault check", "evaluator", vault_unspent=session.utxo_unspent(utxos["vault"]["txid"],
                                                                                          utxos["vault"]["vout"]))
         return prep, session.finish()
+    if recipe == "payout_absolute_timelock" and attack:
+        session.submit("payout", "claimant", graph.payout_tx(claim), note="broadcast right behind the claim")
     session.mine(1, "claim confirmed")
     conf = 1
 
@@ -361,6 +673,21 @@ def run_case(session, row):
         if to > conf:
             session.mine(to - conf)
             conf = to
+
+    # Right after the claim confirms.
+    if recipe == "claim_internal_key_spendable" and attack:
+        if session.submit("key-path sweep", "claimant", graph.sweep_tx(claim, graph.payout_spk)):
+            session.mine(1, "sweep confirms")
+            conf += 1
+    if recipe == "disprove_outputs_unbound" and attack:
+        reject = prep.garbling.reject_label      # the garbler made every label
+        if cfg.disprove_mode == "hashlock":
+            theft = graph.disprove_tx(claim, reject, "claimant", beneficiary=graph.payout_spk)
+        else:
+            theft = rewrite(graph.disprove_tx(claim, reject, "claimant"), [(graph.k_value - FEE, graph.payout_spk)])
+        if session.submit("self-spend disprove", "claimant", theft, note="reject label known to the garbler"):
+            session.mine(1, "self-spend confirms")
+            conf += 1
 
     # Label handover / extraction and evaluation.
     holders = ["watch", "third"] if recipe == "single_watcher_disprove" else ["watch"]
@@ -374,6 +701,12 @@ def run_case(session, row):
     else:
         got = labels
         session.offchain("label handover", "claimant", to=holders, labels=[x.hex() for x in got])
+    corrupt = attack and recipe == "tables_delivered_late"
+    tables, source = evaluator_tables(prep, corrupt)
+    if recipe == "tables_delivered_late":
+        handed = corrupt_tables(prep.garbling.tables) if corrupt else prep.garbling.tables
+        session.offchain("tables handover", "claimant", commitment=tables_commitment(handed),
+                         registered=graph.data["ciphertext_commitment"], evaluator_uses=source)
 
     if recipe == "payout_csv_removed" and attack:
         if session.submit("payout", "claimant", graph.payout_tx(claim), note="immediately after the claim confirms"):
@@ -385,7 +718,7 @@ def run_case(session, row):
     evaluator = "third" if recipe == "single_watcher_disprove" else "watch"
     verdict, out_label = "no labels", None
     if got is not None:
-        out_label = gc.evaluate(STATEMENT, prep.garbling.tables, got)
+        out_label = gc.evaluate(prep.statement, tables, got)
         verdict = gc.decode(out_label, graph.data["accept_label_sha256"], graph.data["reject_label_sha256"])
     if recipe == "single_watcher_disprove":
         session.offchain("watcher offline", "watch")
@@ -397,6 +730,7 @@ def run_case(session, row):
             session.submit("payout", "claimant", graph.payout_tx(claim), note=f"at {WINDOW} confirmations")
         advance(LATENCY)
     session.offchain("evaluate", evaluator, labels=None if got is None else [x.hex() for x in got],
+                     tables_source=source, tables_commitment=tables_commitment(tables),
                      output_label=None if out_label is None else out_label.hex(), verdict=verdict)
 
     if recipe == "seed_reuse_across_claims" and attack:
@@ -416,11 +750,42 @@ def run_case(session, row):
         attempt = forged if forged is not None else gc.xor(out_label, candidates[0])
         session.submit("griefing disprove", "watch", graph.disprove_tx(claim, attempt, "watch"))
     elif verdict == "reject":
-        session.submit("disprove", evaluator, graph.disprove_tx(claim, out_label, evaluator))
+        honest_beneficiary = graph.refund_spk if cfg.disprove_mode == "hashlock" else None
+        disprove = graph.disprove_tx(claim, out_label, evaluator, beneficiary=honest_beneficiary)
+        if cfg.disprove_fee == "zero_anchor":
+            session.submit_package([("disprove", disprove),
+                                    ("disprove fee child", graph.anchor_child(disprove, utxos["watch_fee"]))],
+                                   evaluator, note="desk offline: the watcher pays the fee through the P2A anchor")
+        elif cfg.disprove_fee == "zero_no_anchor":
+            session.submit("disprove", evaluator, disprove, note="presigned at zero fee, no anchor; desk offline")
+        else:
+            session.submit("disprove", evaluator, disprove)
+        if recipe == "bond_self_slash" and attack:
+            # The garbler holds the reject label too, and replaces the watcher's disprove
+            # with one that sends the bond back to itself at a higher fee.
+            take_back = [(VAULT - 2 * FEE, graph.refund_spk), (BOND - FEE, graph.bond_tree.script_pubkey)]
+            if cfg.disprove_mode == "presigned_single":
+                own = graph.disprove_tx(claim, prep.garbling.reject_label, "claimant",
+                                        beneficiary=graph.bond_tree.script_pubkey, fee=2 * FEE)
+            else:
+                own = rewrite(disprove, take_back)
+            session.submit("self-slash disprove", "claimant", own, note="replaces the watcher's disprove (full RBF)")
+            session.mine(1, "a disprove confirms")
+            conf += 1
+        if recipe == "disprove_censored_by_miner" and attack:
+            if cfg.window <= CENSOR:
+                session.mine_empty(cfg.window - 1, "miner", note="the disprove waits in the mempool")
+                conf += cfg.window - 1
+            else:
+                session.mine_empty(CENSOR, "miner", note="censorship bound reached")
+                conf += CENSOR
+            if session.submit_in_block("payout", "miner", graph.payout_tx(claim),
+                                       note="the colluding miner mines the payout, leaving the disprove out"):
+                conf += 1
 
     advance(cfg.window)
     if recipe == "payout_sighash_none" and attack:
-        thief = p2tr_key(public(SECRETS["relayer"])).script_pubkey
+        thief = spk_of("relayer")
         if session.submit("redirected payout", "relayer", graph.payout_tx(claim, destination=thief),
                           note="the relayer mines its own rewrite"):
             session.mine(1, "relayer's block")
@@ -429,13 +794,53 @@ def run_case(session, row):
     return prep, session.finish()
 
 
+def run_replay_case(session, row):
+    """Two vaults, one honest payment proof, claimed against both."""
+    cfg = config(row["recipe"], row["profile"])
+    session.begin(keys())
+    preps = [prepare(row), prepare(row, index=1)]
+    graphs = [Graph(p) for p in preps]
+    for i, (prep, graph) in enumerate(zip(preps, graphs)):
+        session.offchain("setup" if i == 0 else "setup 2", "claimant", statement=prep.statement,
+                         registered=graph.data["ciphertext_commitment"],
+                         reject_label_sha256=graph.data["reject_label_sha256"],
+                         disprove_leaf_hash=graph.disprove_hash.hex(), log=prep.setup_log,
+                         desk_presigns=prep.desk_presigns, config=cfg.__dict__, cltv_height=None)
+    utxos = [session.fund(graphs[0].funding()), session.fund(graphs[1].funding(), label="fund 2")]
+    proof = HONEST_PROOF
+    session.offchain("claim proof", "claimant", proof=list(proof), statement=preps[0].statement)
+    bits = gc.proof_bits(*proof)
+    claims, suffix = [], ("", " 2")
+    for i in range(2):
+        labels = preps[i].garbling.input_labels(bits)
+        claim = graphs[i].claim_tx(utxos[i], labels)
+        session.submit("claim" + suffix[i], "claimant", claim, note=None if i == 0 else "same proof, second vault")
+        claims.append((claim, labels))
+    session.mine(1, "claims confirmed")
+    for i in range(2):
+        claim, labels = claims[i]
+        session.offchain("label handover" + suffix[i], "claimant", to=["watch"], labels=[x.hex() for x in labels])
+        out = gc.evaluate(preps[i].statement, preps[i].garbling.tables, labels)
+        verdict = gc.decode(out, graphs[i].data["accept_label_sha256"], graphs[i].data["reject_label_sha256"])
+        session.offchain("evaluate" + suffix[i], "watch", labels=[x.hex() for x in labels],
+                         statement=preps[i].statement, tables_source="setup",
+                         tables_commitment=tables_commitment(preps[i].garbling.tables),
+                         output_label=out.hex(), verdict=verdict)
+        if verdict == "reject":
+            session.submit("disprove" + suffix[i], "watch", graphs[i].disprove_tx(claim, out, "watch"))
+    session.mine(cfg.window - 1)
+    for i in range(2):
+        session.submit("payout" + suffix[i], "claimant", graphs[i].payout_tx(claims[i][0]))
+    return preps[0], session.finish()
+
+
 def confirmed_now(session, label):
     return any(s["kind"] == "tx" and s["label"] == label and s["broadcast"] for s in session.steps)
 
 
 def claimant_scripts():
     tree = TapTree((push(public(SECRETS["claimant"])) + ops("CHECKSIG"),))
-    return {tree.script_pubkey.hex(), p2tr_key(public(SECRETS["payout"])).script_pubkey.hex()}
+    return {tree.script_pubkey.hex(), spk_of("payout").hex()}
 
 
 def claimant_loss(steps):
@@ -450,7 +855,7 @@ def claimant_loss(steps):
 def score(row, steps):
     """Outcome from confirmed transactions only; never reads the declared expectation."""
     proof = step(steps, "claim proof")
-    honest = proof is not None and sum(proof["proof"]) == proof["statement"]
+    honest = proof is not None and sum(proof["proof"]) == STATEMENT
     paid = confirmed(steps, "payout")
     recipe = row["recipe"]
     if recipe == "seed_reuse_across_claims":
@@ -459,6 +864,18 @@ def score(row, steps):
         attack = confirmed(steps, "redirected payout")
     elif recipe == "claimant_unbonded":
         attack = (not honest) and confirmed(steps, "claim") and claimant_loss(steps) <= 0
+    elif recipe == "bond_self_slash":
+        attack = (not honest) and confirmed(steps, "claim") and claimant_loss(steps) < BOND // 2
+    elif recipe == "claim_sighash_none":
+        attack = confirmed(steps, "rewritten claim")
+    elif recipe == "claim_internal_key_spendable":
+        attack = confirmed(steps, "key-path sweep")
+    elif recipe == "disprove_outputs_unbound":
+        attack = confirmed(steps, "self-spend disprove")
+    elif recipe == "reclaim_preempts_claim":
+        attack = honest and confirmed(steps, "reclaim") and not paid
+    elif recipe == "proof_replay_across_vaults":
+        attack = honest and paid and confirmed(steps, "payout 2")
     else:
         attack = (not honest) and paid
     return {"attack_success": bool(attack), "honest_claim_paid": bool(honest and paid)}
@@ -479,6 +896,34 @@ def execute(binary, directory, rows=None):
     return finalize_report(TRACK, provenance, rows, cases)
 
 
+def audit_instance(cid, row, steps, prep, graph, suffix, problems):
+    setup = step(steps, "setup" + suffix)
+    if setup is None or setup.get("registered") != graph.data["ciphertext_commitment"] \
+            or setup.get("disprove_leaf_hash") != graph.disprove_hash.hex() \
+            or setup.get("desk_presigns") != prep.desk_presigns or setup.get("statement") != prep.statement:
+        problems.append(f"{cid}: recorded setup{suffix} differs from the rebuilt setup")
+    fund = step(steps, "fund" + suffix)
+    if fund is None or fund["outputs"]["vault"]["script_pubkey"] != graph.V.script_pubkey.hex():
+        problems.append(f"{cid}: funded vault{suffix} script differs from the rebuilt graph")
+    claim = step(steps, "claim" + suffix)
+    if claim is not None:
+        parsed = Transaction.parse(claim["raw_transaction"])
+        if parsed.outputs != graph.claim_outputs():
+            problems.append(f"{cid}: claim{suffix} outputs differ from the rebuilt graph")
+    evaluation = step(steps, "evaluate" + suffix)
+    if evaluation is not None and evaluation["labels"] is not None:
+        corrupt = row["variant"] == "attack" and row["recipe"] == "tables_delivered_late"
+        tables, source = evaluator_tables(prep, corrupt)
+        if evaluation.get("tables_source") != source or evaluation.get("tables_commitment") != tables_commitment(tables):
+            problems.append(f"{cid}: recorded evaluator tables{suffix} differ from the rebuilt ones")
+        got = [bytes.fromhex(x) for x in evaluation["labels"]]
+        out = gc.evaluate(prep.statement, tables, got)
+        verdict = gc.decode(out, graph.data["accept_label_sha256"], graph.data["reject_label_sha256"])
+        if out.hex() != evaluation["output_label"] or verdict != evaluation["verdict"]:
+            problems.append(f"{cid}: re-evaluated garbling{suffix} disagrees with the recorded evaluation")
+    return claim
+
+
 def audit(report):
     """Offline audit: envelope, local tx checks, rebuilt setup, re-evaluated garblings, rescoring."""
     rows = catalog()
@@ -492,29 +937,20 @@ def audit(report):
         if case.get("keys") != keys():
             problems.append(f"{cid}: party keys differ from the fixture keys")
         problems += [f"{cid}: {p}" for p in audit_transactions(case, keys())]
-        prep = prepare(row)
-        graph = Graph(prep)
         steps = case["steps"]
-        setup = step(steps, "setup")
-        if setup is None or setup.get("registered") != graph.data["ciphertext_commitment"] \
-                or setup.get("disprove_leaf_hash") != graph.disprove_hash.hex() \
-                or setup.get("desk_presigns") != prep.desk_presigns:
-            problems.append(f"{cid}: recorded setup differs from the rebuilt setup")
-        fund = step(steps, "fund")
-        if fund is None or fund["outputs"]["vault"]["script_pubkey"] != graph.V.script_pubkey.hex():
-            problems.append(f"{cid}: funded vault script differs from the rebuilt graph")
-        claim = step(steps, "claim")
-        if claim is not None:
-            parsed = Transaction.parse(claim["raw_transaction"])
-            if parsed.outputs[0][1] != graph.K.script_pubkey or parsed.outputs[1][1] != op_return(b"IOB3" + graph.claim_id()):
-                problems.append(f"{cid}: claim outputs differ from the rebuilt graph")
-        evaluation = step(steps, "evaluate")
-        if evaluation is not None and evaluation["labels"] is not None:
-            got = [bytes.fromhex(x) for x in evaluation["labels"]]
-            out = gc.evaluate(STATEMENT, prep.garbling.tables, got)
-            verdict = gc.decode(out, graph.data["accept_label_sha256"], graph.data["reject_label_sha256"])
-            if out.hex() != evaluation["output_label"] or verdict != evaluation["verdict"]:
-                problems.append(f"{cid}: re-evaluated garbling disagrees with the recorded evaluation")
+        prep = prepare(row)
+        setup = step(steps, "setup") or {}
+        cltv = None
+        if prep.cfg.payout_timelock == "cltv":
+            cltv = setup.get("cltv_height")
+            if cltv != setup.get("height", -1) + WINDOW:
+                problems.append(f"{cid}: absolute payout height is not setup height + {WINDOW}")
+                cltv = setup.get("height", 0) + WINDOW
+        graph = Graph(prep, cltv)
+        claim = audit_instance(cid, row, steps, prep, graph, "", problems)
+        if row["recipe"] == "proof_replay_across_vaults" and row["variant"] == "attack":
+            prep2 = prepare(row, index=1)
+            audit_instance(cid, row, steps, prep2, Graph(prep2), " 2", problems)
         chain = step(steps, "labels from chain")
         if chain is not None and claim is not None:
             if [x.hex() for x in labels_from_claim(claim["raw_transaction"])] != chain["labels"]:

@@ -1,0 +1,10 @@
+{"op": "claim", "args": {"proof": [40000, 9400], "labels": "handover", "tables": "honest"}}
+{"op": "wait", "args": {"blocks": 1}}
+{"op": "mine", "args": {"include": "none"}}
+{"op": "mine", "args": {"include": "none"}}
+{"op": "mine", "args": {"include": "none"}}
+{"op": "mine", "args": {"include": "none"}}
+{"op": "mine", "args": {"include": "none"}}
+{"op": "spend", "args": {"utxo": "claim", "path": "payout"}}
+{"op": "mine", "args": {"include": ["@claim:payout"]}}
+{"op": "end"}

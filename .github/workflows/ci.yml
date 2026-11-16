@@ -70,6 +70,12 @@ jobs:
           for track in primitive bitvm3 bitvm2; do
             python -m bitvm_corpus native audit "examples/native/$track-core31.1.json"
           done
+      - name: Audit the saved episode reports offline
+        run: |
+          for report in examples/episodes/reports/*.json; do
+            python -m bitvm_corpus native audit "$report"
+          done
+      - run: python -m bitvm_corpus native assess --app iob-payout-desk
 
   corpus-regtest:
     runs-on: ubuntu-latest
@@ -92,7 +98,10 @@ jobs:
           echo "$CORE_SHA256  $RUNNER_TEMP/$archive" | sha256sum -c -
           tar -xzf "$RUNNER_TEMP/$archive" -C "$RUNNER_TEMP" "bitcoin-$CORE_VERSION/bin/bitcoind"
           echo "BITVM_ARENA_BITCOIND=$RUNNER_TEMP/bitcoin-$CORE_VERSION/bin/bitcoind" >> "$GITHUB_ENV"
-      - run: python -m unittest discover -s tests -p test_native.py -v
+      - run: python -m unittest discover -s tests -p 'test_native.py' -v
+      - run: python -m unittest discover -s tests -p 'test_episode.py' -v
+      - name: Rerun every example episode and audit it
+        run: python tools/rebuild_episode_reports.py --bitcoind "$BITVM_ARENA_BITCOIND"
       - name: Run every native track on regtest and audit the reports
         run: |
           mkdir -p reports

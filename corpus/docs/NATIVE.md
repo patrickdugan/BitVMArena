@@ -9,7 +9,7 @@ non-regtest chains, and never attaches to an existing node.
 | Track | Module | Cases | What a case is |
 | --- | --- | --- | --- |
 | `primitive` | [`native.py`](../bitvm_corpus/native.py) | 56 = 14 recipes x 4 | Fund one contract, optionally spend a challenge connector or wait out a timelock, then attempt one spend |
-| `bitvm3` | [`bitvm3.py`](../bitvm_corpus/bitvm3.py) | 40 = 10 recipes x 4 | A garbled-circuit claim graph: setup, claim, label handover, evaluation, disprove, payout ([BITVM3.md](BITVM3.md)) |
+| `bitvm3` | [`bitvm3.py`](../bitvm_corpus/bitvm3.py) | 80 = 20 recipes x 4 | A garbled-circuit claim graph: setup, claim, label handover, evaluation, disprove, payout, across seven layers from garbling to miners ([BITVM3.md](BITVM3.md)). Interactive attacker-driven episodes run on the same graph ([EPISODES.md](EPISODES.md)) |
 | `bitvm2` | [`bitvm2.py`](../bitvm_corpus/bitvm2.py) + [`wots.py`](../bitvm_corpus/wots.py) | 32 = 8 recipes x 4 | The BitVM2 bridge graph at BitVM/BitVM `c620dbfa`: kick-off, challenge, take 1, assert with Winternitz commitments, disprove, take 2. It is the baseline for the comparison in [BITVM3.md](BITVM3.md) |
 
 The four combinations per recipe are `hardened` or `mutant` crossed with `benign` or
@@ -39,9 +39,14 @@ A report records, for each case, every step:
 
 - **Transactions:** raw hex, txid, the prevouts spent, Core's `testmempoolaccept`
   result and reject reason, whether it was broadcast, and its confirmation block.
+  Package submissions (`submitpackage`, for CPFP through a P2A anchor) also record each
+  transaction's result alone and in the package. Transactions a miner put straight into
+  a block (`generateblock`) record both the mempool verdict and the block verdict. A
+  broadcast transaction that a replacement or a conflicting block pushed out is marked
+  `displaced`.
 - **Off-chain actions:** garbling commitments, cut-and-choose openings, label handover,
   evaluation results.
-- **Mining:** the blocks mined between steps.
+- **Mining:** the blocks mined between steps, including empty blocks from a censoring miner.
 
 The report also carries Core's version, subversion and binary SHA-256, and a hash over
 the whole body.
@@ -51,9 +56,12 @@ the whole body.
 - the body hash, and that the cases match this library's catalog row for row;
 - that each txid recomputes from the raw transaction, and each input spends its
   recorded prevout;
+- that no two confirmed transactions spend the same outpoint, and that nothing is both
+  displaced and confirmed;
 - every Taproot script-path commitment, against BIP341, locally;
-- every Schnorr signature, against the key named by the CHECKSIG that consumes it,
-  with the BIP341/342 signature message recomputed. Where Core accepted, every local
+- every Schnorr signature, against the key named by the CHECKSIG that consumes it (or,
+  on the key path, against the output key), with the BIP341/342 signature message
+  recomputed. Where Core accepted, every local
   check must pass. Where Core reported `Invalid Schnorr signature` or `Witness program
   hash mismatch`, the local check must fail too;
 - the deterministic setup, rebuilt from the case id: compiled leaves, graph scripts,
@@ -63,8 +71,8 @@ the whole body.
 - the outcome, rescored from the recorded steps.
 
 Tests show that a flipped transaction byte, an altered confirmation flag, a relabeled
-expectation or a dropped case is reported, even after the attacker recomputes the body
-hash.
+expectation, a dropped case or a replaced transaction claimed as confirmed is reported,
+even after the attacker recomputes the body hash.
 
 ## Primitive recipes
 
@@ -90,13 +98,14 @@ hash.
 | File | Core | Result |
 | --- | --- | --- |
 | [`examples/native/primitive-core31.1.json`](../examples/native/primitive-core31.1.json) | 31.1.0 | 56/56 met; 42 confirmed, 16 rejected transactions |
-| [`examples/native/bitvm3-core31.1.json`](../examples/native/bitvm3-core31.1.json) | 31.1.0 | 40/40 met; 76 confirmed, 19 rejected transactions |
+| [`examples/native/bitvm3-core31.1.json`](../examples/native/bitvm3-core31.1.json) | 31.1.0 | 80/80 met; 159 confirmed, 43 rejected transactions |
 | [`examples/native/bitvm2-core31.1.json`](../examples/native/bitvm2-core31.1.json) | 31.1.0 | 32/32 met; 106 confirmed, 27 rejected transactions |
 
 Core 31.1 was installed from bitcoincore.org with its SHA-256 checked against
 SHA256SUMS and five builder GPG signatures verified (binary SHA-256 `f79eeb94…d3db77a`).
 The BitVM3 track was also run on Core 31.2 (binary `286e32ee…c95801`, archive
-checksum-matched only). Every per-step verdict was identical to 31.1.
+checksum-matched only). All 80 trajectories met their expectations, and every per-step
+verdict was identical to 31.1.
 
 The repository's CI audits these files offline on every push. Its
 `corpus-regtest` job also downloads the Core 31.1 Linux archive, checks it

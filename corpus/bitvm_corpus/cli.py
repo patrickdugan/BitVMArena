@@ -49,10 +49,25 @@ def track_module(name):
 def native_command(args):
     import os
     import uuid
+    if args.action == "apps":
+        from .episode import describe_apps
+        emit(describe_apps(), args.output)
+        return 0
+    if args.action == "episode":
+        return episode_command(args)
+    if args.action == "assess":
+        emit(assess_command(args), args.output)
+        return 0
     if args.action == "audit":
         if args.report is None:
             raise ValidationError("audit needs a report file")
         report = load_json(args.report)
+        if report.get("kind") == "bitvm3-episode":
+            from .episode import audit_episode
+            problems = audit_episode(report)
+            emit({"kind": report["kind"], "app": report.get("app"), "actions": len(report.get("actions", [])),
+                  "outcome": report.get("outcome"), "problems": problems, "valid": not problems})
+            return 0 if not problems else 1
         problems = track_module(report.get("track")).audit(report)
         emit({"track": report.get("track"), "cases": len(report.get("cases", [])),
               "expectation_failures": report.get("summary", {}).get("expectation_failures"),
@@ -74,6 +89,71 @@ def native_command(args):
     if args.output:
         print(f"bitvm-corpus: {json.dumps(report['summary'])}", file=sys.stderr)
     return 0 if not report["summary"]["expectation_failures"] else 1
+
+
+def assess_command(args):
+    """Static exposure check of a BitVM3 design: a preset (--app) or Config overrides."""
+    from dataclasses import fields
+    from .bitvm3 import Config, assess
+    from .canonical import parse_json
+    overrides = parse_json(args.config) if args.config else {}
+    assume = parse_json(args.assume) if args.assume else {}
+    if not isinstance(overrides, dict) or not isinstance(assume, dict):
+        raise ValidationError("--config and --assume must be JSON objects")
+    if args.app:
+        from .episode import resolve_app
+        cfg, preset = resolve_app(args.app, overrides)
+        assume = {"desk_online_at_dispute": preset["desk_online"],
+                  "censorship_blocks": preset["censorship_blocks"], **assume}
+    else:
+        defaults = {f.name: getattr(Config(), f.name) for f in fields(Config)}
+        unknown = set(overrides) - set(defaults)
+        if unknown:
+            raise ValidationError(f"unknown config keys: {sorted(unknown)}")
+        for key, value in overrides.items():
+            if type(value) is not type(defaults[key]):
+                raise ValidationError(f"config {key} must be of type {type(defaults[key]).__name__}")
+        cfg = Config(**{**defaults, **overrides})
+    result = assess(cfg, assume)
+    result["app"] = args.app
+    return result
+
+
+def episode_command(args):
+    import os
+    import uuid
+    from .canonical import parse_json
+    from .episode import run_episode
+    if not args.app:
+        raise ValidationError("episode needs --app")
+    overrides = parse_json(args.config) if args.config else {}
+    root = Path(__file__).resolve().parents[1]
+    default = root / "work/toolchains/core-31.2/bitcoind.exe"
+    binary = args.bitcoind or Path(os.environ.get("BITVM_ARENA_BITCOIND", default))
+
+    def lines():
+        handle = open(args.actions, encoding="utf-8") if args.actions else sys.stdin
+        try:
+            while True:
+                line = handle.readline(65_537)
+                if not line:
+                    return
+                if len(line) > 65_536:
+                    yield "{"          # an oversized action is an invalid action
+                elif line.strip():
+                    yield line
+        finally:
+            if args.actions:
+                handle.close()
+
+    def write(value):
+        print(json.dumps(value, allow_nan=False), flush=True)
+
+    report = run_episode(binary, root / "work" / "regtest" / uuid.uuid4().hex, args.app, overrides, lines(), write,
+                         miner=args.miner, tag=args.tag)
+    if args.output:
+        emit(report, args.output)
+    return 0
 
 
 def main(argv=None):
@@ -118,12 +198,18 @@ def main(argv=None):
     p.add_argument("--argv", required=True, help="JSON argv array for a local adapter")
     p.add_argument("--output", type=Path)
     p = sub.add_parser("native", help="native Bitcoin Core regtest tracks (primitive, bitvm2, bitvm3)")
-    p.add_argument("action", choices=("list", "run", "audit"))
+    p.add_argument("action", choices=("list", "run", "audit", "apps", "episode", "assess"))
     p.add_argument("report", nargs="?", type=Path, help="report file for audit")
     p.add_argument("--track", choices=("primitive", "bitvm2", "bitvm3"), default="bitvm3")
     p.add_argument("--bitcoind", type=Path, help="bitcoind binary (default: $BITVM_ARENA_BITCOIND or work/toolchains)")
     p.add_argument("--match", help="only cases whose id contains this text")
     p.add_argument("--output", type=Path)
+    p.add_argument("--app", help="episode: application preset (see `native apps`)")
+    p.add_argument("--config", help="episode/assess: JSON object overriding config fields (and episode assumptions)")
+    p.add_argument("--tag", default="1", help="episode: setup tag; changes the garbling seed")
+    p.add_argument("--assume", help="assess: JSON object of assumptions (see bitvm3.ASSUMPTIONS)")
+    p.add_argument("--miner", action="store_true", help="episode: grant the attacker the miner capability")
+    p.add_argument("--actions", type=Path, help="episode: JSONL actions file (default: stdin)")
     args = parser.parse_args(argv)
     try:
         if args.command == "native":
