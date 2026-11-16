@@ -25,7 +25,7 @@ claim K   NUMS + { payout:   <6> CSV DROP <D> CHECKSIG               -> P'   (D 
 The leaf scripts, window and reclaim delay are the same as the target's. The claim_id
 framing is the target's, with the toy circuit identifier in place of M14's program key.
 
-**Garbling** ([`gc.py`](../bitvm_arena/gc.py)): free-XOR plus half-gates, with one Δ per
+**Garbling** ([`gc.py`](../bitvm_corpus/gc.py)): free-XOR plus half-gates, with one Δ per
 garbling and point-and-permute. This is the construction family of the
 garbled-snark-verifier engine behind M14, with SHA-256 as the gate hash. The circuit
 accepts a proof `(a, b)` exactly when `a + b == statement` over 16 bits, with no carry
@@ -36,7 +36,7 @@ out. The statement is a circuit constant, as M14 pins its statement.
 - A false claim is a proof that does not satisfy the statement. Evaluating the circuit
   on it yields the reject label, which is the preimage the disprove leaf asks for.
 
-**What the auditor re-checks offline** (`bitvm-arena native audit`):
+**What the auditor re-checks offline** (`bitvm-corpus native audit`):
 
 - every transaction: txid, Taproot commitments, and each signature against the key its
   CHECKSIG names;
@@ -73,7 +73,7 @@ tests.
 
 ## What BitVM3 changes relative to BitVM2
 
-The BitVM2 baseline track ([`bitvm2.py`](../bitvm_arena/bitvm2.py), 32 trajectories, all
+The BitVM2 baseline track ([`bitvm2.py`](../bitvm_corpus/bitvm2.py), 32 trajectories, all
 met; evidence in [`examples/native/bitvm2-core31.1.json`](../examples/native/bitvm2-core31.1.json))
 mirrors the bridge graph in BitVM/BitVM at `c620dbfa`:
 

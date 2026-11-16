@@ -43,7 +43,7 @@ def track_module(name):
     import importlib
     if name not in TRACK_MODULES:
         raise ValidationError("unknown native track")
-    return importlib.import_module(f"bitvm_arena.{TRACK_MODULES[name]}")
+    return importlib.import_module(f"bitvm_corpus.{TRACK_MODULES[name]}")
 
 
 def native_command(args):
@@ -72,7 +72,7 @@ def native_command(args):
     report = module.execute(binary, root / "work" / "regtest" / uuid.uuid4().hex, rows)
     emit(report, args.output)
     if args.output:
-        print(f"bitvm-arena: {json.dumps(report['summary'])}", file=sys.stderr)
+        print(f"bitvm-corpus: {json.dumps(report['summary'])}", file=sys.stderr)
     return 0 if not report["summary"]["expectation_failures"] else 1
 
 
@@ -222,7 +222,7 @@ def main(argv=None):
                    "observation": Arena(row["fixture"]).observe()} for index, row in enumerate(rows)], args.output)
         return 0
     except (ValidationError, ValueError, KeyError, TypeError, OSError, RuntimeError) as exc:
-        print(f"bitvm-arena: {exc}", file=sys.stderr)
+        print(f"bitvm-corpus: {exc}", file=sys.stderr)
         return 2
 
 

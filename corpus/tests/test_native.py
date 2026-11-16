@@ -8,9 +8,9 @@ import uuid
 from contextlib import redirect_stdout
 from pathlib import Path
 
-from bitvm_arena import bitcoin, bitvm3, gc, native
-from bitvm_arena.cli import main, track_module
-from bitvm_arena.canonical import digest
+from bitvm_corpus import bitcoin, bitvm3, gc, native
+from bitvm_corpus.cli import main, track_module
+from bitvm_corpus.canonical import digest
 
 ROOT = Path(__file__).resolve().parents[1]
 EVIDENCE = ROOT / "examples" / "native"
@@ -130,7 +130,7 @@ class GarblingTests(unittest.TestCase):
 
 class WinternitzTests(unittest.TestCase):
     def test_sign_verify_and_hash_forward_forgery(self):
-        from bitvm_arena import wots
+        from bitvm_corpus import wots
         master, n0 = b"\x01" * 20, 3
         keys = wots.public_keys(master, n0)
         pairs = wots.sign(master, 150, n0)

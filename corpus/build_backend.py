@@ -14,12 +14,12 @@ import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
-NAME, VERSION = "bitvm_arena", "0.1.0"
+NAME, VERSION = "bitvm_corpus", "0.1.0"
 DIST = f"{NAME}-{VERSION}.dist-info"
 
 
 def metadata():
-    return (f"Metadata-Version: 2.1\nName: bitvm-arena\nVersion: {VERSION}\n"
+    return (f"Metadata-Version: 2.1\nName: bitvm-corpus\nVersion: {VERSION}\n"
             "Summary: Corruption trajectories and control evaluations for BitVM DeFi\n"
             "Requires-Python: >=3.11\nLicense: MIT\nDescription-Content-Type: text/markdown\n\n"
             + (ROOT / "README.md").read_text(encoding="utf-8")).encode()
@@ -27,15 +27,15 @@ def metadata():
 
 def _metadata_files():
     return {f"{DIST}/METADATA": metadata(),
-            f"{DIST}/WHEEL": b"Wheel-Version: 1.0\nGenerator: bitvm-arena-stdlib\nRoot-Is-Purelib: true\nTag: py3-none-any\n",
-            f"{DIST}/entry_points.txt": b"[console_scripts]\nbitvm-arena = bitvm_arena.cli:main\n",
+            f"{DIST}/WHEEL": b"Wheel-Version: 1.0\nGenerator: bitvm-corpus-stdlib\nRoot-Is-Purelib: true\nTag: py3-none-any\n",
+            f"{DIST}/entry_points.txt": b"[console_scripts]\nbitvm-corpus = bitvm_corpus.cli:main\n",
             f"{DIST}/LICENSE": (ROOT / "LICENSE").read_bytes()}
 
 
 def _wheel(directory, editable=False):
     entries = _metadata_files()
     if editable:
-        entries["bitvm_arena.pth"] = (str(ROOT) + "\n").encode()
+        entries["bitvm_corpus.pth"] = (str(ROOT) + "\n").encode()
     else:
         for path in sorted((ROOT / NAME).rglob("*")):
             if path.is_file() and path.suffix in (".py", ".json") and "__pycache__" not in path.parts:

@@ -4,11 +4,11 @@ import unittest
 from copy import deepcopy
 from pathlib import Path
 
-from bitvm_arena import corpus, schema, spec, sut
-from bitvm_arena.canonical import ValidationError, digest, load_json
-from bitvm_arena.engine import Arena
-from bitvm_arena.fixtures import asset_totals, fixtures, quote, request
-from bitvm_arena.runner import replay, verify_transcript
+from bitvm_corpus import corpus, schema, spec, sut
+from bitvm_corpus.canonical import ValidationError, digest, load_json
+from bitvm_corpus.engine import Arena
+from bitvm_corpus.fixtures import asset_totals, fixtures, quote, request
+from bitvm_corpus.runner import replay, verify_transcript
 
 
 class CorpusTests(unittest.TestCase):

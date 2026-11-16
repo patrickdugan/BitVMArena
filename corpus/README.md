@@ -1,9 +1,14 @@
-# BitVM Arena
+# BitVM Arena corruption corpus
 
 A reproducible library of corruption trajectories for red teaming BitVM-inspired
 DeFi coordinators, watchers, and settlement logic. It connects ordinary Boolean
 gates, Script stack operations, forward-chaining rules, and stateful financial
 operations to an executable evaluation harness.
+
+This directory is a self-contained package, `bitvm_corpus`, inside the
+[BitVM Arena](../README.md) repository. It has its own tests and CLI
+(`bitvm-corpus`); run the commands below from this directory. It shares no code
+with the repository's `src/bitvm_arena` dispute simulator.
 
 The bundled corpus contains **168 trajectories, 42 corruption sites, 14 semantic
 families, paired benign/attack cases, and two deterministic fixture variants**.
@@ -34,8 +39,8 @@ There are two evidence levels, and the library labels which one each result has:
 Neither level verifies SNARKs or reproduces confirmed upstream exploits.
 
 ```bash
-python -m bitvm_arena native run --track bitvm3 --bitcoind /path/to/bitcoind --output work/bitvm3.json
-python -m bitvm_arena native audit examples/native/bitvm3-core31.1.json
+python -m bitvm_corpus native run --track bitvm3 --bitcoind /path/to/bitcoind --output work/bitvm3.json
+python -m bitvm_corpus native audit examples/native/bitvm3-core31.1.json
 ```
 
 ## Run
@@ -43,18 +48,18 @@ python -m bitvm_arena native audit examples/native/bitvm3-core31.1.json
 Python 3.11+; no runtime or build dependencies. From this directory:
 
 ```bash
-python -m bitvm_arena validate
+python -m bitvm_corpus validate
 python -m unittest discover -s tests -v
-python -m bitvm_arena list --family boolean_gates
-python -m bitvm_arena replay effects.recipient_redirect.attack.0 --profile mutant --output work/redirect.json
-python -m bitvm_arena verify work/redirect.json
+python -m bitvm_corpus list --family boolean_gates
+python -m bitvm_corpus replay effects.recipient_redirect.attack.0 --profile mutant --output work/redirect.json
+python -m bitvm_corpus verify work/redirect.json
 ```
 
 Optional installation, including offline installation with an existing pip:
 
 ```bash
 python -m pip install --no-index .
-bitvm-arena --version
+bitvm-corpus --version
 ```
 
 ## What is in the library
@@ -80,9 +85,9 @@ security failure. A monitor sees only the legitimate task, public observations,
 the proposed next action, and the executed prefix. It intervenes before execution.
 
 ```bash
-python -m bitvm_arena calibrate --monitor structural --target-fpr 0.04 --output work/calibration.json
-python -m bitvm_arena evaluate --split test --profile mutant --monitor structural --calibration work/calibration.json --output work/heldout.json
-python -m bitvm_arena export --split test --output work/agent-tasks.json
+python -m bitvm_corpus calibrate --monitor structural --target-fpr 0.04 --output work/calibration.json
+python -m bitvm_corpus evaluate --split test --profile mutant --monitor structural --calibration work/calibration.json --output work/heldout.json
+python -m bitvm_corpus export --split test --output work/agent-tasks.json
 ```
 
 Calibration uses benign **validation** cases only. Families never cross dataset
@@ -93,7 +98,7 @@ synthetic corpus does not estimate deployment security.
 ## Interactive agents and external harnesses
 
 ```bash
-python -m bitvm_arena session
+python -m bitvm_corpus session
 ```
 
 The process emits an initial public observation. Submit one action object per

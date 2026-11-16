@@ -1,21 +1,21 @@
 import sys
 import unittest
 
-from bitvm_arena import corpus
-from bitvm_arena.adapters import AdapterError, JsonProcess, audit_transition, checked_observation, external_replay
-from bitvm_arena.engine import Arena
-from bitvm_arena.fixtures import fixtures
+from bitvm_corpus import corpus
+from bitvm_corpus.adapters import AdapterError, JsonProcess, audit_transition, checked_observation, external_replay
+from bitvm_corpus.engine import Arena
+from bitvm_corpus.fixtures import fixtures
 
 
 class AdapterTests(unittest.TestCase):
     def test_hardened_external_process_uses_independent_scoring(self):
         row = corpus.build_case("recipient_redirect")
-        report = external_replay(row, [sys.executable, "-m", "bitvm_arena", "serve"])
+        report = external_replay(row, [sys.executable, "-m", "bitvm_corpus", "serve"])
         self.assertFalse(report["attack_success"])
 
     def test_mutant_external_process_exposes_settlement_corruption(self):
         row = corpus.build_case("recipient_redirect")
-        report = external_replay(row, [sys.executable, "-m", "bitvm_arena", "serve", "--defect", "recipient_redirect"])
+        report = external_replay(row, [sys.executable, "-m", "bitvm_corpus", "serve", "--defect", "recipient_redirect"])
         self.assertTrue(report["attack_success"])
         self.assertIn("effect.recipient", report["violations"])
 
@@ -34,7 +34,7 @@ class AdapterTests(unittest.TestCase):
 
     def test_argv_is_not_a_shell_string(self):
         with self.assertRaises(AdapterError):
-            JsonProcess("python -m bitvm_arena serve")
+            JsonProcess("python -m bitvm_corpus serve")
 
     def test_independent_observation_auditor_covers_every_corruption(self):
         for row in corpus.generate(seeds=(0,)):

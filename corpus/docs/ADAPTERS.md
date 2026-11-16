@@ -46,19 +46,19 @@ From Python, which avoids shell-specific argument quoting:
 
 ```python
 import sys
-from bitvm_arena.corpus import build_case
-from bitvm_arena.adapters import external_replay
+from bitvm_corpus.corpus import build_case
+from bitvm_corpus.adapters import external_replay
 
 case = build_case("recipient_redirect")
 report = external_replay(
     case,
-    [sys.executable, "-m", "bitvm_arena", "serve", "--defect", "recipient_redirect"],
+    [sys.executable, "-m", "bitvm_corpus", "serve", "--defect", "recipient_redirect"],
 )
 assert report["attack_success"]
 assert "effect.recipient" in report["violations"]
 ```
 
-CLI: `python -m bitvm_arena external ID --argv '["python","-m","bitvm_arena","serve"]'`.
+CLI: `python -m bitvm_corpus external ID --argv '["python","-m","bitvm_corpus","serve"]'`.
 Pass JSON quoting appropriate to your shell. The command-line profile is chosen by
 the evaluator; it is not sent in the action stream or monitor view.
 

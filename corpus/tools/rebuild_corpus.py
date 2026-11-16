@@ -7,8 +7,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from bitvm_arena import corpus
-from bitvm_arena.sut import DEFECTS
+from bitvm_corpus import corpus
+from bitvm_corpus.sut import DEFECTS
 
 
 def write(path, value):
@@ -17,7 +17,7 @@ def write(path, value):
 
 
 rows = corpus.generate()
-write(ROOT / "bitvm_arena/data/trajectories.json", rows)
+write(ROOT / "bitvm_corpus/data/trajectories.json", rows)
 write(ROOT / "corpus/manifest.json", corpus.manifest(rows))
 write(ROOT / "examples/recipient_redirect.attack.json", corpus.build_case("recipient_redirect"))
 write(ROOT / "examples/recipient_redirect.benign.json", corpus.build_case("recipient_redirect", "benign"))

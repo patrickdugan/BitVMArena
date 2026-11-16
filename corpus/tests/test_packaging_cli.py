@@ -12,8 +12,8 @@ from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
 
 import build_backend
-from bitvm_arena import __version__, corpus
-from bitvm_arena.cli import main
+from bitvm_corpus import __version__, corpus
+from bitvm_corpus.cli import main
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -56,7 +56,7 @@ class PackagingCliTests(unittest.TestCase):
                         self.assertEqual(int(size), len(data))
                 archive.extractall(Path(folder) / "installed")
             code = ("import sys; sys.path.insert(0, sys.argv[1]); "
-                    "from bitvm_arena.corpus import load; "
+                    "from bitvm_corpus.corpus import load; "
                     "assert len(load()) == 168; print('installed-corpus-ok')")
             result = subprocess.run([sys.executable, "-I", "-c", code, str(Path(folder) / "installed")],
                                     capture_output=True, text=True, timeout=15)

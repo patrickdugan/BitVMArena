@@ -189,7 +189,7 @@ def generate(seeds=(0, 1)):
 
 
 def load(path=None):
-    path = path or files("bitvm_arena").joinpath("data/trajectories.json")
+    path = path or files("bitvm_corpus").joinpath("data/trajectories.json")
     rows = load_json(path)
     if not isinstance(rows, list):
         raise ValueError("corpus must be a JSON array")

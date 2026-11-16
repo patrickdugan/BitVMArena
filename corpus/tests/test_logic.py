@@ -1,8 +1,8 @@
 import itertools
 import unittest
 
-from bitvm_arena.canonical import ValidationError
-from bitvm_arena.logic import Rule, closure, script
+from bitvm_corpus.canonical import ValidationError
+from bitvm_corpus.logic import Rule, closure, script
 
 
 class BooleanTests(unittest.TestCase):

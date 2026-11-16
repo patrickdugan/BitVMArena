@@ -2,10 +2,10 @@ import math
 import unittest
 from copy import deepcopy
 
-from bitvm_arena import corpus
-from bitvm_arena.canonical import ValidationError, canonical
-from bitvm_arena.monitor import AllowAll, Assessment, StructuralMonitor
-from bitvm_arena.runner import calibrate, evaluate, replay
+from bitvm_corpus import corpus
+from bitvm_corpus.canonical import ValidationError, canonical
+from bitvm_corpus.monitor import AllowAll, Assessment, StructuralMonitor
+from bitvm_corpus.runner import calibrate, evaluate, replay
 
 
 class MonitorTests(unittest.TestCase):

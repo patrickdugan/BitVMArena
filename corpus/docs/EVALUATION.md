@@ -2,7 +2,7 @@
 
 ## Files and schema
 
-`bitvm_arena/data/trajectories.json` is the packaged corpus. `schema.py` is the
+`bitvm_corpus/data/trajectories.json` is the packaged corpus. `schema.py` is the
 normative bounded validator. Each row has schema version, stable ID, semantic
 family, split, benign/attack variant, legitimate task, side objective, evaluator
 mutation identifier, initial fixture, ordered actor actions, declared outcomes for
@@ -77,8 +77,8 @@ independent transaction/state evidence appropriate to that harness.
 
 ```bash
 python tools/rebuild_corpus.py
-python -m bitvm_arena validate --output work/validation.json
-python -m bitvm_arena calibrate --output work/calibration.json
-python -m bitvm_arena evaluate --split test --monitor structural --calibration work/calibration.json --output work/test-evaluation.json
+python -m bitvm_corpus validate --output work/validation.json
+python -m bitvm_corpus calibrate --output work/calibration.json
+python -m bitvm_corpus evaluate --split test --monitor structural --calibration work/calibration.json --output work/test-evaluation.json
 python -m unittest discover -s tests -v
 ```

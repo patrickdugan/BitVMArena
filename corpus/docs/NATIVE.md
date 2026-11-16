@@ -8,9 +8,9 @@ non-regtest chains, and never attaches to an existing node.
 
 | Track | Module | Cases | What a case is |
 | --- | --- | --- | --- |
-| `primitive` | [`native.py`](../bitvm_arena/native.py) | 56 = 14 recipes x 4 | Fund one contract, optionally spend a challenge connector or wait out a timelock, then attempt one spend |
-| `bitvm3` | [`bitvm3.py`](../bitvm_arena/bitvm3.py) | 40 = 10 recipes x 4 | A garbled-circuit claim graph: setup, claim, label handover, evaluation, disprove, payout ([BITVM3.md](BITVM3.md)) |
-| `bitvm2` | [`bitvm2.py`](../bitvm_arena/bitvm2.py) + [`wots.py`](../bitvm_arena/wots.py) | 32 = 8 recipes x 4 | The BitVM2 bridge graph at BitVM/BitVM `c620dbfa`: kick-off, challenge, take 1, assert with Winternitz commitments, disprove, take 2. It is the baseline for the comparison in [BITVM3.md](BITVM3.md) |
+| `primitive` | [`native.py`](../bitvm_corpus/native.py) | 56 = 14 recipes x 4 | Fund one contract, optionally spend a challenge connector or wait out a timelock, then attempt one spend |
+| `bitvm3` | [`bitvm3.py`](../bitvm_corpus/bitvm3.py) | 40 = 10 recipes x 4 | A garbled-circuit claim graph: setup, claim, label handover, evaluation, disprove, payout ([BITVM3.md](BITVM3.md)) |
+| `bitvm2` | [`bitvm2.py`](../bitvm_corpus/bitvm2.py) + [`wots.py`](../bitvm_corpus/wots.py) | 32 = 8 recipes x 4 | The BitVM2 bridge graph at BitVM/BitVM `c620dbfa`: kick-off, challenge, take 1, assert with Winternitz commitments, disprove, take 2. It is the baseline for the comparison in [BITVM3.md](BITVM3.md) |
 
 The four combinations per recipe are `hardened` or `mutant` crossed with `benign` or
 `attack`. Expected outcomes are declared in each track's `catalog()`. Outcomes are
@@ -19,9 +19,9 @@ scored only from the transactions Core confirmed; a scorer never reads the expec
 ## Run
 
 ```bash
-python -m bitvm_arena native list --track bitvm3
-python -m bitvm_arena native run --track bitvm3 --bitcoind /path/to/bitcoind --output work/bitvm3.json
-python -m bitvm_arena native audit work/bitvm3.json
+python -m bitvm_corpus native list --track bitvm3
+python -m bitvm_corpus native run --track bitvm3 --bitcoind /path/to/bitcoind --output work/bitvm3.json
+python -m bitvm_corpus native audit work/bitvm3.json
 ```
 
 `--match TEXT` limits a run to case ids containing TEXT. The binary defaults to
@@ -97,3 +97,9 @@ Core 31.1 was installed from bitcoincore.org with its SHA-256 checked against
 SHA256SUMS and five builder GPG signatures verified (binary SHA-256 `f79eeb94…d3db77a`).
 The BitVM3 track was also run on Core 31.2 (binary `286e32ee…c95801`, archive
 checksum-matched only). Every per-step verdict was identical to 31.1.
+
+The repository's CI audits these files offline on every push. Its
+`corpus-regtest` job also downloads the Core 31.1 Linux archive, checks it
+against the SHA-256 pinned in the workflow (taken from the release's
+`SHA256SUMS`, signatures not checked), reruns all three tracks, audits the fresh
+reports, and uploads them as the `corpus-native-reports` artifact.
