@@ -25,18 +25,25 @@ Done:
 - interactive episodes (`native episode`): a red-team agent plays the claimant, the desk,
   the watcher or a relayer against an application preset or any `Config`, Core judges
   every transaction, and an entitlement-based value-flow scorer reports the outcome
-  ([EPISODES.md](EPISODES.md)).
+  ([EPISODES.md](EPISODES.md));
+- testnet4 staging (`bitvm3-testnet4`, [TESTNET4.md](TESTNET4.md)): the hardened profiles
+  (the IOB fixes) and their attacks broadcast on the public network.
+  - **Wave 1:** 18 hardened rows; 17 met expectations.
+  - **The eighteenth** was lost to a testnet4 reorg that the harness had not counted
+    for. The session now re-checks depth through reorgs, and the rehearsal can reorganize.
 
 Next:
 
 1. **More recipes at M14 scale.** Seed reuse needs the evaluator's input labels, which
    `m14-claim` does not export; the window and censorship recipes need the evaluation
    time measured on the watcher hardware a deployment expects.
-2. **The IOB fixes as hardened profiles on testnet4:** a desk-presigned refund disprove
-   with a TRUC P2A anchor (closes the watcher redirect and the single-watcher point), a
-   payout co-signed by the claimant, a burned claimant bond, a window derived from
-   measured evaluation time and the censorship bound, and one seed per claim. Only with
-   explicit approval before any broadcast.
+2. **The rest of the testnet4 catalog.**
+   - Wave 2 covers the mutant attacks, to show the flaws landing on the public network.
+   - Running all 84 rows at once needs about 163k sats of coins. Most of the value comes
+     back to the staging wallet, but outputs whose only spend path is the 144-block
+     reclaim stay locked until a sweep with the stage keys.
+   - The recipes that need a miner or a topology (`disprove_censored_by_miner`,
+     `disprove_anchor_pinned`, `disprove_partitioned`) stay on regtest.
 3. **Statement-only label commitment.** The input-label availability recipe with a
    512-bit statement on chain and data availability for the rest of the proof (about
    12k vB at the measured 23.5 vB per bit).

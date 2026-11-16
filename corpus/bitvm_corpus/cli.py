@@ -186,7 +186,7 @@ def testnet4_command(args):
         default = root / "work/toolchains/core-31.2/bitcoind.exe"
         binary = args.bitcoind or Path(os.environ.get("BITVM_ARENA_BITCOIND", default))
         report = testnet4.rehearse(binary, root / "work" / "staging" / uuid.uuid4().hex, rows, wave=wave,
-                                   interval=args.interval)
+                                   interval=args.interval, reorg_every=args.reorg_every)
     else:
         if not args.broadcast:
             raise ValidationError("run broadcasts real testnet4 transactions; pass --broadcast")
@@ -268,10 +268,12 @@ def main(argv=None):
     p = sub.add_parser("testnet4", help="stage bitvm3 trajectories on testnet4 (rehearse on regtest first)")
     p.add_argument("action", choices=("list", "rehearse", "run", "audit"))
     p.add_argument("report", nargs="?", type=Path, help="report file for audit")
-    p.add_argument("--wave", choices=("wave1",), help="a predefined set of rows (testnet4.WAVES)")
+    p.add_argument("--wave", choices=("wave1", "wave2"), help="a predefined set of rows (testnet4.WAVES)")
     p.add_argument("--row", action="append", default=[], help="a row id, or text a row id contains (repeatable)")
     p.add_argument("--bitcoind", type=Path, help="rehearse: bitcoind binary")
     p.add_argument("--interval", type=float, default=1.5, help="rehearse: seconds between the network's blocks")
+    p.add_argument("--reorg-every", type=int, default=0,
+                   help="rehearse: every Nth block is a reorg (tip invalidated, two empty blocks replace it)")
     p.add_argument("--rpc-port", type=int, help="run/audit: RPC port of an existing testnet4 node")
     p.add_argument("--cookie", type=Path, help="run/audit: that node's RPC cookie file")
     p.add_argument("--wallet", help="run: the node wallet that funds the wave")

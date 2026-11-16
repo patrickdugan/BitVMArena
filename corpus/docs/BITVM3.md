@@ -273,8 +273,12 @@ the deployed testnet4 vaults, and nothing was broadcast outside regtest.
    | 60 min | 0.94 | 0.55 | 0.15 | 0.020 |
 
    That is before label and table transfer (138 MB and 12.57 GB per claim) and broadcast.
-   Testnet4's minimum-difficulty blocks shorten the window further. The same 6 blocks are
-   also the censorship budget: a miner that can withhold the disprove for 6 blocks gets the
+   Testnet4's minimum-difficulty blocks shorten the window further. Staging wave 1 measured
+   a median of 461 s per block over 42 waits. From the claim's block (161,704) to the tip at
+   which a 6-block-CSV payout is accepted (161,709) took 36 minutes. Minimum-difficulty blocks are also reorganized routinely: a claim mined in
+   161,710 was mined again in 161,712, which restarts every relative timelock that counts
+   from it. Watcher and claimant software has to recount from the block that stays
+   ([TESTNET4.md](TESTNET4.md)). The same 6 blocks are also the censorship budget: a miner that can withhold the disprove for 6 blocks gets the
    payout through (`disprove_censored_by_miner`).
 
 3. **A single watcher is a liveness and bribery point.** Only W can open the disprove

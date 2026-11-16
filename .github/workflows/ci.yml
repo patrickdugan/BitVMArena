@@ -108,10 +108,10 @@ jobs:
       - run: python -m unittest discover -s tests -p 'test_episode.py' -v
       - run: python -m unittest discover -s tests -p 'test_m14.py' -v
       - run: python -m unittest discover -s tests -p 'test_testnet4.py' -v
-      - name: Rehearse every testnet4 row on regtest (blocks on a timer, cases concurrent)
+      - name: Rehearse every testnet4 row on regtest (blocks on a timer, every third a reorg, cases concurrent)
         run: |
           mkdir -p reports
-          python -m bitvm_corpus testnet4 rehearse --row bitvm3-testnet4 --output reports/testnet4-rehearsal-linux.json
+          python -m bitvm_corpus testnet4 rehearse --row bitvm3-testnet4 --reorg-every 3 --output reports/testnet4-rehearsal-linux.json
           python -m bitvm_corpus testnet4 audit reports/testnet4-rehearsal-linux.json
       - name: Rerun every example episode and audit it
         run: python tools/rebuild_episode_reports.py --bitcoind "$BITVM_ARENA_BITCOIND"

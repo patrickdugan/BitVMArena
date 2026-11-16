@@ -4,7 +4,7 @@ import json
 import os
 import unittest
 import uuid
-from contextlib import redirect_stderr
+from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
 
 from bitvm_corpus import bitvm3, gc, testnet4
@@ -38,6 +38,9 @@ class CatalogTests(unittest.TestCase):
         for wave, members in testnet4.WAVES.items():
             self.assertTrue(set(members) <= ids, wave)
             self.assertEqual(len(members), len(set(members)), wave)
+            with redirect_stdout(io.StringIO()) as out:
+                self.assertEqual(main(["testnet4", "list", "--wave", wave]), 0)
+            self.assertEqual([r["id"] for r in json.loads(out.getvalue())], members)
 
 
 class StageTests(unittest.TestCase):
@@ -119,6 +122,116 @@ class CliSafetyTests(unittest.TestCase):
             testnet4.StagingNode(1, "cookie", "w", chain="main")
 
 
+class ScriptedNetwork:
+    """A best chain plus a mempool, advanced one scripted event per tip-change wait."""
+
+    def __init__(self, height, events):
+        self.blocks = [(f"G{h}", []) for h in range(height + 1)]
+        self.mempool, self.events, self.version = set(), list(events), 0
+        self.resendable = set()     # txids the node would accept again (inputs still unspent)
+
+    # the node side
+    def rpc(self, method, *params, **_):
+        tip = len(self.blocks) - 1
+        if method == "getblockcount":
+            return tip
+        if method == "getrawtransaction":
+            for height, (block, txids) in enumerate(self.blocks):
+                if params[0] in txids:
+                    return {"hex": "aa", "blockhash": block, "confirmations": tip - height + 1}
+            if params[0] in self.mempool:
+                return {"hex": "aa"}
+            raise testnet4.CoreError("No such mempool or blockchain transaction")
+        if method == "getmempoolentry":
+            if params[0] not in self.mempool:
+                raise testnet4.CoreError("Transaction not in mempool")
+            return {}
+        if method == "getblockheader":
+            return {"height": next(h for h, (b, _) in enumerate(self.blocks) if b == params[0]), "time": 0}
+        if method == "sendrawtransaction":
+            txid = next((t for t in self.resendable), None)
+            if txid is None:
+                raise testnet4.CoreError("bad-txns-inputs-missingorspent")
+            self.resendable.discard(txid)
+            self.mempool.add(txid)
+            return txid
+        raise AssertionError(method)
+
+    # the chain-poller side
+    def wait_change(self, seen, timeout=60):
+        event = self.events.pop(0) if self.events else ("block", [])
+        if event[0] == "block":
+            txids = [t for t in event[1] if t in self.mempool]
+            self.mempool -= set(txids)
+            self.blocks.append((f"B{len(self.blocks)}", txids))
+        else:                       # ("reorg", depth, replacement block count)
+            for _, txids in self.blocks[-event[1]:]:
+                self.mempool |= set(txids)
+            del self.blocks[-event[1]:]
+            self.blocks += [(f"R{len(self.blocks) + i}", []) for i in range(event[2])]
+        self.version += 1
+        return self.version
+
+
+class ReorgTests(unittest.TestCase):
+    class Quiet:
+        def write(self, **_):
+            pass
+
+    def session(self, network):
+        session = testnet4.StagingSession(network, network, None, self.Quiet(), "case", patience=18)
+        session._record(kind="tx", label="claim", actor="claimant", txid="claim", raw_transaction="aa",
+                        prevouts=[], allowed=True, broadcast=True)
+        network.mempool.add("claim")
+        return session
+
+    def test_owed_confirmations_follow_regtest(self):
+        network = ScriptedNetwork(100, [])
+        session = self.session(network)
+        session._record(kind="blocks", label="2 network blocks", blocks=2)
+        session._record(kind="tx", label="payout", txid="payout", broadcast=True)
+        session._record(kind="tx", label="refused", txid="refused", broadcast=False)
+        self.assertEqual(session._owed(3), {"payout": 3, "claim": 5})
+
+    def test_a_reorg_after_the_claim_confirms_extends_the_csv_wait(self):
+        # Wave 1: the claim confirmed in block 161,710, a reorg replaced that block, and the
+        # claim confirmed again at 161,712. The 5-block wait for a 6-block CSV must count
+        # from the block the claim ends up in.
+        network = ScriptedNetwork(100, [("block", ["claim"]), ("reorg", 1, 2), ("block", ["claim"])])
+        session = self.session(network)
+        session.mine(1)
+        self.assertEqual(network.rpc("getblockcount"), 101)     # confirmed in A101, as on testnet4
+        session.mine(5)
+        self.assertEqual(session._confirmations("claim"), 6)
+        self.assertEqual(network.rpc("getblockcount"), 108)     # claim at 103, so 103 + 5
+        steps = session.finish()
+        claim = steps[0]
+        self.assertEqual((claim["confirmed"], claim["block_height"]), (True, 103))
+        self.assertEqual(claim["reorged_out_of"], ["B101"])
+        self.assertEqual(steps[-1]["stalled"], [])
+
+    def test_a_displaced_transaction_does_not_hold_the_wait(self):
+        network = ScriptedNetwork(100, [])
+        session = self.session(network)
+        network.mempool.clear()                  # replaced by a conflict that never shows here
+        session.mine(2)
+        self.assertEqual(network.rpc("getblockcount"), 102)
+        claim = session.finish()[0]
+        self.assertFalse(claim["confirmed"])
+        self.assertTrue(claim.get("displaced") or claim.get("dropped"))
+        self.assertNotIn("rebroadcasts", claim)
+
+    def test_a_dropped_transaction_is_sent_again_and_waited_for(self):
+        network = ScriptedNetwork(100, [("block", []), ("block", ["claim"])])
+        session = self.session(network)
+        network.mempool.clear()                  # evicted, inputs still unspent
+        network.resendable.add("claim")
+        session.mine(1)
+        self.assertEqual(session._confirmations("claim"), 1)
+        self.assertEqual(network.rpc("getblockcount"), 102)
+        self.assertEqual(session.finish()[0]["rebroadcasts"], 1)
+
+
 @unittest.skipUnless(reports(), "no committed testnet4 report")
 class EvidenceTests(unittest.TestCase):
     def test_committed_reports_audit_clean_and_detect_tampering(self):
@@ -148,6 +261,16 @@ class RehearsalTests(unittest.TestCase):
         self.assertEqual(report["summary"]["expectation_failures"], [])
         problems = [p for p in testnet4.audit(report) if "catalog" not in p]
         self.assertEqual(problems, [])
+
+    def test_rehearsal_through_reorgs(self):
+        rows = testnet4.select(["reclaim_preempts_claim.hardened.attack", "seed_reuse_across_claims.hardened.benign",
+                                "payout_csv_removed.hardened.attack", "disprove_unbumpable.hardened.attack"])
+        report = testnet4.rehearse(Path(os.environ["BITVM_ARENA_BITCOIND"]),
+                                   ROOT / "work" / "staging" / uuid.uuid4().hex, rows, interval=1.0, reorg_every=3)
+        self.assertEqual(report["summary"]["errors"], [])
+        self.assertEqual(report["summary"]["expectation_failures"], [])
+        self.assertGreater(report["provenance"]["rehearsal_network"]["reorgs"], 0)
+        self.assertEqual(testnet4.audit(report), [])
 
 
 if __name__ == "__main__":

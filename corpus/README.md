@@ -33,6 +33,10 @@ There are two evidence levels, and the library labels which one each result has:
   - **BitVM3 at M14 scale** (`bitvm3-m14`, 8 trajectories): the same graph decided by the
     real M14 garbled verifier on the M16 mainnet payment proof, from recorded `m14-claim`
     runs;
+  - **BitVM3 on testnet4** (`bitvm3-testnet4`, 84 rows): the same trajectories broadcast
+    on the public testnet4 network, where real relay, real miners and real block timing
+    decide them, with a regtest rehearsal (including reorgs) first
+    ([staging and wave results](docs/TESTNET4.md));
   - the **BitVM2** baseline: the BitVM/BitVM bridge graph with Winternitz commitments
     (32 trajectories), used to see which weaknesses BitVM3 introduces, removes or
     carries over;

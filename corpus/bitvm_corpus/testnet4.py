@@ -80,6 +80,22 @@ WAVES = {
         ("disprove_outputs_unbound", "attack"),
         ("payout_absolute_timelock", "attack"),
     )],
+    # The second wave: the mutant attacks that should succeed on the public network, so the
+    # flaws are shown landing against real relay and real miners, plus the wave 1 row a reorg
+    # cost (reclaim_preempts_claim.hardened.attack), run again on the reorg-aware session.
+    # Sized to the staging wallet's 28,489 sats after wave 1.
+    "wave2": [f"{TRACK}.{recipe}.{profile}.attack" for recipe, profile in (
+        ("reclaim_preempts_claim", "hardened"),
+        ("reclaim_preempts_claim", "mutant"),
+        ("desk_key_retained", "mutant"),
+        ("disprove_watcher_redirect", "mutant"),
+        ("payout_csv_removed", "mutant"),
+        ("claim_internal_key_spendable", "mutant"),
+        ("disprove_outputs_unbound", "mutant"),
+        ("labels_offchain_withheld", "mutant"),
+        ("claimant_unbonded", "mutant"),
+        ("disprove_unbumpable", "mutant"),
+    )],
 }
 
 
@@ -259,11 +275,15 @@ class StagingNode:
 
 
 class Chain:
-    """Polls the tip; wakes every waiting case when a block arrives."""
+    """Polls the tip; wakes every waiting case when the best block changes.
+
+    `version` counts tip changes. A reorg to a branch of the same height changes the tip
+    without changing the height, so the poller compares block hashes, not heights."""
 
     def __init__(self, node, poll=POLL):
         self.node, self.poll = node, poll
-        self.height = node.rpc("getblockcount")
+        self.tip = node.rpc("getbestblockhash")
+        self.version = 0
         self.cond = threading.Condition()
         self.stopped = False
         self.thread = threading.Thread(target=self._run, name="chain-poll", daemon=True)
@@ -275,30 +295,33 @@ class Chain:
     def _run(self):
         while not self.stopped:
             try:
-                height = self.node.rpc("getblockcount")
+                tip = self.node.rpc("getbestblockhash")
             except Exception:       # keep polling through any transient failure
-                height = None
-            if height is not None and height != self.height:
+                tip = None
+            if tip is not None and tip != self.tip:
                 with self.cond:
-                    self.height = height
+                    self.tip = tip
+                    self.version += 1
                     self.cond.notify_all()
             time.sleep(self.poll)
 
     def wait_change(self, seen, timeout=60):
+        """Until `version` moves past `seen` (or `timeout` seconds pass)."""
         with self.cond:
-            self.cond.wait_for(lambda: self.height != seen or self.stopped, timeout)
-            return self.height
+            self.cond.wait_for(lambda: self.version != seen or self.stopped, timeout)
+            return self.version
 
     def wait_until(self, predicate, timeout):
-        """Re-check `predicate` on every new block (and once a minute) until it holds."""
+        """Re-check `predicate` on every tip change (and once a minute) until it holds."""
         deadline = time.monotonic() + timeout
         while True:
+            seen = self.version
             if predicate():
                 return True
             left = deadline - time.monotonic()
             if left <= 0:
                 return False
-            self.wait_change(self.height, min(60, left))
+            self.wait_change(seen, min(60, left))
 
     def stop(self):
         self.stopped = True
@@ -389,40 +412,109 @@ class StagingSession(Session):
         super().__init__(node)
         self.chain, self.pool, self.journal, self.case_id = chain, pool, journal, case_id
         self.feerate, self.patience = feerate, patience
-        self.settled = {}       # txid -> "confirmed" | "displaced"
+        self.blocks_seen = {}   # txid -> every block it has been seen confirmed in, in order
+        self.last_block = {}    # txid -> the block it was in at its latest check
+        self.raws = {}          # txid -> serialized transaction, for rebroadcasts
+        self.rebroadcasts = {}  # txid -> how many times it was sent again
 
     def _record(self, **step):
         step["time"] = now()
         recorded = super()._record(**step)
+        if recorded.get("raw_transaction") and recorded.get("txid"):
+            self.raws[recorded["txid"]] = recorded["raw_transaction"]
         self.journal.write(case=self.case_id, **{k: v for k, v in recorded.items() if k != "raw_transaction"})
         return recorded
 
-    def _state(self, txid):
-        if txid in self.settled:
-            return self.settled[txid]
-        if confirmations(self.node, txid) >= 1:
-            self.settled[txid] = "confirmed"
-        elif not in_mempool(self.node, txid):
-            # A block may have confirmed it between the two calls; ask again before calling it
-            # displaced (replaced, or spent around by a conflict).
-            self.settled[txid] = "confirmed" if confirmations(self.node, txid) >= 1 else "displaced"
-        return self.settled.get(txid, "pending")
+    def _confirmations(self, txid):
+        """Confirmations in the node's current best chain: 0 while the transaction waits in the
+        mempool, None when it is in neither (replaced, spent around by a conflict, or dropped).
 
-    def _pending(self, extra=()):
-        txids = [s["txid"] for s in self.steps if s["kind"] == "tx" and s["broadcast"]] + list(extra)
-        return [t for t in dict.fromkeys(txids) if self._state(t) == "pending"]
+        Never cached. On testnet4 a minimum-difficulty block is routinely reorganized away by
+        a real-difficulty block on a sibling branch, and the transactions in it confirm again
+        later, which restarts every relative timelock that counts from them."""
+        for attempt in range(2):
+            try:
+                info = self.node.rpc("getrawtransaction", txid, True)
+            except CoreError:
+                info = {}
+            count = info.get("confirmations", 0)
+            if count >= 1:
+                seen = self.blocks_seen.setdefault(txid, [])
+                if info["blockhash"] not in seen:
+                    seen.append(info["blockhash"])
+                self.last_block[txid] = info["blockhash"]
+                return count
+            if attempt == 0:
+                if in_mempool(self.node, txid):
+                    return 0
+                # While a reorg is being applied, a transaction from a disconnected block is
+                # briefly in neither the mempool nor the active chain (and txindex still
+                # answers from the stale block). A block may also land between the calls.
+                # Look once more before calling it gone.
+                time.sleep(0.5)
+        return None
 
-    def _wait(self, target, extra=()):
-        """Until the tip reaches `target` and every broadcast of this case has confirmed or been
-        displaced. Returns the txids still pending after `patience` more blocks."""
+    def _resend(self, txid):
+        """Send a transaction that left the mempool without confirming once more, as its
+        owner's software would. True when it is back in the mempool or already in a block."""
+        raw = self.raws.get(txid)
+        if raw is None:
+            return False
+        try:
+            self.node.rpc("sendrawtransaction", raw)
+        except CoreError as exc:
+            if "already" not in str(exc):   # "txn-already-in-mempool", "...already in block chain"
+                return False
+        self.rebroadcasts[txid] = self.rebroadcasts.get(txid, 0) + 1
+        self.journal.write(case=self.case_id, kind="rebroadcast", txid=txid, at_height=self.height())
+        return True
+
+    def _owed(self, blocks=0):
+        """The confirmations each broadcast of this case has on regtest once `blocks` more
+        blocks are mined. On regtest a funding transaction confirms in its own block and any
+        other broadcast in the first block of the next mine(); each later block adds one."""
+        owed, after = {}, blocks
+        for step in reversed(self.steps):
+            if step["kind"] == "blocks":
+                after += step["blocks"]
+            elif step["kind"] == "fund":
+                owed.setdefault(step["txid"], 1 + after)
+            elif step["kind"] == "tx" and step["broadcast"]:
+                owed.setdefault(step["txid"], after)
+        return owed
+
+    def _check(self, owed):
+        """One pass over `owed`: (the txids with fewer confirmations than they are owed,
+        {txid: confirmations or None}). A transaction that is in neither the chain nor the
+        mempool is sent again; if the node refuses it (an input is spent by a conflict, or it
+        cannot pay its way alone) it is displaced or dropped, and is never short: nothing will
+        confirm it."""
+        short, snapshot = [], {}
+        for txid, need in owed.items():
+            have = self._confirmations(txid)
+            if have is None and self._resend(txid):
+                have = 0
+            snapshot[txid] = have
+            if have is not None and have < need:
+                short.append(txid)
+        return short, snapshot
+
+    def _wait(self, target, owed):
+        """Until the tip reaches `target` and every transaction in `owed` has at least its owed
+        confirmations in the current best chain (or has been displaced). Confirmations are read
+        again on every tip change, so a reorg that moves a transaction to a later block extends
+        the wait. Returns (the txids still short after `patience` more blocks, the snapshot the
+        decision was made on). Callers use the snapshot rather than asking again: the next
+        reorg can land between two calls."""
         while True:
+            seen = self.chain.version
             tip = self.height()
-            pending = self._pending(extra)
-            if tip >= target and not pending:
-                return []
+            short, snapshot = self._check(owed)
+            if tip >= target and not short:
+                return [], snapshot
             if tip >= target + self.patience:
-                return pending
-            self.chain.wait_change(tip, 60)
+                return short, snapshot
+            self.chain.wait_change(seen, 60)
 
     def fund(self, outputs, label="fund"):
         payments, wanted = [], {}
@@ -437,21 +529,26 @@ class StagingSession(Session):
                                      options={"inputs": [{"txid": coin["txid"], "vout": coin["vout"]}],
                                               "add_inputs": False})
         txid = result["txid"]
-        stalled = self._wait(self.height() + 1, extra=[txid])
-        if stalled:
+        self.raws[txid] = self.node.rpc("gettransaction", txid, wallet=True)["hex"]
+        stalled, snapshot = self._wait(self.height() + 1, {txid: 1})
+        if stalled or not snapshot[txid]:
             raise CoreError(f"{label} {txid} did not confirm")
-        funding = self.node.rpc("getrawtransaction", txid, True)
+        blockhash = self.last_block[txid]
+        funding = self.node.rpc("getrawtransaction", txid, True, blockhash)
         utxos = {}
         for name, (spk, sats) in wanted.items():
             output = next(v for v in funding["vout"] if v["scriptPubKey"]["hex"] == spk.hex())
             utxos[name] = {"txid": txid, "vout": output["n"], "amount": sats, "script_pubkey": spk.hex()}
+        extra = {"rebroadcasts": self.rebroadcasts[txid]} if self.rebroadcasts.get(txid) else {}
         self._record(kind="fund", label=label, actor="evaluator", txid=txid, raw_transaction=funding["hex"],
-                     outputs=utxos, coin=coin, blockhash=funding["blockhash"])
+                     outputs=utxos, coin=coin, blockhash=blockhash, **extra)
         return utxos
 
     def mine(self, count, note=None):
+        """The network's equivalent of regtest's mine(count): at least `count` more blocks, and
+        every broadcast of this case as deep as regtest would have it."""
         start, began = self.height(), time.monotonic()
-        stalled = self._wait(start + count)
+        stalled, _ = self._wait(start + count, self._owed(count))
         self._record(kind="blocks", label=f"{count} network block{'s' if count != 1 else ''}", actor="network",
                      blocks=count, from_height=start, seconds=round(time.monotonic() - began),
                      stalled=stalled, note=note)
@@ -467,37 +564,48 @@ class StagingSession(Session):
 
     def finish(self):
         """Wait for this case's broadcasts, then attach what the network did with each one.
-        Nothing is mined; a transaction still unconfirmed at the end is recorded as such."""
-        self._wait(self.height())
+        Nothing is mined; a transaction still unconfirmed at the end is recorded as such. A
+        transaction that was seen in blocks a reorg later removed lists them in
+        `reorged_out_of`."""
+        _, snapshot = self._wait(self.height(), {t: max(n, 1) for t, n in self._owed().items()})
         for step in self.steps:
             if step["kind"] != "tx":
                 continue
             step["confirmed"] = False
             if not step["broadcast"]:
                 continue
-            state = self._state(step["txid"])
-            if state == "displaced":
+            have = snapshot[step["txid"]]
+            if have is None:
                 # Displaced: an input is spent by something else. Dropped: the inputs are
                 # unspent but no mempool holds the transaction any more.
                 spent = any(self.node.rpc("gettxout", p["txid"], p["vout"]) is None for p in step["prevouts"])
                 step["displaced" if spent else "dropped"] = True
-                continue
-            if state == "pending":
+            elif have == 0:
                 step["unconfirmed"] = True
-                continue
-            info = self.node.rpc("getrawtransaction", step["txid"], True)
-            if info["hex"] != step["raw_transaction"]:
-                raise CoreError("the confirmed transaction differs from the submitted one")
-            header = self.node.rpc("getblockheader", info["blockhash"])
-            step.update(confirmed=True, blockhash=info["blockhash"], block_height=header["height"],
-                        block_time=header["time"])
+            else:
+                # The block it was in when the wait was satisfied; a later reorg is the chain
+                # audit's to report (verify_chain).
+                blockhash = self.last_block[step["txid"]]
+                info = self.node.rpc("getrawtransaction", step["txid"], True, blockhash)
+                if info["hex"] != step["raw_transaction"]:
+                    raise CoreError("the confirmed transaction differs from the submitted one")
+                header = self.node.rpc("getblockheader", blockhash)
+                step.update(confirmed=True, blockhash=blockhash, block_height=header["height"],
+                            block_time=header["time"])
+            stale = [b for b in self.blocks_seen.get(step["txid"], []) if b != step.get("blockhash")]
+            if stale:
+                step["reorged_out_of"] = stale
+            if self.rebroadcasts.get(step["txid"]):
+                step["rebroadcasts"] = self.rebroadcasts[step["txid"]]
         return self.steps
 
 
 # --- waves -------------------------------------------------------------------------------
 
-def run_wave(node, rows, stage, state, *, wave, feerate=FUNDING_FEERATE, patience=PATIENCE, poll=POLL):
-    """Run `rows` concurrently on `node`. `state` is a directory outside the repository."""
+def run_wave(node, rows, stage, state, *, wave, feerate=FUNDING_FEERATE, patience=PATIENCE, poll=POLL,
+             rehearsal=None):
+    """Run `rows` concurrently on `node`. `state` is a directory outside the repository.
+    `rehearsal` is a callable returning the rehearsal network's settings for the report."""
     state = Path(state)
     (state / "cases").mkdir(parents=True, exist_ok=True)
     journal = Journal(state / "events.jsonl")
@@ -532,17 +640,21 @@ def run_wave(node, rows, stage, state, *, wave, feerate=FUNDING_FEERATE, patienc
     finally:
         chain.stop()
     cases = [results[r["id"]] for r in rows]
-    report = finalize(wave, start_prov, node.provenance(), started, now(), stage, split, cases, patience)
+    report = finalize(wave, start_prov, node.provenance(), started, now(), stage, split, cases, patience,
+                      rehearsal() if rehearsal else None)
     journal.write(kind="wave end", wave=wave, summary=report["summary"])
     return report
 
 
-def finalize(wave, start_prov, end_prov, started, ended, stage, split, cases, patience):
+def finalize(wave, start_prov, end_prov, started, ended, stage, split, cases, patience, rehearsal=None):
     tx_steps = [s for c in cases for s in c["steps"] if s["kind"] == "tx"]
+    provenance = {"start": start_prov, "end": end_prov, "started": started, "ended": ended,
+                  "patience_blocks": patience}
+    if rehearsal is not None:
+        provenance["rehearsal_network"] = rehearsal
     report = {"schema_version": 1, "track": TRACK, "network": start_prov["chain"], "wave": wave,
               "evidence_level": EVIDENCE_LEVEL if start_prov["chain"] == NETWORK else "staging-rehearsal-regtest",
-              "provenance": {"start": start_prov, "end": end_prov, "started": started, "ended": ended,
-                             "patience_blocks": patience},
+              "provenance": provenance,
               "stage": stage_record(stage), "funding": split, "catalog_hash": digest(catalog()),
               "rows": [c["id"] for c in cases], "cases": cases,
               "summary": {"cases": len(cases),
@@ -551,6 +663,8 @@ def finalize(wave, start_prov, end_prov, started, ended, stage, split, cases, pa
                           "displaced_transactions": sum(1 for s in tx_steps if s.get("displaced")),
                           "unconfirmed_transactions": sum(1 for s in tx_steps if s.get("unconfirmed")),
                           "dropped_transactions": sum(1 for s in tx_steps if s.get("dropped")),
+                          "reorged_transactions": sum(1 for s in tx_steps if s.get("reorged_out_of")),
+                          "rebroadcast_transactions": sum(1 for s in tx_steps if s.get("rebroadcasts")),
                           "errors": [c["id"] for c in cases if c.get("error")],
                           "expectation_failures": [c["id"] for c in cases if not c["expectation_met"]]}}
     report["evidence_hash"] = digest(report)
@@ -560,19 +674,35 @@ def finalize(wave, start_prov, end_prov, started, ended, stage, split, cases, pa
 # --- rehearsal ---------------------------------------------------------------------------
 
 class NetworkMiner:
-    """The rehearsal's network: a block every `interval` seconds with whatever is in the mempool."""
+    """The rehearsal's network: a block every `interval` seconds with whatever is in the mempool.
 
-    def __init__(self, node, address, interval):
-        self.node, self.address, self.interval = node, address, interval
+    With `reorg_every=k`, every k-th tick is a reorg of the shape testnet4 showed in wave 1
+    (a real-difficulty block replacing minimum-difficulty blocks): the tip is invalidated, so
+    its transactions return to the mempool, and two empty blocks replace it. Those
+    transactions then confirm two blocks later than they first did."""
+
+    def __init__(self, node, address, interval, reorg_every=0):
+        self.node, self.address, self.interval, self.reorg_every = node, address, interval, reorg_every
+        self.ticks = self.reorgs = 0
         self.stopped = threading.Event()
         self.thread = threading.Thread(target=self._run, name="network-miner", daemon=True)
 
     def _run(self):
         while not self.stopped.wait(self.interval):
+            self.ticks += 1
             try:
-                self.node.rpc("generatetoaddress", 1, self.address)
+                if self.reorg_every and self.ticks % self.reorg_every == 0:
+                    self.node.rpc("invalidateblock", self.node.rpc("getbestblockhash"))
+                    for _ in range(2):
+                        self.node.rpc("generateblock", self.address, [])
+                    self.reorgs += 1
+                else:
+                    self.node.rpc("generatetoaddress", 1, self.address)
             except Exception:       # keep mining through any transient failure
                 pass
+
+    def settings(self):
+        return {"interval_seconds": self.interval, "reorg_every": self.reorg_every, "reorgs": self.reorgs}
 
     def __enter__(self):
         self.thread.start()
@@ -583,15 +713,17 @@ class NetworkMiner:
         self.thread.join(timeout=30)
 
 
-def rehearse(binary, directory, rows, *, wave="rehearsal", interval=1.5, stage=None, patience=PATIENCE):
-    """Run a wave against an owned regtest node that mines on a timer, as testnet4 would."""
+def rehearse(binary, directory, rows, *, wave="rehearsal", interval=1.5, reorg_every=0, stage=None,
+             patience=PATIENCE):
+    """Run a wave against an owned regtest node that mines on a timer, as testnet4 would, and
+    with `reorg_every` also reorganizes it the way testnet4 does."""
     directory = Path(directory)
     with Regtest(binary, directory / "node") as owned:
         owned.initialize_wallet()
         node = StagingNode(owned.port, owned.cookie, "arena", chain="regtest").check()
-        with NetworkMiner(node, owned.miner, interval):
+        with NetworkMiner(node, owned.miner, interval, reorg_every) as miner:
             return run_wave(node, rows, stage or new_stage(), directory / "state", wave=wave,
-                            patience=patience, poll=0.25)
+                            patience=patience, poll=0.25, rehearsal=miner.settings)
 
 
 # --- audit -------------------------------------------------------------------------------
