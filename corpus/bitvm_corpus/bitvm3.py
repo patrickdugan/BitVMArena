@@ -214,8 +214,49 @@ def catalog():
     return rows
 
 
+@dataclass(frozen=True)
+class Stage:
+    """Keys, garbling-seed salt and amounts of one run.
+
+    FIXTURE is the regtest catalog's stage: the public test secrets above, no salt, and the
+    module amounts. A run on a public network uses fresh secrets, a fresh salt and small
+    amounts (testnet4.py). An auditor rebuilds graphs from the public keys alone
+    (`secrets=None`); only signing needs the secrets.
+    """
+    keys: dict                      # name -> 32-byte x-only public key
+    secrets: dict | None = None     # name -> secret scalar
+    salt: bytes = b""
+    vault: int = VAULT
+    bond: int = BOND
+    fee: int = FEE
+    watch_funds: int = WATCH_FUNDS
+    child_fee: int = CHILD_FEE
+    claim_feerate: int | None = None      # sat/kvB for the claim; None: the claim pays `fee`
+
+    @classmethod
+    def from_secrets(cls, secrets, **fields):
+        return cls({name: public(secret) for name, secret in secrets.items()}, dict(secrets), **fields)
+
+    def secret(self, name):
+        if not self.secrets:
+            raise ValidationError("this stage has public keys only and cannot sign")
+        return self.secrets[name]
+
+    def spk(self, name):
+        return p2tr_key(self.keys[name]).script_pubkey
+
+    def seed(self, case_id, tag):
+        return sha(self.salt + f"{case_id}:{tag}".encode())[:16]
+
+    def public_keys(self):
+        return {name: key.hex() for name, key in self.keys.items()}
+
+
+FIXTURE = Stage.from_secrets(SECRETS)
+
+
 def keys():
-    return {name: public(secret).hex() for name, secret in SECRETS.items()}
+    return FIXTURE.public_keys()
 
 
 def frame(data):
@@ -223,11 +264,11 @@ def frame(data):
 
 
 def seed(case_id, tag):
-    return sha(f"{case_id}:{tag}".encode())[:16]
+    return FIXTURE.seed(case_id, tag)
 
 
 def spk_of(name):
-    return p2tr_key(public(SECRETS[name])).script_pubkey
+    return FIXTURE.spk(name)
 
 
 @dataclass
@@ -415,10 +456,12 @@ class Prepared:
     prior: object = None        # G4: the earlier claim's garbling
     statement: int = STATEMENT
     index: int = 0              # vault instance
+    stage: Stage = FIXTURE
 
 
-def prepare(row, index=0, cfg=None):
+def prepare(row, index=0, cfg=None, stage=FIXTURE):
     """Deterministic setup: garbling(s), cut-and-choose, and the desk's presign decision."""
+    seed = stage.seed
     recipe = row["recipe"]
     cfg = (cfg or config(recipe, row["profile"])).check()
     attack, cid = row["variant"] == "attack", row["id"]
@@ -429,7 +472,7 @@ def prepare(row, index=0, cfg=None):
         garbling = gc.garble(statement, seed(cid, "garbling" if index == 0 else f"garbling/v{index}"))
         data = published(garbling, swapped=malicious)
         log["cut_and_choose"] = "not run (desk presigns the registered instance)"
-        prep = Prepared(row, cfg, garbling, data, True, log, statement=statement, index=index)
+        prep = Prepared(row, cfg, garbling, data, True, log, statement=statement, index=index, stage=stage)
     else:
         instances = [gc.garble(statement, seed(cid, f"instance{i}")) for i in range(CUT)]
 
@@ -479,7 +522,7 @@ def prepare(row, index=0, cfg=None):
         log.update(k=CUT, malicious=sorted(bad), grind_attempts=attempts, kept=kept,
                    commitments=commitments, opened_checks={str(i): ok for i, ok in checks.items()})
         prep = Prepared(row, cfg, instances[kept], datas[kept], all(checks.values()), log,
-                        statement=statement, index=index)
+                        statement=statement, index=index, stage=stage)
     if recipe == "seed_reuse_across_claims":
         prior_seed = seed(cid, "garbling") if cfg.seed_reuse else seed(cid, "prior-garbling")
         prep.prior = gc.garble(PRIOR_STATEMENT, prior_seed)
@@ -490,7 +533,8 @@ def prepare(row, index=0, cfg=None):
 class Graph:
     def __init__(self, prep, cltv_height=None):
         self.prep, self.cfg, self.data = prep, prep.cfg, prep.public
-        self.D, self.C, self.W = (public(SECRETS[n]) for n in ("desk", "claimant", "watch"))
+        self.stage = stage = getattr(prep, "stage", FIXTURE)
+        self.D, self.C, self.W = (stage.keys[n] for n in ("desk", "claimant", "watch"))
         if self.cfg.payout_timelock == "cltv" and cltv_height is None:
             raise ValidationError("an absolute payout timelock needs its setup height")
         self.cltv_height = cltv_height if self.cfg.payout_timelock == "cltv" else None
@@ -519,9 +563,31 @@ class Graph:
             disprove = ops("SHA256") + push(self.disprove_hash) + ops("EQUALVERIFY") + push(signer) + ops("CHECKSIG")
         self.K = TapTree((payout, disprove), self.C if self.cfg.claim_internal == "claimant" else NUMS)
         self.bond_tree = TapTree((push(self.C) + ops("CHECKSIG"),))
-        self.payout_spk = spk_of("payout")
-        self.refund_spk = spk_of("refund")
-        self.k_value = VAULT + (BOND if self.cfg.bond else 0) - FEE
+        self.payout_spk = stage.spk("payout")
+        self.refund_spk = stage.spk("refund")
+        self.fee = stage.fee
+        self.claim_fee = self._claim_fee()
+        self.k_value = stage.vault + (stage.bond if self.cfg.bond else 0) - self.claim_fee
+
+    def _claim_fee(self):
+        """The claim's fee: `fee`, or a feerate times the signed claim's virtual size (which
+        does not depend on the amounts or on the signatures' values)."""
+        rate = self.stage.claim_feerate
+        if rate is None:
+            return self.stage.fee
+        dummy = {"txid": "00" * 32, "vout": 0, "amount": 0, "script_pubkey": self.V.script_pubkey.hex()}
+        ins = [utxo_input(dummy, 0xffffffff)] + ([utxo_input(dummy)] if self.cfg.bond else [])
+        tx = Transaction(ins, [(0, self.K.script_pubkey), (0, op_return(b"IOB3" + bytes(32)))])
+        leaf = self.V.leaf(0)
+        sig_d = bytes(64 if self.cfg.claim_hash_type == SIGHASH_DEFAULT else 65)
+        labels = []
+        if self.cfg.labels_onchain:
+            labels = self.prep.garbling.input_labels(gc.proof_bits(*HONEST_PROOF))
+        tx.inputs[0].witness = [bytes(64), sig_d] + labels + [leaf.script, leaf.control]
+        if self.cfg.bond:
+            bond_leaf = self.bond_tree.leaf(0)
+            tx.inputs[1].witness = [bytes(64), bond_leaf.script, bond_leaf.control]
+        return -(-tx.vsize * rate // 1000)
 
     def claim_id(self):
         h = hashlib.sha256(frame(TAG))
@@ -532,9 +598,9 @@ class Graph:
         return h.digest()
 
     def funding(self, extra=None):
-        outputs = {"vault": (self.V, VAULT)}
+        outputs = {"vault": (self.V, self.stage.vault)}
         if self.cfg.bond:
-            outputs["bond"] = (self.bond_tree, BOND)
+            outputs["bond"] = (self.bond_tree, self.stage.bond)
         outputs.update(extra or {})
         return outputs
 
@@ -550,16 +616,17 @@ class Graph:
         tx = Transaction(ins, self.claim_outputs())
         leaf = self.V.leaf(0)
         # Without the desk's presignature the claimant can only sign in its place.
-        sig_d = tx.signature(0, leaf, SECRETS["desk"] if desk_signs else SECRETS["claimant"],
+        sig_d = tx.signature(0, leaf, self.stage.secret("desk" if desk_signs else "claimant"),
                              self.cfg.claim_hash_type if desk_signs else SIGHASH_DEFAULT)
         if outputs is not None:
             tx.outputs = list(outputs)
-        sig_c = tx.signature(0, leaf, SECRETS["claimant"])
+        sig_c = tx.signature(0, leaf, self.stage.secret("claimant"))
         stack = [sig_c, sig_d] + (list(reversed(labels)) if self.cfg.labels_onchain else [])
         tx.inputs[0].witness = stack + [leaf.script, leaf.control]
         if self.cfg.bond:
             bond_leaf = self.bond_tree.leaf(0)
-            tx.inputs[1].witness = [tx.signature(1, bond_leaf, SECRETS["claimant"]), bond_leaf.script, bond_leaf.control]
+            tx.inputs[1].witness = [tx.signature(1, bond_leaf, self.stage.secret("claimant")), bond_leaf.script,
+                                    bond_leaf.control]
         return tx
 
     def k_utxo(self, claim):
@@ -567,47 +634,49 @@ class Graph:
 
     def payout_tx(self, claim, destination=None):
         if self.cltv_height is not None:
-            tx = Transaction([utxo_input(self.k_utxo(claim), 0xfffffffe)], [(self.k_value - FEE, self.payout_spk)],
+            tx = Transaction([utxo_input(self.k_utxo(claim), 0xfffffffe)], [(self.k_value - self.fee, self.payout_spk)],
                              locktime=self.cltv_height)
         else:
             sequence = self.cfg.window if self.cfg.payout_csv else 0xfffffffd
-            tx = Transaction([utxo_input(self.k_utxo(claim), sequence)], [(self.k_value - FEE, self.payout_spk)])
+            tx = Transaction([utxo_input(self.k_utxo(claim), sequence)], [(self.k_value - self.fee, self.payout_spk)])
         leaf = self.K.leaf(0)
-        sig_d = tx.signature(0, leaf, SECRETS["desk"], self.cfg.payout_hash_type)
-        cosig = [tx.signature(0, leaf, SECRETS["claimant"])] if self.cfg.payout_cosigned else []
+        sig_d = tx.signature(0, leaf, self.stage.secret("desk"), self.cfg.payout_hash_type)
+        cosig = [tx.signature(0, leaf, self.stage.secret("claimant"))] if self.cfg.payout_cosigned else []
         tx.inputs[0].witness = cosig + [sig_d, leaf.script, leaf.control]
         if destination is not None:     # an outsider rewrites the outputs, keeping the desk's witness
-            tx.outputs = [(self.k_value - FEE, destination)]
+            tx.outputs = [(self.k_value - self.fee, destination)]
         return tx
 
-    def desk_payout_tx(self, claim, destination, fee=2 * FEE):
+    def desk_payout_tx(self, claim, destination, fee=None):
         """A desk that kept its key signs the matured payout to `destination` itself. Under a
         cosigned payout leaf it has no claimant signature and can only put its own in that slot."""
+        fee = 2 * self.fee if fee is None else fee
         sequence = self.cfg.window if self.cfg.payout_csv else 0xfffffffd
         tx = Transaction([utxo_input(self.k_utxo(claim), sequence)], [(self.k_value - fee, destination)])
         leaf = self.K.leaf(0)
-        sig_d = tx.signature(0, leaf, SECRETS["desk"])
+        sig_d = tx.signature(0, leaf, self.stage.secret("desk"))
         tx.inputs[0].witness = ([sig_d] if self.cfg.payout_cosigned else []) + [sig_d, leaf.script, leaf.control]
         return tx
 
-    def disprove_outputs(self, beneficiary, fee=FEE):
+    def disprove_outputs(self, beneficiary, fee=None):
+        fee = self.fee if fee is None else fee
         if self.cfg.disprove_fee == "zero_no_anchor":
             return [(self.k_value, self.refund_spk)]
         if self.cfg.disprove_fee in ("zero_anchor", "zero_anchor_v2"):
             return [(self.k_value, self.refund_spk), (0, P2A)]
         if self.cfg.bond:
-            return [(VAULT - 2 * FEE, self.refund_spk),
-                    (BOND - (fee - FEE), BURN_SPK if self.cfg.bond_burn else beneficiary)]
+            return [(self.stage.vault - self.claim_fee - self.fee, self.refund_spk),
+                    (self.stage.bond - (fee - self.fee), BURN_SPK if self.cfg.bond_burn else beneficiary)]
         if self.cfg.disprove_mode == "hashlock":
             return [(self.k_value - fee, beneficiary)]
         return [(self.k_value - fee, self.refund_spk)]
 
-    def disprove_tx(self, claim, label, signer, beneficiary=None, fee=FEE, outputs=None):
+    def disprove_tx(self, claim, label, signer, beneficiary=None, fee=None, outputs=None):
         """The disprove spend. `beneficiary` takes whatever output the mode leaves open
         (a bond reward, or everything under a hashlock-only leaf). `outputs` replaces the
         outputs before signing: only a signer who chooses them (the watcher) can do that."""
         if beneficiary is None:
-            beneficiary = spk_of(signer)
+            beneficiary = self.stage.spk(signer)
         version = 3 if self.cfg.disprove_fee == "zero_anchor" else 2
         tx = Transaction([utxo_input(self.k_utxo(claim))], list(outputs) if outputs is not None
                          else self.disprove_outputs(beneficiary, fee), version=version)
@@ -618,15 +687,17 @@ class Graph:
         else:
             key = "desk" if mode in ("presigned", "presigned_single") else signer
             hash_type = SIGHASH_SINGLE if mode == "presigned_single" else SIGHASH_DEFAULT
-            tx.inputs[0].witness = [tx.signature(0, leaf, SECRETS[key], hash_type), label, leaf.script, leaf.control]
+            tx.inputs[0].witness = [tx.signature(0, leaf, self.stage.secret(key), hash_type), label, leaf.script,
+                                    leaf.control]
         return tx
 
-    def anchor_child(self, parent, fee_utxo, fee=CHILD_FEE):
+    def anchor_child(self, parent, fee_utxo, fee=None):
         """Child spending the disprove's P2A anchor plus the watcher's own coin (the parent's version)."""
+        fee = self.stage.child_fee if fee is None else fee
         anchor = {"txid": parent.txid, "vout": 1, "amount": 0, "script_pubkey": P2A.hex()}
         tx = Transaction([utxo_input(anchor), utxo_input(fee_utxo)],
-                         [(fee_utxo["amount"] - fee, spk_of("watch"))], version=parent.version)
-        tx.inputs[1].witness = [tx.signature(1, None, p2tr_key(self.W).tweaked_secret(SECRETS["watch"]))]
+                         [(fee_utxo["amount"] - fee, self.stage.spk("watch"))], version=parent.version)
+        tx.inputs[1].witness = [tx.signature(1, None, p2tr_key(self.W).tweaked_secret(self.stage.secret("watch")))]
         return tx
 
     def pin_child(self, parent, coin, outputs, fee):
@@ -637,30 +708,31 @@ class Graph:
         body = [(330, mine)] * (outputs - 1)
         change = coin["amount"] - 330 * (outputs - 1) - fee
         tx = Transaction([utxo_input(anchor), utxo_input(coin)], body + [(change, mine)], version=parent.version)
-        tx.inputs[1].witness = [tx.signature(1, None, p2tr_key(self.C).tweaked_secret(SECRETS["claimant"]))]
+        tx.inputs[1].witness = [tx.signature(1, None, p2tr_key(self.C).tweaked_secret(self.stage.secret("claimant")))]
         return tx
 
     def payout_with_fee(self, claim, coin, extra):
         """The presigned payout (SINGLE|ANYONECANPAY) plus a fee input and change from the claimant."""
         tx = Transaction([utxo_input(self.k_utxo(claim), self.cfg.window), utxo_input(coin)],
-                         [(self.k_value - FEE, self.payout_spk), (coin["amount"] - extra, self.payout_spk)])
+                         [(self.k_value - self.fee, self.payout_spk), (coin["amount"] - extra, self.payout_spk)])
         leaf = self.K.leaf(0)
-        sig_d = tx.signature(0, leaf, SECRETS["desk"], self.cfg.payout_hash_type)
+        sig_d = tx.signature(0, leaf, self.stage.secret("desk"), self.cfg.payout_hash_type)
         tx.inputs[0].witness = [sig_d, leaf.script, leaf.control]
-        tx.inputs[1].witness = [tx.signature(1, None, p2tr_key(public(SECRETS["payout"])).tweaked_secret(SECRETS["payout"]))]
+        payout_key = p2tr_key(self.stage.keys["payout"])
+        tx.inputs[1].witness = [tx.signature(1, None, payout_key.tweaked_secret(self.stage.secret("payout")))]
         return tx
 
     def sweep_tx(self, claim, destination):
         """Key-path spend of the claim output by the claimant, as if it were the internal key."""
-        tx = Transaction([utxo_input(self.k_utxo(claim))], [(self.k_value - FEE, destination)])
+        tx = Transaction([utxo_input(self.k_utxo(claim))], [(self.k_value - self.fee, destination)])
         tree = TapTree(self.K.scripts, self.C)
-        tx.inputs[0].witness = [tx.signature(0, None, tree.tweaked_secret(SECRETS["claimant"]))]
+        tx.inputs[0].witness = [tx.signature(0, None, tree.tweaked_secret(self.stage.secret("claimant")))]
         return tx
 
     def reclaim_tx(self, utxo):
-        tx = Transaction([utxo_input(utxo, self.cfg.reclaim)], [(VAULT - FEE, self.refund_spk)])
+        tx = Transaction([utxo_input(utxo, self.cfg.reclaim)], [(self.stage.vault - self.fee, self.refund_spk)])
         leaf = self.V.leaf(1)
-        tx.inputs[0].witness = [tx.signature(0, leaf, SECRETS["desk"]), leaf.script, leaf.control]
+        tx.inputs[0].witness = [tx.signature(0, leaf, self.stage.secret("desk")), leaf.script, leaf.control]
         return tx
 
 
@@ -695,20 +767,20 @@ def setup_record(session, prep, graph, statement):
                      desk_presigns=prep.desk_presigns, config=prep.cfg.__dict__, cltv_height=graph.cltv_height)
 
 
-def run_pinning_case(session, row):
+def run_pinning_case(session, row, stage=FIXTURE):
     """A congested fee market, a zero-fee presigned disprove with a keyless anchor, a desk offline."""
     attack = row["variant"] == "attack"
     cfg = config(row["recipe"], row["profile"])
-    session.begin(keys())
-    prep = prepare(row)
+    session.begin(stage.public_keys())
+    prep = prepare(row, stage=stage)
     graph = Graph(prep)
     proof = proof_for(row)
     setup_record(session, prep, graph, prep.statement)
     session.offchain("fee market", "environment", fee_floor_sat_vb=PIN_FLOOR,
                      note="blocks after the claim only have room for packages paying at least the floor")
-    utxos = session.fund(graph.funding({"watch_fee": (p2tr_key(graph.W), WATCH_FUNDS),
+    utxos = session.fund(graph.funding({"watch_fee": (p2tr_key(graph.W), stage.watch_funds),
                                         "claimant_pin": (p2tr_key(graph.C), PIN_COIN),
-                                        "claimant_fee": (p2tr_key(public(SECRETS["payout"])), FEE_COIN)}))
+                                        "claimant_fee": (p2tr_key(stage.keys["payout"]), FEE_COIN)}))
     labels = prep.garbling.input_labels(gc.proof_bits(*proof))
     session.offchain("claim proof", "claimant", proof=list(proof), statement=prep.statement)
     claim = graph.claim_tx(utxos, labels)
@@ -760,7 +832,7 @@ def wait_for(predicate, timeout, interval=0.25):
     return bool(predicate())
 
 
-def run_partition_case(session, row):
+def run_partition_case(session, row, stage=FIXTURE):
     """Three owned nodes joined over loopback P2P: a miner, a blocks-only relay run by the
     attacker, and the watcher's node. Eclipsed, the watcher's only peer is the relay."""
     cfg = config(row["recipe"], row["profile"])
@@ -793,8 +865,8 @@ def run_partition_case(session, row):
         topology = {k: [{"addr": p["addr"], "inbound": p["inbound"], "relaytxes": p.get("relaytxes")}
                         for p in n.check_peers()] for k, n in nodes}
         cs = Session(miner)
-        cs.begin(keys())
-        prep = prepare(row)
+        cs.begin(stage.public_keys())
+        prep = prepare(row, stage=stage)
         graph = Graph(prep)
         proof = proof_for(row)
         setup_record(cs, prep, graph, prep.statement)
@@ -830,21 +902,21 @@ def run_partition_case(session, row):
             node.close()
 
 
-def run_case(session, row):
+def run_case(session, row, stage=FIXTURE):
     if row["recipe"] == "disprove_partitioned":
-        return run_partition_case(session, row)
+        return run_partition_case(session, row, stage)
     if row["recipe"] == "proof_replay_across_vaults" and row["variant"] == "attack":
-        return run_replay_case(session, row)
+        return run_replay_case(session, row, stage)
     if row["recipe"] == "disprove_anchor_pinned":
-        return run_pinning_case(session, row)
+        return run_pinning_case(session, row, stage)
     recipe, attack = row["recipe"], row["variant"] == "attack"
     cfg = config(recipe, row["profile"])
-    session.begin(keys())
-    prep = prepare(row)
+    session.begin(stage.public_keys())
+    prep = prepare(row, stage=stage)
     graph = Graph(prep, cltv_height=session.height() + WINDOW if cfg.payout_timelock == "cltv" else None)
     proof = proof_for(row)
     setup_record(session, prep, graph, prep.statement)
-    extra = {"watch_fee": (p2tr_key(graph.W), WATCH_FUNDS)} if recipe == "disprove_unbumpable" else None
+    extra = {"watch_fee": (p2tr_key(graph.W), stage.watch_funds)} if recipe == "disprove_unbumpable" else None
     utxos = session.fund(graph.funding(extra))
     bits = gc.proof_bits(*proof)
     labels = prep.garbling.input_labels(bits)
@@ -900,7 +972,7 @@ def run_case(session, row):
         if cfg.disprove_mode == "hashlock":
             theft = graph.disprove_tx(claim, reject, "claimant", beneficiary=graph.payout_spk)
         else:
-            theft = rewrite(graph.disprove_tx(claim, reject, "claimant"), [(graph.k_value - FEE, graph.payout_spk)])
+            theft = rewrite(graph.disprove_tx(claim, reject, "claimant"), [(graph.k_value - graph.fee, graph.payout_spk)])
         if session.submit("self-spend disprove", "claimant", theft, note="reject label known to the garbler"):
             session.mine(1, "self-spend confirms")
             conf += 1
@@ -966,7 +1038,7 @@ def run_case(session, row):
         attempt = forged if forged is not None else gc.xor(out_label, candidates[0])
         session.submit("griefing disprove", "watch", graph.disprove_tx(claim, attempt, "watch"))
     elif verdict == "reject" and recipe == "disprove_watcher_redirect" and attack:
-        steal = [(graph.k_value - FEE, spk_of("watch"))]
+        steal = [(graph.k_value - graph.fee, stage.spk("watch"))]
         if cfg.disprove_mode == "watcher":
             redirect = graph.disprove_tx(claim, out_label, "watch", outputs=steal)
         else:
@@ -991,10 +1063,11 @@ def run_case(session, row):
         if recipe == "bond_self_slash" and attack:
             # The garbler holds the reject label too, and replaces the watcher's disprove
             # with one that sends the bond back to itself at a higher fee.
-            take_back = [(VAULT - 2 * FEE, graph.refund_spk), (BOND - FEE, graph.bond_tree.script_pubkey)]
+            take_back = [(stage.vault - graph.claim_fee - graph.fee, graph.refund_spk),
+                         (stage.bond - graph.fee, graph.bond_tree.script_pubkey)]
             if cfg.disprove_mode == "presigned_single":
                 own = graph.disprove_tx(claim, prep.garbling.reject_label, "claimant",
-                                        beneficiary=graph.bond_tree.script_pubkey, fee=2 * FEE)
+                                        beneficiary=graph.bond_tree.script_pubkey, fee=2 * graph.fee)
             else:
                 own = rewrite(disprove, take_back)
             session.submit("self-slash disprove", "claimant", own, note="replaces the watcher's disprove (full RBF)")
@@ -1017,7 +1090,7 @@ def run_case(session, row):
                           note="the desk signs the matured payout to itself"):
             session.mine(1, "desk payout confirms")
     if recipe == "payout_sighash_none" and attack:
-        thief = spk_of("relayer")
+        thief = stage.spk("relayer")
         if session.submit("redirected payout", "relayer", graph.payout_tx(claim, destination=thief),
                           note="the relayer mines its own rewrite"):
             session.mine(1, "relayer's block")
@@ -1026,11 +1099,11 @@ def run_case(session, row):
     return prep, session.finish()
 
 
-def run_replay_case(session, row):
+def run_replay_case(session, row, stage=FIXTURE):
     """Two vaults, one honest payment proof, claimed against both."""
     cfg = config(row["recipe"], row["profile"])
-    session.begin(keys())
-    preps = [prepare(row), prepare(row, index=1)]
+    session.begin(stage.public_keys())
+    preps = [prepare(row, stage=stage), prepare(row, index=1, stage=stage)]
     graphs = [Graph(p) for p in preps]
     for i, (prep, graph) in enumerate(zip(preps, graphs)):
         session.offchain("setup" if i == 0 else "setup 2", "claimant", statement=prep.statement,
@@ -1070,13 +1143,13 @@ def confirmed_now(session, label):
     return any(s["kind"] == "tx" and s["label"] == label and s["broadcast"] for s in session.steps)
 
 
-def claimant_scripts():
-    tree = TapTree((push(public(SECRETS["claimant"])) + ops("CHECKSIG"),))
-    return {tree.script_pubkey.hex(), spk_of("payout").hex()}
+def claimant_scripts(stage=FIXTURE):
+    tree = TapTree((push(stage.keys["claimant"]) + ops("CHECKSIG"),))
+    return {tree.script_pubkey.hex(), stage.spk("payout").hex()}
 
 
-def claimant_loss(steps):
-    mine, loss = claimant_scripts(), 0
+def claimant_loss(steps, stage=FIXTURE):
+    mine, loss = claimant_scripts(stage), 0
     for s in steps:
         if s["kind"] == "tx" and s.get("confirmed"):
             loss += sum(p["amount"] for p in s["prevouts"] if p["script_pubkey"] in mine)
@@ -1084,7 +1157,7 @@ def claimant_loss(steps):
     return loss
 
 
-def score(row, steps):
+def score(row, steps, stage=FIXTURE):
     """Outcome from confirmed transactions only; never reads the declared expectation."""
     proof = step(steps, "claim proof")
     honest = proof is not None and sum(proof["proof"]) == STATEMENT
@@ -1095,9 +1168,9 @@ def score(row, steps):
     elif recipe == "payout_sighash_none":
         attack = confirmed(steps, "redirected payout")
     elif recipe == "claimant_unbonded":
-        attack = (not honest) and confirmed(steps, "claim") and claimant_loss(steps) <= 0
+        attack = (not honest) and confirmed(steps, "claim") and claimant_loss(steps, stage) <= 0
     elif recipe == "bond_self_slash":
-        attack = (not honest) and confirmed(steps, "claim") and claimant_loss(steps) < BOND // 2
+        attack = (not honest) and confirmed(steps, "claim") and claimant_loss(steps, stage) < stage.bond // 2
     elif recipe == "claim_sighash_none":
         attack = confirmed(steps, "rewritten claim")
     elif recipe == "claim_internal_key_spendable":
@@ -1164,33 +1237,43 @@ def audit(report):
     """Offline audit: envelope, local tx checks, rebuilt setup, re-evaluated garblings, rescoring."""
     rows = catalog()
     problems = check_report_envelope(report, TRACK, rows)
-    by_id = {r["id"]: r for r in rows}
     for case in report.get("cases", []):
+        if case.get("id") in {r["id"] for r in rows} and case.get("keys") != keys():
+            problems.append(f"{case['id']}: party keys differ from the fixture keys")
+    return problems + audit_cases(report.get("cases", []), rows, FIXTURE)
+
+
+def audit_cases(cases, rows, stage, cltv_slack=0):
+    """Per-case checks shared by the regtest and public-network tracks. On a public network a
+    block can arrive between reading the tip for an absolute payout height and recording the
+    setup step; `cltv_slack` is how many blocks earlier that read may have been."""
+    problems = []
+    by_id = {r["id"]: r for r in rows}
+    for case in cases:
         row = by_id.get(case.get("id"))
         if row is None:
             continue
         cid = row["id"]
-        if case.get("keys") != keys():
-            problems.append(f"{cid}: party keys differ from the fixture keys")
-        problems += [f"{cid}: {p}" for p in audit_transactions(case, keys())]
+        problems += [f"{cid}: {p}" for p in audit_transactions(case, stage.public_keys())]
         steps = case["steps"]
-        prep = prepare(row)
+        prep = prepare(row, stage=stage)
         setup = step(steps, "setup") or {}
         cltv = None
         if prep.cfg.payout_timelock == "cltv":
             cltv = setup.get("cltv_height")
-            if cltv != setup.get("height", -1) + WINDOW:
+            height = setup.get("height", -1)
+            if not isinstance(cltv, int) or not height - cltv_slack <= cltv - WINDOW <= height:
                 problems.append(f"{cid}: absolute payout height is not setup height + {WINDOW}")
-                cltv = setup.get("height", 0) + WINDOW
+                cltv = height + WINDOW
         graph = Graph(prep, cltv)
         claim = audit_instance(cid, row, steps, prep, graph, "", problems)
         if row["recipe"] == "proof_replay_across_vaults" and row["variant"] == "attack":
-            prep2 = prepare(row, index=1)
+            prep2 = prepare(row, index=1, stage=stage)
             audit_instance(cid, row, steps, prep2, Graph(prep2), " 2", problems)
         chain = step(steps, "labels from chain")
         if chain is not None and claim is not None:
             if [x.hex() for x in labels_from_claim(claim["raw_transaction"])] != chain["labels"]:
                 problems.append(f"{cid}: labels read from the claim witness differ")
-        if score(row, steps) != case.get("outcome"):
+        if score(row, steps, stage) != case.get("outcome"):
             problems.append(f"{cid}: outcome does not follow from the recorded steps")
     return problems

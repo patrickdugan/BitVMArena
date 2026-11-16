@@ -76,6 +76,12 @@ jobs:
             python -m bitvm_corpus native audit "$report"
           done
       - run: python -m bitvm_corpus native assess --app iob-payout-desk
+      - name: Audit the saved testnet4 staging reports offline
+        run: |
+          for report in examples/testnet4/*.json; do
+            [ -e "$report" ] || continue
+            python -m bitvm_corpus testnet4 audit "$report"
+          done
 
   corpus-regtest:
     runs-on: ubuntu-latest
@@ -101,6 +107,12 @@ jobs:
       - run: python -m unittest discover -s tests -p 'test_native.py' -v
       - run: python -m unittest discover -s tests -p 'test_episode.py' -v
       - run: python -m unittest discover -s tests -p 'test_m14.py' -v
+      - run: python -m unittest discover -s tests -p 'test_testnet4.py' -v
+      - name: Rehearse every testnet4 row on regtest (blocks on a timer, cases concurrent)
+        run: |
+          mkdir -p reports
+          python -m bitvm_corpus testnet4 rehearse --row bitvm3-testnet4 --output reports/testnet4-rehearsal-linux.json
+          python -m bitvm_corpus testnet4 audit reports/testnet4-rehearsal-linux.json
       - name: Rerun every example episode and audit it
         run: python tools/rebuild_episode_reports.py --bitcoind "$BITVM_ARENA_BITCOIND"
       - name: Run every native track on regtest and audit the reports

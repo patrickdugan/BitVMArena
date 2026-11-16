@@ -156,6 +156,59 @@ def episode_command(args):
     return 0
 
 
+def testnet4_command(args):
+    """Stage BitVM3 trajectories on testnet4 (run), rehearse them on regtest, audit a report."""
+    import os
+    import uuid
+    from . import testnet4
+    root = Path(__file__).resolve().parents[1]
+    if args.action == "audit":
+        if args.report is None:
+            raise ValidationError("audit needs a report file")
+        report = load_json(args.report)
+        problems, notes = testnet4.audit(report), []
+        if args.rpc_port:
+            node = testnet4.StagingNode(args.rpc_port, args.cookie, args.wallet or "", chain=report.get("network"))
+            node.check(wallet=False)
+            chain_problems, notes = testnet4.verify_chain(report, node)
+            problems += chain_problems
+        emit({"track": report.get("track"), "wave": report.get("wave"), "cases": len(report.get("cases", [])),
+              "summary": report.get("summary"), "problems": problems, "chain_notes": notes, "valid": not problems})
+        return 0 if not problems else 1
+    if args.action == "list":
+        waves = {i: w for w, ids in testnet4.WAVES.items() for i in ids}
+        rows = testnet4.select(args.row, args.wave) if (args.row or args.wave) else testnet4.catalog()
+        emit([{"id": r["id"], "expected": r["expected"], "wave": waves.get(r["id"])} for r in rows], args.output)
+        return 0
+    rows = testnet4.select(args.row, args.wave)
+    wave = args.wave or "custom"
+    if args.action == "rehearse":
+        default = root / "work/toolchains/core-31.2/bitcoind.exe"
+        binary = args.bitcoind or Path(os.environ.get("BITVM_ARENA_BITCOIND", default))
+        report = testnet4.rehearse(binary, root / "work" / "staging" / uuid.uuid4().hex, rows, wave=wave,
+                                   interval=args.interval)
+    else:
+        if not args.broadcast:
+            raise ValidationError("run broadcasts real testnet4 transactions; pass --broadcast")
+        if args.state is None or args.rpc_port is None or args.cookie is None or not args.wallet:
+            raise ValidationError("run needs --state, --rpc-port, --cookie and --wallet")
+        state = args.state.resolve()
+        if state == root.parent or root.parent in state.parents:
+            raise ValidationError("the state directory holds stage secrets; keep it outside the repository")
+        if (state / "stage.json").exists():
+            raise ValidationError("this state directory already holds a stage; use a new one per wave")
+        node = testnet4.StagingNode(args.rpc_port, args.cookie, args.wallet).check()
+        stage = testnet4.new_stage()
+        state.mkdir(parents=True, exist_ok=True)
+        (state / "stage.json").write_text(json.dumps(testnet4.stage_record(stage, private=True), indent=1),
+                                          encoding="utf-8")
+        report = testnet4.run_wave(node, rows, stage, state, wave=wave)
+        (state / "report.json").write_text(json.dumps(report, indent=1, sort_keys=True), encoding="utf-8")
+    emit(report, args.output)
+    print(f"bitvm-corpus: {json.dumps(report['summary'])}", file=sys.stderr)
+    return 0 if not report["summary"]["expectation_failures"] else 1
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description="BitVM Arena model trajectories and control evaluations")
     parser.add_argument("--version", action="version", version=__version__)
@@ -212,8 +265,23 @@ def main(argv=None):
                    help="episode: the role the attacker plays; the other roles are scripted honestly")
     p.add_argument("--miner", action="store_true", help="episode: grant the attacker the miner capability")
     p.add_argument("--actions", type=Path, help="episode: JSONL actions file (default: stdin)")
+    p = sub.add_parser("testnet4", help="stage bitvm3 trajectories on testnet4 (rehearse on regtest first)")
+    p.add_argument("action", choices=("list", "rehearse", "run", "audit"))
+    p.add_argument("report", nargs="?", type=Path, help="report file for audit")
+    p.add_argument("--wave", choices=("wave1",), help="a predefined set of rows (testnet4.WAVES)")
+    p.add_argument("--row", action="append", default=[], help="a row id, or text a row id contains (repeatable)")
+    p.add_argument("--bitcoind", type=Path, help="rehearse: bitcoind binary")
+    p.add_argument("--interval", type=float, default=1.5, help="rehearse: seconds between the network's blocks")
+    p.add_argument("--rpc-port", type=int, help="run/audit: RPC port of an existing testnet4 node")
+    p.add_argument("--cookie", type=Path, help="run/audit: that node's RPC cookie file")
+    p.add_argument("--wallet", help="run: the node wallet that funds the wave")
+    p.add_argument("--state", type=Path, help="run: new directory outside the repository for keys and the journal")
+    p.add_argument("--broadcast", action="store_true", help="run: confirm that real testnet4 transactions are sent")
+    p.add_argument("--output", type=Path)
     args = parser.parse_args(argv)
     try:
+        if args.command == "testnet4":
+            return testnet4_command(args)
         if args.command == "native":
             return native_command(args)
         if args.command == "external":
