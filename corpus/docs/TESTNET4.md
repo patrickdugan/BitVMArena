@@ -155,6 +155,14 @@ The rehearsal can now reorganize too. `--reorg-every N` turns every Nth block of
 regtest "network" into the shape testnet4 showed: the tip is invalidated, its transactions
 return to the mempool, and two empty blocks replace it.
 
+N must be 0 or at least 3, and the harness refuses 1 and 2 before it starts a node:
+- With N=2, the block each reorg invalidates is the only block since the previous reorg
+  that carried transactions. No transaction is ever confirmed twice, and a full rehearsal
+  with N=2 sat at its coin split for four hours.
+- With N=1, no transaction is mined at all.
+- Either setting is a censoring miner, which the regtest track already models as
+  `disprove_censored_by_miner`.
+
 Results:
 - **Before the full fix,** the reorg rehearsal of all 84 rows exposed two more races, and
   each one lost cases:
@@ -253,6 +261,52 @@ What the public network showed:
      transaction. On testnet4, a window of N blocks gives a disprove fewer than N blocks
      that will take it. The window recipes are harder on the watcher here than on
      regtest, where every block takes the mempool.
+
+## Wave 3: attacks on timing and on presigned transactions
+
+[`examples/testnet4/wave3.json`](../examples/testnet4/wave3.json), broadcast on
+2026-11-16:
+- **Rows:** six mutant attacks whose outcome turns on public-network timing or on a
+  presigned transaction that someone other than its signer can rewrite.
+- **Funding:** the 18,812 sats left after wave 2, split into 7 coins in `e5243f11…`
+  (161,765).
+- **Run:** the tip went from 161,764 to 161,783 between 21:06 and 23:26 UTC.
+- **Transactions:** 13 confirmed and 4 refused by mempool policy. None was displaced,
+  dropped or left unconfirmed.
+  - One was reorged during its row.
+  - None had to be sent again.
+- **Expectations:** 6 of 6 met. Every attack landed, and every transaction step matched
+  the regtest catalog.
+- **Audit:**
+  - offline, clean;
+  - against the node's best chain, valid;
+  - three notes: payouts recorded in 161,776 now sit in 161,778 (below).
+- **Cost:** 6,478 sats of fees, of which 1,274 were for the split, so about 870 per row.
+  Wave 2 came to about 780 per row after its 1,866-sat split. Nothing was left in contract
+  outputs.
+
+| Row (mutant attack) | What testnet4 did |
+| --- | --- |
+| `payout_absolute_timelock` | late claim and its payout both in 161,772, a real-difficulty block; disprove refused `missing-inputs` |
+| `window_below_latency` | claim 161,767; payout 161,776 (now 161,778) before the evaluation finished; disprove refused `missing-inputs` |
+| `claim_sighash_none` | the claimant's rewrite of the presigned claim, paying the vault straight to itself, 161,767 |
+| `payout_sighash_none` | claim 161,767; redirected payout 161,776 (now 161,778); honest payout refused `missing-inputs` |
+| `proof_replay_across_vaults` | one payment proof claimed both vaults, 161,772; both paid 161,783 |
+| `single_watcher_disprove` | claim 161,767; a disprove by a reject-label holder other than the one authorized watcher refused `Invalid Schnorr signature`; false claim paid 161,776 (now 161,778) |
+
+What the public network showed:
+
+1. **An absolute payout height leaves no window at all.** A testnet4 miner confirmed the
+   late claim and its payout in the same real-difficulty block, as the recipe describes.
+   A watcher that saw the claim in the mempool had no block in which to answer.
+2. **Block 161,776 was replaced twice.**
+   - The `window_below_latency` payout was first mined in minimum-difficulty block
+     161,776 (`000000006b0ffa9b…`). A sibling block at the same height replaced it, and
+     the payout was mined again there (`000000000013f45d…`) with the other two payouts.
+   - The rows ended on that block. Real-difficulty block 161,778 (`0000000000000000dc97…`)
+     then extended a third branch and mined all three payouts again.
+   - The audit's chain re-check notes each move. No outcome changed: on every branch,
+     the payout was the transaction that spent the claim output.
 
 ## Running a wave
 

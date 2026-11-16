@@ -33,6 +33,8 @@ Done:
     for. The session now re-checks depth through reorgs, and the rehearsal can reorganize.
   - **Wave 2:** nine mutant attacks plus that row; 10 of 10 met. Every flaw landed on the
     public network, and 13 transactions came through a reorg without a resend.
+  - **Wave 3:** six mutant attacks on timing and on presigned transactions; 6 of 6 met.
+    The absolute-timelock payout landed in its claim's block.
 
 Next:
 
@@ -40,19 +42,19 @@ Next:
    `m14-claim` does not export; the window and censorship recipes need the evaluation
    time measured on the watcher hardware a deployment expects.
 2. **The rest of the testnet4 catalog.**
-   - Wave 3 runs six mutant attacks whose outcome turns on public-network timing or on what
-     a relayer can rewrite: absolute timelock, short window, SIGHASH_NONE claim and payout,
-     proof replay, single watcher.
-   - Left after wave 3:
-     - the other six mutant attacks;
+   - Wave 4 runs four more mutant attacks: seed reuse, swapped polarity, bond self-slash
+     and unchecked garbling.
+   - Left after wave 4:
+     - two mutant attacks (`cut_and_choose_grindable`, `tables_delivered_late`);
      - the six hardened attacks wave 1 left out;
      - the 39 benign rows.
    - The cost is fees, about 970–990 sats per row (funding, claim, disprove, payout).
      - Wave 1 spent 17,740 of its 49,000 sats and left 2,771 in contract outputs (a claim
        output never paid out, and a bond) until their 144-block reclaim.
-     - Wave 2 spent 9,677 and left nothing locked.
-     - The staging wallet had 18,812 sats before wave 3. The rows after it need about
-       50k more.
+     - Wave 2 spent 9,677 and wave 3 spent 6,478. Neither left anything locked.
+     - The staging wallet had 12,334 sats before wave 4. At about 900 sats per row plus
+       the split, wave 4 leaves about 8k. That covers the last two mutant attacks (4,600 in
+       coins plus a split). The 45 rows after that need about 45k more.
    - Running all 84 rows at once would need about 163k sats of coins in flight. Waves sized
      to the wallet recycle the same coins.
    - The recipes that need a miner or a topology (`disprove_censored_by_miner`,

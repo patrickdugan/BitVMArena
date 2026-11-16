@@ -109,6 +109,15 @@ WAVES = {
         "proof_replay_across_vaults",
         "single_watcher_disprove",
     )],
+    # The fourth wave: a griefing disprove made with reused seeds, a disprove the swapped
+    # polarity refuses, the bond self-slash replacement under full RBF, and a claim on an
+    # unchecked garbling. Sized to the 12,334 sats (eight coins) left after wave 3.
+    "wave4": [f"{TRACK}.{recipe}.mutant.attack" for recipe in (
+        "seed_reuse_across_claims",
+        "output_polarity_swapped",
+        "bond_self_slash",
+        "garbling_unchecked",
+    )],
 }
 
 
@@ -692,9 +701,15 @@ class NetworkMiner:
     With `reorg_every=k`, every k-th tick is a reorg of the shape testnet4 showed in wave 1
     (a real-difficulty block replacing minimum-difficulty blocks): the tip is invalidated, so
     its transactions return to the mempool, and two empty blocks replace it. Those
-    transactions then confirm two blocks later than they first did."""
+    transactions then confirm two blocks later than they first did.
+
+    k must be 0 or at least 3. With k=2 the block every reorg invalidates is the only block
+    since the last reorg that carried transactions, so no transaction is ever confirmed
+    twice and a run stalls; k=1 never mines a transaction at all. That is a censoring miner,
+    which the regtest track models directly (`disprove_censored_by_miner`)."""
 
     def __init__(self, node, address, interval, reorg_every=0):
+        self.check_reorg_every(reorg_every)
         self.node, self.address, self.interval, self.reorg_every = node, address, interval, reorg_every
         self.ticks = self.reorgs = 0
         self.stopped = threading.Event()
@@ -714,6 +729,12 @@ class NetworkMiner:
             except Exception:       # keep mining through any transient failure
                 pass
 
+    @staticmethod
+    def check_reorg_every(reorg_every):
+        if reorg_every != 0 and reorg_every < 3:
+            raise ValidationError(f"--reorg-every {reorg_every}: use 0 (no reorgs) or at least 3; with 1 or 2 "
+                                  "every block that carries transactions is reorganized away and nothing confirms")
+
     def settings(self):
         return {"interval_seconds": self.interval, "reorg_every": self.reorg_every, "reorgs": self.reorgs}
 
@@ -730,6 +751,7 @@ def rehearse(binary, directory, rows, *, wave="rehearsal", interval=1.5, reorg_e
              patience=PATIENCE):
     """Run a wave against an owned regtest node that mines on a timer, as testnet4 would, and
     with `reorg_every` also reorganizes it the way testnet4 does."""
+    NetworkMiner.check_reorg_every(reorg_every)
     directory = Path(directory)
     with Regtest(binary, directory / "node") as owned:
         owned.initialize_wallet()

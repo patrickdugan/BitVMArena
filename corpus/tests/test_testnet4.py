@@ -117,6 +117,14 @@ class CliSafetyTests(unittest.TestCase):
         self.assertEqual(code, 2)
         self.assertIn("outside the repository", err)
 
+    def test_rehearsal_refuses_a_reorg_every_block_or_two(self):
+        # With 1 or 2 every transaction-bearing block is reorganized away; refused before a node starts.
+        for every in ("1", "2", "-3"):
+            code, err = self.run_cli("testnet4", "rehearse", "--wave", "wave1", "--bitcoind", "missing.exe",
+                                     "--reorg-every", every)
+            self.assertEqual(code, 2)
+            self.assertIn("at least 3", err)
+
     def test_staging_node_refuses_other_chains(self):
         with self.assertRaises(Exception):
             testnet4.StagingNode(1, "cookie", "w", chain="main")
