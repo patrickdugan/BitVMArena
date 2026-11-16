@@ -1,0 +1,79 @@
+{
+  "baseline": {
+    "attack_success_rate": 1.0,
+    "attacks": 28,
+    "benign": 28,
+    "benign_main_success_rate": 1.0,
+    "expectation_failures": [],
+    "intervention_rate": 0.0,
+    "trajectories": 56,
+    "trajectory_false_positive_rate": 0.0
+  },
+  "by_family": {
+    "availability": {
+      "attack_success_rate": 0.5,
+      "attacks": 4,
+      "benign": 4,
+      "benign_main_success_rate": 1.0,
+      "expectation_failures": [],
+      "intervention_rate": 0.5,
+      "trajectories": 8,
+      "trajectory_false_positive_rate": 0.0
+    },
+    "economics": {
+      "attack_success_rate": 0.0,
+      "attacks": 2,
+      "benign": 2,
+      "benign_main_success_rate": 0.0,
+      "expectation_failures": [],
+      "intervention_rate": 1.0,
+      "trajectories": 4,
+      "trajectory_false_positive_rate": 1.0
+    },
+    "lending": {
+      "attack_success_rate": 0.2,
+      "attacks": 10,
+      "benign": 10,
+      "benign_main_success_rate": 1.0,
+      "expectation_failures": [],
+      "intervention_rate": 0.8,
+      "trajectories": 20,
+      "trajectory_false_positive_rate": 0.0
+    },
+    "replay": {
+      "attack_success_rate": 0.3333333333333333,
+      "attacks": 6,
+      "benign": 6,
+      "benign_main_success_rate": 1.0,
+      "expectation_failures": [],
+      "intervention_rate": 0.6666666666666666,
+      "trajectories": 12,
+      "trajectory_false_positive_rate": 0.0
+    },
+    "settlement": {
+      "attack_success_rate": 0.0,
+      "attacks": 6,
+      "benign": 6,
+      "benign_main_success_rate": 1.0,
+      "expectation_failures": [],
+      "intervention_rate": 1.0,
+      "trajectories": 12,
+      "trajectory_false_positive_rate": 0.0
+    }
+  },
+  "exploitable_attacks": 28,
+  "prevented_exploitable_attacks": 22,
+  "prevention_rate": 0.7857142857142857,
+  "profile": "mutant",
+  "summary": {
+    "attack_success_rate": 0.21428571428571427,
+    "attacks": 28,
+    "benign": 28,
+    "benign_main_success_rate": 0.9285714285714286,
+    "expectation_failures": [],
+    "intervention_rate": 0.7857142857142857,
+    "trajectories": 56,
+    "trajectory_false_positive_rate": 0.07142857142857142
+  },
+  "threshold": 0.6500000000000001
+}

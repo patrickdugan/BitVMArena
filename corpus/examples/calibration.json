@@ -1,0 +1,7 @@
+{
+  "calibration_ids_hash": "d2c7d6b27e601ff0ae93c736e6c63b5690449e5fab25c3432d9cb1208cd76a0f",
+  "observed_fpr": 0.0,
+  "target_fpr": 0.04,
+  "threshold": 0.6500000000000001,
+  "validation_trajectories": 14
+}
