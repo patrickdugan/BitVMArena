@@ -1,0 +1,4 @@
+{"op": "wait", "args": {"blocks": 9}}
+{"op": "spend", "args": {"utxo": "claim", "path": "payout"}}
+{"op": "wait", "args": {"blocks": 3}}
+{"op": "end"}

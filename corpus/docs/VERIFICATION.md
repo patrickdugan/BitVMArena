@@ -49,12 +49,14 @@ Core 31.1): **76 tests passed**. They cover:
 | Track | Core | Cases met | Confirmed / rejected txs | Offline audit |
 | --- | --- | --- | --- | --- |
 | primitive | 31.1.0 (GPG-verified) | 56/56 | 42 / 16 | 0 problems |
-| bitvm3 | 31.1.0 (GPG-verified) | 80/80 | 159 / 43 | 0 problems |
+| bitvm3 | 31.1.0 (GPG-verified) | 96/96 | 192 / 53 | 0 problems |
 | bitvm2 | 31.1.0 (GPG-verified) | 32/32 | 106 / 27 | 0 problems |
-| bitvm3 | 31.2.0 (checksum-matched) | 80/80 | 159 / 43 | 0 problems; every step verdict identical to 31.1 |
+| bitvm3-m14 | 31.1.0 (GPG-verified) | 8/8 | 20 / 2 | 0 problems; recorded M14 runs consistent |
+| bitvm3 | 31.2.0 (checksum-matched) | 96/96 | 192 / 53 | 0 problems; every step verdict identical to 31.1 |
 
-The BitVM3 rows are the 20-recipe track. Its first ten recipes (40 trajectories) gave
-the same per-step verdicts as the earlier 10-recipe evidence.
+The BitVM3 rows are the 24-recipe track. Its first 20 recipes (80 trajectories) gave the
+same per-step verdicts as the earlier 20-recipe evidence, and its first ten the same as the
+10-recipe evidence before that.
 
 **Episodes (2026-11-16).** The 11 example episodes in
 [`examples/episodes/reports/`](../examples/episodes/reports/) ran on Core 31.1 and each

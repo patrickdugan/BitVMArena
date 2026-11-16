@@ -16,17 +16,19 @@ from dataclasses import fields
 
 from . import gc
 from .bitcoin import P2A, Transaction, TapTree, p2tr_key
-from .bitvm3 import (BOND, BURN_SPK, CENSOR, FEE, HARDENED_WINDOW, SECRETS, STATEMENT, VAULT, WATCH_FUNDS, Config,
-                     Graph, claimant_scripts, evaluator_tables, keys, labels_from_claim, prepare, rewrite,
-                     setup_record, spk_of, tables_commitment)
+from .bitvm3 import (BOND, BURN_SPK, CENSOR, FALSE_PROOF, FEE, HARDENED_WINDOW, HONEST_PROOF, PAYMENT_DELAY, SECRETS,
+                     STATEMENT, VAULT, WATCH_FUNDS, Config, Graph, claimant_scripts, evaluator_tables, keys,
+                     labels_from_claim, prepare, rewrite, setup_record, spk_of, tables_commitment)
 from .canonical import ValidationError, digest, integer
 from .core import CoreError, Regtest, safe_json
 from .track import SATS, Session, audit_transactions, step, utxo_input
 
 KIND = "bitvm3-episode"
 MAX_ACTIONS, MAX_BLOCKS, MAX_OUTPUTS, MAX_HEX = 200, 500, 16, 200_000
-ASSUMPTIONS = {"watcher_online": True, "watcher_latency": 1, "desk_online": True, "censorship_blocks": CENSOR}
-DESTINATIONS = ("claimant", "payout", "refund", "relayer", "watch", "burn")
+ROLES = ("claimant", "desk", "watch", "relayer")
+ASSUMPTIONS = {"watcher_online": True, "watcher_latency": 1, "desk_online": True, "censorship_blocks": CENSOR,
+               "claim_delay": PAYMENT_DELAY, "claim_proof": "honest"}
+DESTINATIONS = ("claimant", "payout", "refund", "desk", "relayer", "watch", "burn")
 
 APPS = {
     "iob-payout-desk": {
@@ -70,7 +72,7 @@ def resolve_app(app, overrides=None):
     if unknown:
         raise ValidationError(f"unknown override keys: {sorted(unknown)}")
     spec = APPS[app]
-    config, assumptions = {**defaults, **spec["config"]}, {**spec["assumptions"]}
+    config, assumptions = {**defaults, **spec["config"]}, {**ASSUMPTIONS, **spec["assumptions"]}
     for key, value in overrides.items():
         reference = assumptions[key] if key in ASSUMPTIONS else defaults[key]
         if type(value) is not type(reference):
@@ -80,7 +82,17 @@ def resolve_app(app, overrides=None):
         raise ValidationError("watcher_latency must be in [0, 100]")
     if not 0 <= assumptions["censorship_blocks"] <= MAX_BLOCKS:
         raise ValidationError(f"censorship_blocks must be in [0, {MAX_BLOCKS}]")
+    if not 0 <= assumptions["claim_delay"] <= 100:
+        raise ValidationError("claim_delay must be in [0, 100]")
+    _choice(assumptions["claim_proof"], "claim_proof", ("honest", "false"))
     return Config(**config).check(), assumptions
+
+
+def scripted_proof(assumptions, attacker):
+    """The proof the scripted claimant submits; None when the attacker is the claimant."""
+    if attacker == "claimant":
+        return None
+    return FALSE_PROOF if assumptions["claim_proof"] == "false" else HONEST_PROOF
 
 
 def episode_row(app, tag):
@@ -130,7 +142,7 @@ def _choice(value, name, allowed):
 
 def party_map(graph):
     parties = {spk: "claimant" for spk in claimant_scripts()}
-    for name in ("refund", "watch", "relayer"):
+    for name in ("desk", "refund", "watch", "relayer"):
         parties[spk_of(name).hex()] = name
     parties[BURN_SPK.hex()] = "burn"
     for spk in (graph.V.script_pubkey, graph.K.script_pubkey, P2A):
@@ -138,52 +150,71 @@ def party_map(graph):
     return parties
 
 
-def score(graph, steps):
-    """Outcome from confirmed transactions only; never reads action labels or declared intents."""
-    parties = party_map(graph)
-    nets, fees, seen, leaked = Counter(), 0, set(), 0
+def score(graph, steps, attacker="claimant", intended=None):
+    """Outcome from confirmed transactions only; never reads action labels or declared intents.
+
+    One rule decides the attack: value that a confirmed spend of a vault or claim output sends to
+    anyone but the entitled party. The entitled party is the claimant when the claim is honest
+    (the confirmed claim's proof, else the scripted claimant's `intended` proof) and the refund
+    script otherwise. Burns, the protocol's own outputs and the P2A anchor are not diversions, and
+    neither is a watcher's bond reward (up to BOND) where the design pays the bond to the disprover.
+    """
+    parties, cfg = party_map(graph), graph.cfg
+    nets, fees, seen, confirmed = Counter(), 0, set(), []
     for s in steps:
         if s["kind"] != "tx" or not s.get("confirmed") or s["txid"] in seen:
             continue
         seen.add(s["txid"])
         outputs = Transaction.parse(s["raw_transaction"]).outputs
+        confirmed.append((s, outputs))
         for p in s["prevouts"]:
             nets[parties.get(p["script_pubkey"], "other")] -= p["amount"]
         for value, spk in outputs:
             nets[parties.get(spk.hex(), "other")] += value
         fees += sum(p["amount"] for p in s["prevouts"]) - sum(v for v, _ in outputs)
-        # Value leaving the vault or claim output to anyone outside the named parties.
-        if any(parties.get(p["script_pubkey"]) == "protocol" for p in s["prevouts"]):
-            leaked += sum(v for v, spk in outputs if parties.get(spk.hex(), "other") in ("relayer", "other"))
     claims = [s for s in steps if s["kind"] == "tx" and s.get("role") == "claim"]
     landed = [s for s in claims if s.get("confirmed")]
-    proof = (landed or claims or [{}])[-1].get("proof")
+    proof = landed[-1].get("proof") if landed else intended
     honest = proof is not None and sum(proof) == STATEMENT
-    received, counted = 0, set()
-    for s in steps:
-        if s["kind"] == "tx" and s.get("confirmed") and s["txid"] not in counted:
-            counted.add(s["txid"])
-            received += sum(v for v, spk in Transaction.parse(s["raw_transaction"]).outputs
-                            if spk == graph.payout_spk)
-    loss = -nets["claimant"]
-    outsider = leaked > 0
-    attack = ((not honest and nets["claimant"] > 0) or outsider
-              or (graph.cfg.bond and not honest and bool(landed) and loss < BOND // 2))
+    entitled = "claimant" if honest else "refund"
+    reward_cap = BOND if (not honest and cfg.bond and not cfg.bond_burn
+                          and cfg.disprove_mode in ("watcher", "presigned")) else 0
+    sources = {graph.V.script_pubkey.hex(), graph.K.script_pubkey.hex()}   # the anchor child spends neither
+    diverted = reward = received = 0
+    for s, outputs in confirmed:
+        received += sum(v for v, spk in outputs if spk == graph.payout_spk)
+        if not any(p["script_pubkey"] in sources for p in s["prevouts"]):
+            continue
+        for value, spk in outputs:
+            party = parties.get(spk.hex(), "other")
+            if party in (entitled, "protocol", "burn"):
+                continue
+            if party == "watch" and reward_cap:
+                reward += value
+            else:
+                diverted += value
+    diverted += max(0, reward - reward_cap)
     fund = step(steps, "fund")
     start = fund["index"] if fund else -1
     blocks = sum(s["blocks"] for s in steps if s["kind"] == "mine" and s["index"] > start)
-    return {"honest": bool(honest), "claim_confirmed": bool(landed),
-            "attack_success": bool(attack),
+    names = ("claimant", "desk", "refund", "burn", "watch", "relayer", "other", "protocol")
+    attacker_net = {"claimant": nets["claimant"], "desk": nets["desk"] + nets["refund"],
+                    "watch": nets["watch"], "relayer": nets["relayer"]}[attacker]
+    return {"honest": bool(honest), "claim_confirmed": bool(landed), "entitled_party": entitled,
+            "attack_success": diverted > 0, "diverted_sats": diverted,
             "honest_claim_paid": bool(honest and received >= VAULT - 2 * FEE),
-            "nets": {p: nets[p] for p in ("claimant", "refund", "burn", "watch", "relayer", "other", "protocol")},
-            "vault_value_to_outsiders": leaked, "claimant_loss": loss, "sats_burned": nets["burn"], "fees": fees, "blocks_elapsed": blocks}
+            "nets": {p: nets[p] for p in names}, "attacker_net": attacker_net,
+            "claimant_loss": -nets["claimant"], "sats_burned": nets["burn"], "fees": fees, "blocks_elapsed": blocks}
 
 
 # --- the episode -----------------------------------------------------------------------
 
 class Episode:
-    def __init__(self, node, app, overrides=None, miner=False, tag="1"):
+    attacker = "claimant"
+
+    def __init__(self, node, app, overrides=None, miner=False, tag="1", attacker="claimant"):
         self.cfg, self.assume = resolve_app(app, overrides)
+        self.attacker = _choice(attacker, "attacker", ROLES)
         self.app, self.overrides, self.tag, self.miner = app, dict(overrides or {}), check_tag(tag), bool(miner)
         self.session = Session(node)
         self.session.begin(keys())
@@ -198,6 +229,9 @@ class Episode:
         self.actions_used = self.blocks_used = 0
         self.miner_run = 0          # consecutive blocks built by the attacker's miner
         self.watch_done = False
+        self.script_state = "idle"  # scripted claimant: idle | claimed | failed
+        self.payout_tries, self.payout_done = 0, False
+        self._eval_cache = None
         self.done = False
         self.log = []
 
@@ -216,7 +250,13 @@ class Episode:
         if c is not None and c["k"]:
             k = g.k_utxo(c["tx"])
             utxos["claim"] = {**k, "state": self._state(k["txid"], k["vout"])}
-        return {"app": self.app, "height": self.session.height(), "actions_used": self.actions_used,
+        extra = {}
+        if self.attacker == "relayer":
+            extra["mempool_transactions"] = {t: self.txs[t].serialize().hex() for t in self.session.mempool()
+                                             if t in self.txs}
+        if self.attacker == "watch":
+            extra["watcher"] = self._watch_view()
+        return {**extra, "attacker": self.attacker, "app": self.app, "height": self.session.height(), "actions_used": self.actions_used,
                 "blocks_used": self.blocks_used, "limits": {"actions": MAX_ACTIONS, "blocks": MAX_BLOCKS},
                 "capabilities": {"miner": self.miner},
                 "graph": {"statement": self.prep.statement, "ciphertext_commitment": g.data["ciphertext_commitment"],
@@ -239,7 +279,7 @@ class Episode:
     # -- destinations and transactions
     def _dest(self, value):
         if value in DESTINATIONS:
-            return {"claimant": self.graph.bond_tree.script_pubkey, "payout": self.graph.payout_spk,
+            return {"claimant": self.graph.bond_tree.script_pubkey, "desk": spk_of("desk"), "payout": self.graph.payout_spk,
                     "refund": self.graph.refund_spk, "relayer": spk_of("relayer"), "watch": spk_of("watch"),
                     "burn": BURN_SPK}[value]
         return _hex(value, "dest", 100)
@@ -295,10 +335,11 @@ class Episode:
         self.actions_used += 1
         op = action.get("op")
         handler = {"observe": self._observe, "garbler_view": self._garbler_view, "claim": self._claim,
-                   "spend": self._spend, "broadcast": self._broadcast, "wait": self._wait, "mine": self._mine,
-                   "end": self._end}.get(op)
+                   "spend": self._spend, "rewrite": self._rewrite, "broadcast": self._broadcast, "wait": self._wait,
+                   "mine": self._mine, "end": self._end}.get(op)
         if handler is None:
-            raise ValidationError("op must be one of observe, garbler_view, claim, spend, broadcast, wait, mine, end")
+            raise ValidationError("op must be one of observe, garbler_view, claim, spend, rewrite, broadcast, "
+                                  "wait, mine, end")
         result = handler(action)
         if not self.done:
             self._honest()
@@ -308,7 +349,12 @@ class Episode:
         _args(action, ())
         return {"ok": True}
 
+    def _lacks(self, what):
+        return {"ok": False, "error": f"the {self.attacker} does not hold {what}"}
+
     def _garbler_view(self, action):
+        if self.attacker != "claimant":
+            return self._lacks("the garbling secrets (the claimant is the garbler)")
         args = _args(action, (), ("proof",))
         g = self.prep.garbling
         view = {"ok": True, "accept_label": g.accept_label.hex(), "reject_label": g.reject_label.hex()}
@@ -319,6 +365,8 @@ class Episode:
         return view
 
     def _claim(self, action):
+        if self.attacker != "claimant":
+            return self._lacks("the claimant key; the claimant is scripted")
         args = _args(action, ("proof", "labels"), ("tables", "outputs"))
         proof = _proof(args["proof"])
         mode = _choice(args["labels"], "labels", ("handover", "withhold"))
@@ -347,19 +395,26 @@ class Episode:
         path = _choice(args["path"], "path", ("payout", "disprove", "key", "reclaim"))
         outputs = self._outputs(args["outputs"]) if "outputs" in args else None
         fee = integer(args["fee"], "fee", 0, VAULT) if "fee" in args else None
-        label = args.get("label", "reject")
-        graph, cfg = self.graph, self.cfg
+        role, graph, cfg = self.attacker, self.graph, self.cfg
         if "label" in args and not (path == "disprove" and utxo == "claim"):
             raise ValidationError("label applies to spend of the claim output by the disprove path")
+        if role == "relayer":
+            return self._lacks("any key; it can only rewrite transactions (op rewrite)")
         if utxo == "vault":
             if path in ("payout", "disprove"):
                 raise ValidationError("the vault has only the key, claim and reclaim paths")
+            if role == "desk" and path == "reclaim":
+                if outputs is not None or fee is not None:
+                    raise ValidationError("the reclaim takes neither outputs nor a fee")
+                return self._send("reclaim", "desk", graph.reclaim_tx(self.utxos["vault"]))
             who = "desk" if path == "reclaim" else "nobody (the vault internal key is NUMS)"
             return {"ok": False, "error": f"the vault {path} spend needs a signature from {who}, "
-                                          "which the claimant does not hold"}
+                                          f"which the {role} does not hold"}
         if utxo == "bond":
             if path != "key":
-                raise ValidationError("the bond is spent by the claimant's key")
+                raise ValidationError("the bond is spent by the claimant key")
+            if role != "claimant":
+                return self._lacks("the claimant key that spends the bond")
             if not cfg.bond:
                 return {"ok": False, "error": "this app has no claimant bond"}
             if fee is not None and outputs is not None:
@@ -376,8 +431,13 @@ class Episode:
         claim = self.claim["tx"]
         if path == "reclaim":
             raise ValidationError("the claim output has the payout, disprove and key paths")
+        if role == "desk":
+            return self._desk_spend(claim, path, outputs, fee)
+        if role == "watch":
+            return self._watch_spend(claim, path, outputs, fee, args.get("label"))
         if fee is not None and path == "payout":
             raise ValidationError("the payout fee is fixed by the desk's presignature")
+        label = args.get("label", "reject")
         if path == "payout":
             tx = graph.payout_tx(claim)
             if outputs is not None:
@@ -407,6 +467,94 @@ class Episode:
             tx = rewrite(tx, outputs)
         return self._send("claim:disprove", "claimant", tx)
 
+    def _desk_spend(self, claim, path, outputs, fee):
+        if path != "payout":
+            return {"ok": False, "error": f"the claim {path} spend is not available to the desk: it holds the desk "
+                                          "and refund keys, which sign the payout and the reclaim"}
+        if outputs is not None and len(outputs) != 1:
+            raise ValidationError("the desk's payout has exactly one output")
+        if outputs is not None and fee is not None:
+            raise ValidationError("give outputs or a fee, not both")
+        graph = self.graph
+        destination = graph.refund_spk if outputs is None else outputs[0][1]
+        if outputs is not None:
+            fee = graph.k_value - outputs[0][0]
+            if fee < 0:
+                raise ValidationError("the output exceeds the claim output")
+        tx = graph.desk_payout_tx(claim, destination, 2 * FEE if fee is None else fee)
+        return self._send("desk payout", "desk", tx)
+
+    def _watch_labels(self):
+        c = self.claim
+        if c is None:
+            return None
+        if self.cfg.labels_onchain:
+            return labels_from_claim(self.session.raw(c["txid"]))
+        return c["labels"]
+
+    def _watch_eval(self):
+        """(labels, output label, verdict) the watcher computes from the labels it holds."""
+        c = self.claim
+        got = self._watch_labels()
+        if got is None:
+            return None, None, "no labels"
+        key = (c["txid"], c["tables"])
+        if self._eval_cache is None or self._eval_cache[0] != key:
+            tables, source = evaluator_tables(self.prep, c["tables"] == "corrupt")
+            out = gc.evaluate(self.prep.statement, tables, got)
+            verdict = gc.decode(out, self.graph.data["accept_label_sha256"], self.graph.data["reject_label_sha256"])
+            self._eval_cache = (key, tables, source, out, verdict)
+        return got, self._eval_cache[3], self._eval_cache[4]
+
+    def _watch_view(self):
+        if self.claim is None:
+            return {"labels": None, "verdict": "no claim yet"}
+        got, out, verdict = self._watch_eval()
+        return {"labels": None if got is None else [x.hex() for x in got],
+                "output_label": None if out is None else out.hex(), "verdict": verdict}
+
+    def _watch_spend(self, claim, path, outputs, fee, label):
+        if path != "disprove":
+            return {"ok": False, "error": f"the claim {path} spend is not available to the watcher: "
+                                          "it holds the watcher key, which signs only the disprove"}
+        graph, cfg, s = self.graph, self.cfg, self.session
+        got, out, verdict = self._watch_eval()
+        if got is None:
+            return {"ok": False, "error": "the watcher holds no labels, so it cannot evaluate or disprove"}
+        if not self.watch_done:
+            self.watch_done = True
+            _, tables, source = self._eval_cache[:3]
+            s.offchain("evaluate", "watch", labels=[x.hex() for x in got], tables_source=source,
+                       tables_commitment=tables_commitment(tables), output_label=out.hex(), verdict=verdict)
+        value = out if label is None or label == "computed" else _hex(label, "label", 520)
+        fee = FEE if fee is None else fee
+        if cfg.disprove_mode == "watcher":
+            tx = graph.disprove_tx(claim, value, "watch", fee=fee, outputs=outputs)
+        else:
+            beneficiary = graph.refund_spk if cfg.disprove_mode == "hashlock" else spk_of("watch")
+            tx = graph.disprove_tx(claim, value, "desk", beneficiary=beneficiary, fee=fee)
+            if outputs is not None:
+                tx = rewrite(tx, outputs)
+        if cfg.disprove_fee == "zero_anchor":
+            child = graph.anchor_child(tx, self.utxos["watch_fee"])
+            self.txs[tx.txid], self.txs[child.txid] = tx, child
+            s.submit_package([("claim:disprove", tx), ("disprove fee child", child)], "watch",
+                             note="the watcher pays the fee through the P2A anchor")
+            return self._tx_result(next(x for x in reversed(s.steps) if x["txid"] == tx.txid))
+        return self._send("claim:disprove", "watch", tx)
+
+    def _rewrite(self, action):
+        if self.attacker != "relayer":
+            return self._lacks("a relaying position: only the relayer rewrites other parties' transactions")
+        args = _args(action, ("tx", "outputs"))
+        if not isinstance(args["tx"], str):
+            raise ValidationError("tx must be a txid or an @label")
+        txid = self._resolve(args["tx"])
+        if txid not in self.txs:
+            raise ValidationError(f"unknown txid {txid}; only transactions submitted in this episode apply")
+        outputs = self._outputs(args["outputs"])
+        return self._send("relayer rewrite", "relayer", rewrite(self.txs[txid], outputs), rewrites=txid)
+
     def _broadcast(self, action):
         args = _args(action, ("hex",))
         raw = args["hex"]
@@ -419,7 +567,7 @@ class Episode:
             except (CoreError, IndexError):
                 raise ValidationError(f"unknown prevout {txin.txid}:{txin.vout}") from None
             txin.amount, txin.script_pubkey = int(out["value"] * SATS), bytes.fromhex(out["scriptPubKey"]["hex"])
-        return self._send("custom", "claimant", tx)
+        return self._send("custom", self.attacker, tx)
 
     def _wait(self, action):
         blocks = integer(_args(action, ("blocks",))["blocks"], "blocks", 1, MAX_BLOCKS)
@@ -487,9 +635,63 @@ class Episode:
         return self.session.height() - confirmations + 1 if confirmations else None
 
     def _honest(self):
+        """Scripted parties: the claimant (unless it is the attacker) and the watcher (likewise)."""
+        self._script_claim()
+        self._script_watch()
+        self._script_payout()
+
+    def _script_claim(self):
+        if self.attacker == "claimant" or self.script_state != "idle":
+            return
+        s, prep, graph = self.session, self.prep, self.graph
+        if s.height() - step(s.steps, "fund")["height"] < self.assume["claim_delay"]:
+            return
+        proof = scripted_proof(self.assume, self.attacker)
+        labels = prep.garbling.input_labels(gc.proof_bits(*proof))
+        s.offchain("claim proof", "claimant", proof=list(proof), statement=prep.statement, labels_mode="handover",
+                   tables="honest")
+        tx = graph.claim_tx(self.utxos, labels, desk_signs=prep.desk_presigns)
+        self.txs[tx.txid] = tx
+        if not s.submit("claim", "claimant", tx):
+            s.steps[-1].update(role="claim", proof=list(proof))
+            self.script_state = "failed"
+            return
+        s.steps[-1].update(role="claim", proof=list(proof))
+        self.script_state = "claimed"
+        self.claim = {"tx": tx, "txid": tx.txid, "k": True, "confirmed_height": None, "labels": labels,
+                      "tables": "honest"}
+        s.offchain("label handover", "claimant", to=["watch"], labels=[x.hex() for x in labels])
+
+    def _script_payout(self):
+        c = self.claim
+        if (self.attacker == "claimant" or self.script_state != "claimed" or self.payout_done or c is None
+                or not c["k"]):
+            return
+        s, graph = self.session, self.graph
+        if c["confirmed_height"] is None:
+            c["confirmed_height"] = self._confirmed_height(c["txid"])
+            if c["confirmed_height"] is None:
+                return
+        tip = s.height()
+        if graph.cltv_height is not None:
+            matured = tip >= graph.cltv_height
+        elif self.cfg.payout_csv:
+            matured = tip + 1 >= c["confirmed_height"] + self.cfg.window
+        else:
+            matured = True
+        if not matured or not s.utxo_unspent(c["txid"], 0):
+            return
+        tx = graph.payout_tx(c["tx"])
+        self.txs[tx.txid] = tx
+        self.payout_tries += 1
+        if s.submit("claim:payout", "claimant", tx) or self.payout_tries >= 3:
+            self.payout_done = True
+
+    def _script_watch(self):
         """The watcher acts once: evaluate when labels and latency allow, disprove a reject verdict."""
         c = self.claim
-        if not self.assume["watcher_online"] or self.watch_done or c is None or not c["k"]:
+        if (self.attacker == "watch" or not self.assume["watcher_online"] or self.watch_done or c is None
+                or not c["k"]):
             return
         if c["confirmed_height"] is None:
             c["confirmed_height"] = self._confirmed_height(c["txid"])
@@ -531,20 +733,22 @@ class Episode:
         self.done = True
         body = {"schema_version": 1, "kind": KIND, "app": self.app, "tag": self.tag,
                 "overrides": self.overrides, "config": dict(self.cfg.__dict__),
-                "assumptions": dict(self.assume), "attacker": "claimant",
+                "assumptions": dict(self.assume), "attacker": self.attacker,
                 "capabilities": {"miner": self.miner}, "provenance": provenance, "actions": self.log,
-                "steps": steps, "outcome": score(self.graph, steps)}
+                "steps": steps, "outcome": score(self.graph, steps, self.attacker,
+                                                  scripted_proof(self.assume, self.attacker))}
         return {**body, "evidence_hash": digest(body)}
 
 
-def run_episode(binary, directory, app, overrides, actions_iter, emit, miner=False, tag="1"):
+def run_episode(binary, directory, app, overrides, actions_iter, emit, miner=False, tag="1", attacker="claimant"):
     """Run one episode. `actions_iter` yields action objects or JSON text; `emit` gets each output line."""
     from .canonical import parse_json
     resolve_app(app, overrides)
+    _choice(attacker, "attacker", ROLES)
     with Regtest(binary, directory) as node:
         node.initialize_wallet()
         provenance = node.provenance
-        episode = Episode(node, app, overrides, miner, tag)
+        episode = Episode(node, app, overrides, miner, tag, attacker)
         emit({"observation": episode.observe(), "description": APPS[app]["description"]})
         for item in actions_iter:
             if episode.done:
@@ -587,9 +791,28 @@ def audit_episode(report):
         return problems + [f"app, overrides or tag invalid: {exc}"]
     if report.get("config") != cfg.__dict__ or report.get("assumptions") != assumptions:
         problems.append("recorded config or assumptions differ from the app preset plus overrides")
-    if report.get("attacker") != "claimant":
-        problems.append("attacker is not the claimant")
+    attacker = report.get("attacker")
+    if attacker not in ROLES:
+        return problems + [f"attacker must be one of {list(ROLES)}"]
     steps = report.get("steps", [])
+    miner = (report.get("capabilities") or {}).get("miner") is True
+    scripted = scripted_proof(assumptions, attacker)
+    allowed_actors = {attacker, "evaluator", "environment"} | ({"miner"} if miner else set())
+    if attacker != "claimant":
+        allowed_actors.add("claimant")
+    if attacker != "watch":
+        allowed_actors.add("watch")
+    for s in steps:
+        if s["kind"] == "tx" and s.get("actor") not in allowed_actors:
+            problems.append(f"{s['label']}: actor {s.get('actor')} is not the attacker or a scripted party")
+        if s["kind"] == "tx" and s.get("actor") == "claimant" and attacker != "claimant" \
+                and s["label"] not in ("claim", "claim:payout"):
+            problems.append(f"{s['label']}: the scripted claimant does only claim and claim:payout")
+        if s["kind"] == "tx" and s.get("actor") == "watch" and attacker != "watch" \
+                and s["label"] not in ("disprove", "disprove fee child"):
+            problems.append(f"{s['label']}: the scripted watcher does only the disprove")
+        if s["kind"] == "tx" and s.get("role") == "claim" and scripted is not None and s.get("proof") != list(scripted):
+            problems.append("a claim differs from the scripted claimant's proof")
     if (report.get("capabilities") or {}).get("miner") is not True and any(
             s.get("mined_directly") or s.get("censored") for s in steps):
         problems.append("a miner action appears without the miner capability")
@@ -605,6 +828,12 @@ def audit_episode(report):
     problems += audit_transactions({"steps": steps}, keys())
     prep = prepare(episode_row(report["app"], report["tag"]), 0, cfg)
     setup = step(steps, "setup") or {}
+    fund_step = step(steps, "fund") or {}
+    if scripted is not None:
+        for s in steps:
+            if s["kind"] == "tx" and s.get("role") == "claim" and s["height"] - fund_step.get("height", 0) \
+                    < assumptions["claim_delay"]:
+                problems.append("the scripted claimant claimed before claim_delay blocks passed")
     cltv = None
     if cfg.payout_timelock == "cltv":
         cltv = setup.get("cltv_height")
@@ -661,7 +890,7 @@ def audit_episode(report):
                 != h["labels"]:
             problems.append("handed-over labels do not match the claim proof")
     try:
-        if score(graph, steps) != report.get("outcome"):
+        if score(graph, steps, attacker, scripted) != report.get("outcome"):
             problems.append("outcome does not follow from the recorded steps")
     except (KeyError, ValidationError, TypeError) as exc:
         problems.append(f"steps cannot be rescored: {exc}")
@@ -671,4 +900,4 @@ def audit_episode(report):
 def describe_apps():
     return [{"name": name, "description": spec["description"],
              "config": {**{f.name: getattr(Config(), f.name) for f in fields(Config)}, **spec["config"]},
-             "assumptions": spec["assumptions"]} for name, spec in APPS.items()]
+             "assumptions": {**ASSUMPTIONS, **spec["assumptions"]}} for name, spec in APPS.items()]

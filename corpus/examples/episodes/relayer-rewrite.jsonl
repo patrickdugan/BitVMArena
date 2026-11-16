@@ -1,0 +1,5 @@
+{"op": "wait", "args": {"blocks": 9}}
+{"op": "observe"}
+{"op": "rewrite", "args": {"tx": "@claim:payout", "outputs": [[93000, "relayer"]]}}
+{"op": "wait", "args": {"blocks": 3}}
+{"op": "end"}

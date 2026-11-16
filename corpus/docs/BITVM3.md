@@ -2,9 +2,11 @@
 
 The BitVM3 track runs a garbled-circuit claim graph on an owned Bitcoin Core regtest
 node. A real (toy-sized) garbled circuit decides each claim; Core decides every
-transaction, including package relay, replacement and miner-built blocks. Each of the 20
-recipes changes one design decision of the graph. Every recipe runs in four combinations
-(hardened or mutant, benign or attack), for 80 trajectories.
+transaction, including package relay, replacement, miner-built blocks and relay between
+nodes. Each of the 24 recipes changes one design decision of the graph. Every recipe runs in
+four combinations (hardened or mutant, benign or attack), for 96 trajectories. A separate
+track, [`bitvm3-m14`](#bitvm3-at-m14-scale), decides the same graph with the real M14 garbled
+verifier.
 
 The recipes cover the seven layers a BitVM3-dependent application exposes:
 
@@ -13,8 +15,8 @@ The recipes cover the seven layers a BitVM3-dependent application exposes:
 | Garbling | `garbling_unchecked`, `cut_and_choose_grindable`, `seed_reuse_across_claims`, `output_polarity_swapped` |
 | Data availability | `labels_offchain_withheld`, `tables_delivered_late` |
 | Statement binding | `proof_replay_across_vaults` |
-| Transaction graph | `payout_csv_removed`, `payout_absolute_timelock`, `payout_sighash_none`, `claim_sighash_none`, `claim_internal_key_spendable`, `reclaim_preempts_claim`, `disprove_outputs_unbound` |
-| Mempool and miners | `disprove_unbumpable`, `disprove_censored_by_miner` |
+| Transaction graph | `payout_csv_removed`, `payout_absolute_timelock`, `payout_sighash_none`, `claim_sighash_none`, `claim_internal_key_spendable`, `reclaim_preempts_claim`, `disprove_outputs_unbound`, `disprove_watcher_redirect`, `desk_key_retained` |
+| Mempool and miners | `disprove_unbumpable`, `disprove_anchor_pinned`, `disprove_censored_by_miner`, `disprove_partitioned` |
 | Liveness | `single_watcher_disprove`, `window_below_latency` |
 | Economics | `claimant_unbonded`, `bond_self_slash` |
 
@@ -71,10 +73,10 @@ out. The statement is a circuit constant, as M14 pins its statement.
 
 ## Results (Bitcoin Core 31.1, regtest)
 
-All 80 trajectories met the expectations declared in the catalog. The run confirmed 159
-transactions, rejected 43 and took 2 min 33 s. Saved evidence:
+All 96 trajectories met the expectations declared in the catalog. The run confirmed 192
+transactions, rejected 53 and took 3 min 18 s. Saved evidence:
 [`examples/native/bitvm3-core31.1.json`](../examples/native/bitvm3-core31.1.json). Core 31.2
-gave the same verdict at every step of all 80 trajectories. The 40 trajectories of the
+gave the same verdict at every step of all 96 trajectories. The 40 trajectories of the
 first ten recipes also match the previous evidence file step for step.
 
 The "IOB status" column names the target graph's own documented trust assumption or
@@ -97,8 +99,12 @@ defect in the target code.
 | `claim_internal_key_spendable` | The claim output's Taproot internal key is the claimant's key | n/a (NUMS) | The claimant's key-path signature fails with `Invalid Schnorr signature`; the false claim is disproven | The claimant sweeps K through the key path a block after the claim; the disprove fails with `missing-inputs` |
 | `reclaim_preempts_claim` | The desk can reclaim the vault after 2 blocks | 144 blocks | The desk's reclaim is `non-BIP68-final`; the honest claim is paid | The desk reclaims while the honest claimant is still paying the user; the claim fails with `missing-inputs` |
 | `disprove_outputs_unbound` | The disprove leaf is `SHA256 <H> EQUAL`, with no signature | W signs | The desk presigned the disprove over a refund-only output. The claimant's rewrite to itself fails with `Invalid Schnorr signature` | The garbler, who knows the reject label, spends K to itself through the disprove leaf a block after claiming |
+| `disprove_watcher_redirect` | W signs the disprove when it broadcasts, so it chooses the outputs (the IOB graph as built) | W signs: = mutant | The desk presigned the disprove over a refund-only output; the watcher's rewrite to itself fails with `Invalid Schnorr signature`, and another label holder's refund confirms | The watcher disproves the false claim and pays the whole vault to itself |
+| `desk_key_retained` | Only the desk signs the payout leaf, and it kept its key | D-only payout: = mutant | The payout leaf also needs C's signature; the desk's own payout fails with `Invalid Schnorr signature` and P' is paid | After the window the desk signs the payout to itself; the honest claim's payout fails with `missing-inputs` |
 | `disprove_unbumpable` | The desk presigns the disprove at zero fee, without an anchor; the desk is offline | n/a | A version-3 disprove with a P2A anchor is rejected alone (`min relay fee not met`) and accepted as a package with the watcher's fee child | The disprove is rejected (`min relay fee not met`) and nobody can bump it; the false claim is paid |
+| `disprove_anchor_pinned` | Congested blocks need 2 sat/vB. The zero-fee disprove's P2A anchor is in a version-2 transaction | n/a | TRUC refuses the claimant's 43,112 vB child (`TRUC-violation`). Its 153 vB child is replaced by the watcher's, and the disprove confirms in the first congested block | The claimant's 43,112 vB child pays 12,000 sats at 0.28 sat/vB. The watcher's bump needs more than that and holds 10,000: `insufficient fee`. Five congested blocks include nothing, then an 18,000-sat payout replaces the whole package |
 | `disprove_censored_by_miner` | Window 6 against a colluding miner that censors up to 8 blocks | WINDOW=6: = mutant | With window 24, the miner's payout block after 8 empty blocks is invalid (`non-BIP68-final`); the disprove confirms once censorship ends | Five empty blocks, then the miner mines the payout itself (the mempool rejects it: `insufficient fee` against the waiting disprove); the disprove is evicted |
+| `disprove_partitioned` | Three owned nodes over loopback P2P; the watcher's only peer is a blocks-only relay | n/a | With a direct link to the miner, the disprove reaches the miner's mempool in about 3 s and confirms | The disprove never reaches the miner (waited 30 s); the payout is mined and the disprove is displaced |
 | `single_watcher_disprove` | Only W's signature opens the disprove leaf; W is offline | single W: = mutant | The desk presigns a disprove with a fixed refund output, and any label holder broadcasts it | The third party's disprove fails with `Invalid Schnorr signature`; the false claim is paid |
 | `window_below_latency` | WINDOW 6 against a declared evaluation latency of 8 blocks | WINDOW=6: = mutant | With WINDOW 24, the payout at 6 confirmations is `non-BIP68-final` and the disprove at 8 confirms | The payout confirms at 6; the disprove at 8 fails with `missing-inputs` |
 | `claimant_unbonded` | The claim carries no claimant bond | no bond: = mutant | The disproven false claim costs the claimant its 20,000-sat bond, which goes to the watcher | Disproven, but the claimant's loss is 0 sats |
@@ -129,8 +135,12 @@ proven external fact.
 | `claim_internal_key_spendable` | All: a key path bypasses the whole dispute | NUMS (or a key nobody controls alone) as the internal key of every graph output |
 | `reclaim_preempts_claim` | Bridge (the operator fronts the peg-out), desk: the vault owner reclaims after the claimant has paid | A reclaim delay longer than the claimant's payment-plus-claim deadline |
 | `disprove_outputs_unbound` | All: the garbler always knows the reject label | Disprove outputs fixed by a presignature or a signature the claimant does not control |
+| `disprove_watcher_redirect` | All with a designated watcher; the claimant can hand it the reject label, so collusion costs one false claim | Disprove outputs fixed by the vault owner's presignature, not chosen by whoever disproves |
+| `desk_key_retained` | Bridge and desk: the committee that presigned can re-sign after setup | The claimant co-signs the payout leaf, or the committee's key deletion is enforced (per-graph keys, secure hardware) |
 | `disprove_unbumpable` | Lending and settlement, where the vault owner may be passive at dispute time | Zero-fee presigned transactions carry an anchor (P2A, TRUC) that a third party can spend |
+| `disprove_anchor_pinned` | All with presigned zero-fee disproves, in a fee market where blocks are full | TRUC (version 3) for every presigned transaction with an anchor; a watcher fee budget for the replacement rules that remain |
 | `disprove_censored_by_miner` | All, more so for high-value vaults that make miner bribery pay | Window longer than the censorship you assume, in blocks |
+| `disprove_partitioned` | All: one watcher node behind attacker-controlled peers never reaches miners | Watchers broadcast through several independent peers or services, and check that miners received the disprove |
 | `single_watcher_disprove`, `window_below_latency` | All: liveness of the dispute decides safety | Permissionless disprove; window longer than evaluation plus label transfer plus broadcast |
 | `claimant_unbonded`, `bond_self_slash` | Bridge and lending, where each false claim forces an expensive evaluation | A bond that a disproven claimant cannot recover; burn it, or pay only a capped reward |
 
@@ -146,14 +156,59 @@ python -m bitvm_corpus native assess --config '{"window": 12, "bond": true}' \
 ```
 
 The assumptions (`evaluation_latency_blocks`, `censorship_blocks`, `claim_deadline_blocks`,
-`desk_online_at_dispute`, `watchers`, `claims_per_garbling_seed`,
-`vaults_per_statement`) carry what the graph alone cannot show. A test checks that every
+`desk_online_at_dispute`, `watchers`, `claims_per_garbling_seed`, `vaults_per_statement`,
+`desk_keys_deleted`) carry what the graph alone cannot show. A test checks that every
 recipe's mutant design is flagged for that recipe and its hardened design is not. The
-IOB graph as built is flagged for six: off-chain labels, unchecked garbling, a 6-block
+IOB graph as built is flagged for eight: off-chain labels, unchecked garbling, a 6-block
 window against both the censorship bound and the evaluation latency, the single watcher,
-and no bond. The static check only selects what to try. Confirmation comes from
+no bond, the watcher choosing the disprove's outputs, and a payout only the desk signs
+(with `desk_keys_deleted` false, its default). The static check only selects what to try. Confirmation comes from
 replaying the named trajectory, or from an [episode](EPISODES.md) against the full
 design.
+
+## BitVM3 at M14 scale
+
+The `bitvm3-m14` track ([`m14.py`](../bitvm_corpus/m14.py)) runs the same claim graph,
+decided by M14, the complete garbled final verifier: 785,442,492 gates and 8,635,080
+input bits per instance. The garbler is `m14-claim` from
+patrickdugan/garbled-snark-verifier at `04b6d3e` (binary sha256 `9624c2ad…`). The proof is
+the M16 mainnet SPV payment proof (wrap v2, sha256 `97871e86…`); the vault statements are
+the M16 statement and, as a different statement, c4's. Each vault's disprove leaf commits
+to its garbling's real reject-label hash. A disprove spends with the label the M14
+evaluator produced, and Core checks that hash.
+
+The M14 runs are recorded once in [`examples/m14/`](../examples/m14/) by
+`tools/m14_runs.sh` and `tools/m14_collect.py`, with public fixture seeds. The Core
+trajectories replay them. The audit checks that every recorded output label hashes to its
+garbling's committed accept or reject label, that garbler and evaluator saw the same
+ciphertext stream, and that the setup run committed to the same labels and stream before
+the tampered-proof evaluation.
+
+| Run | Seed | Verdict | Wall time | Peak RSS |
+| --- | --- | --- | --- | --- |
+| setup (tampered-proof instance) | `9844fd70…` | commits accept/reject hashes | 416 s | 10.6 GB |
+| honest M16 proof, M16 statement | `ff1f4762…` | accept | 1,330 s | 18.2 GB |
+| same proof, one input bit flipped | `9844fd70…` | reject, the label the setup committed | 1,073 s | 18.3 GB |
+| same proof, c4 statement | `582c650d…` | reject | 627 s | 18.6 GB |
+| same proof, second vault for the M16 statement | `e0565615…` | accept | 769 s | 16.7 GB |
+
+Measured on this laptop in WSL with a 20 GB memory cap (48 GB swap). Evaluate runs the
+garbler and evaluator together and swapped. The IOB testnet4 runs of the same binary on
+the same laptop took 348–401 s.
+
+| Recipe | Hardened attack | Mutant attack |
+| --- | --- | --- |
+| `m14_false_claim` | The watcher holds the 8,635,080 labels (138 MB, off-chain), gets the real reject label and disproves; the payout fails with `missing-inputs` | The labels are withheld; nobody can evaluate and the false claim is paid |
+| `m14_statement_binding` | Vault 2 is garbled for the c4 statement; the M16 proof evaluates to reject there and vault 2 is disproven | Vault 2 is garbled for the M16 statement too; one mainnet payment proof is paid out of both vaults |
+
+All 8 trajectories met their expectations on Core 31.1 (20 confirmed, 2 rejected).
+Evidence: [`examples/native/bitvm3-m14-core31.1.json`](../examples/native/bitvm3-m14-core31.1.json).
+
+What M14 scale adds to the toy track's numbers:
+- each claim instance streams 785,442,492 ciphertexts, 12.57 GB at 16 bytes, which the
+  evaluator must have. That is `tables_delivered_late` at full size;
+- the input-label handover is 138 MB, `labels_offchain_withheld` at full size;
+- evaluation takes 6–22 minutes on one laptop, depending on memory (finding 2).
 
 ## What BitVM3 changes relative to BitVM2
 
@@ -171,7 +226,7 @@ Both tracks run under the same harness, so each weakness class can be lined up o
 
 | Weakness class | BitVM2 baseline (mutant attack) | BitVM3 / IOB graph | What changed |
 | --- | --- | --- | --- |
-| Reimbursement before the dispute window | `take1_csv_removed`: take 1 confirms, and the late challenge fails with `missing-inputs` | `payout_csv_removed`, `payout_absolute_timelock`, `window_below_latency` | **Carried and widened.** BitVM3's window also has to cover off-chain evaluation (about 60 min for M14). A BitVM2 watcher only needs on-chain data and one transaction build |
+| Reimbursement before the dispute window | `take1_csv_removed`: take 1 confirms, and the late challenge fails with `missing-inputs` | `payout_csv_removed`, `payout_absolute_timelock`, `window_below_latency` | **Carried and widened.** BitVM3's window also has to cover off-chain evaluation (6–22 min for M14 on one laptop, more on weaker hardware). A BitVM2 watcher only needs on-chain data and one transaction build |
 | Reimbursement not bound to the dispute | `take1_unbound_connector_a` and `take2_unbound_disprove`: the operator is paid after a successful challenge or disprove | Payout and disprove are two leaves of the same claim output | **Removed by construction.** Spending one leaf consumes the other, unless a key path or a rewritten claim bypasses the output (`claim_internal_key_spendable`, `claim_sighash_none`) |
 | Challenge crowdfunding | `challenge_sighash_all`: the challenger cannot attach funds, and take 1 goes through | No challenge transaction | **Removed** (fewer moving parts, one less presigned policy) |
 | Correctness of the disprove computation | `chunk_carry_dropped`: a buggy on-chain chunk lets a wrapped sum stand and also disproves the honest operator | `garbling_unchecked`, `cut_and_choose_grindable`, `output_polarity_swapped` | **Changed.** Correctness moves off-chain into the garbling. Script only checks a hash, so a bad circuit is invisible on-chain and can be caught only by cut-and-choose, which must use challenger randomness |
@@ -180,7 +235,9 @@ Both tracks run under the same harness, so each weakness class can be lined up o
 | Statement binding | The Groth16 public input binds the peg-out | `proof_replay_across_vaults` | **Carried.** The statement is a circuit constant here, so the binding has to happen at setup |
 | Deterrence | `disprove_burn_sighash_none`: a lying operator self-disproves and recovers its stake | `claimant_unbonded`, `bond_self_slash` | **Changed.** IOB has no stake to burn, so a false claim costs only fees, and the vault pays those. Adding a bond reintroduces BitVM2's burn requirement |
 | Disprove reward front-running | `disprove_reward_unbound`: **inherent**, confirmed in both profiles. Input 0's SINGLE commits only the burn output, so a relayer rewrites the reward | `single_watcher_disprove`, `bond_self_slash` | **Traded.** IOB requires W's signature, which removes front-running but adds single-watcher liveness. A desk-presigned disprove with fixed outputs keeps both properties |
-| Fee bumping and censorship | Presigned transactions with anchors; challenge windows in blocks | `disprove_unbumpable`, `disprove_censored_by_miner` | **Carried** |
+| Fee bumping, pinning, censorship and propagation | Presigned transactions with anchors; challenge windows in blocks | `disprove_unbumpable`, `disprove_anchor_pinned`, `disprove_censored_by_miner`, `disprove_partitioned` | **Carried** |
+| Who chooses the disprove's outputs | Input 0 presigned SINGLE fixes the burn output | `disprove_watcher_redirect` | **Changed.** IOB's watcher signs at broadcast, so the refund to the desk is a convention, not a rule |
+| Signing committee after setup | n-of-n presigns, then deletes its keys | `desk_key_retained` | **Carried.** A single desk key that survives setup can re-sign the payout |
 | Presigned output binding | (presigned ALL in the baseline) | `payout_sighash_none`, `claim_sighash_none` | **Carried** |
 
 New in BitVM3, with no BitVM2 counterpart: input-label and table withholding, unchecked
@@ -203,20 +260,22 @@ the deployed testnet4 vaults, and nothing was broadcast outside regtest.
    - A 512-bit statement-only commitment would be about 12k vB. That is the arithmetic
      behind the "statement on-chain, rest by data availability or a succinct wrapper"
      direction in the S6 notes.
-2. **The window is close to the evaluation time.** M14 evaluation was measured at about
-   60 minutes. At mainnet block rates (Poisson, 6 blocks per hour), the chance that 6
-   blocks arrive within 60 minutes is **0.554**. That is before label transfer and
-   broadcast. Testnet4's minimum-difficulty blocks can make it worse. The same 6 blocks
-   are also the censorship budget: a miner that can withhold the disprove for 6 blocks
-   gets the payout through (`disprove_censored_by_miner`).
+2. **The window has to fit the slowest honest watcher.** Measured M14 evaluation on one
+   laptop ranges from 348–401 s (IOB runs) to 627–1,330 s (this track, swapping under a
+   20 GB memory cap); an earlier note recorded about 60 minutes. At mainnet block rates
+   (Poisson, 6 blocks per hour) the chance that a 6-block window ends before the
+   evaluation finishes:
 
-   | Window (blocks) | P(window ends within a 60-min evaluation) | Within 120 min |
-   | --- | --- | --- |
-   | 6 | 0.554 | 0.980 |
-   | 9 | 0.153 | 0.845 |
-   | 12 | 0.020 | 0.538 |
-   | 18 | 0.0001 | 0.063 |
-   | 24 | <0.0001 | 0.0015 |
+   | Evaluation time | Window 3 | Window 6 | Window 9 | Window 12 |
+   | --- | --- | --- | --- | --- |
+   | 401 s (no swap) | 0.031 | 0.00007 | <0.000001 | <0.000001 |
+   | 1,330 s (swapping) | 0.38 | 0.026 | 0.0005 | 0.000004 |
+   | 60 min | 0.94 | 0.55 | 0.15 | 0.020 |
+
+   That is before label and table transfer (138 MB and 12.57 GB per claim) and broadcast.
+   Testnet4's minimum-difficulty blocks shorten the window further. The same 6 blocks are
+   also the censorship budget: a miner that can withhold the disprove for 6 blocks gets the
+   payout through (`disprove_censored_by_miner`).
 
 3. **A single watcher is a liveness and bribery point.** Only W can open the disprove
    leaf. A desk-presigned disprove (`SHA256 <H(reject)> EQUALVERIFY <D> CHECKSIG`, with
@@ -225,7 +284,7 @@ the deployed testnet4 vaults, and nothing was broadcast outside regtest.
    reward front-running. If it is presigned at zero fee for a desk that may be offline,
    it needs a P2A anchor (`disprove_unbumpable`).
 4. **A false claim is free.** The vault pays the claim fee, so a disproven claimant loses
-   nothing, while each claim forces an M14 evaluation (60 min and 18.4 GB measured) and a
+   nothing, while each claim forces an M14 evaluation (6–22 min and about 18 GB measured) and a
    fresh setup. A claimant bond input on the claim tx makes lying cost something, but
    only if a disproven bond is burned or paid to a fixed party: a bond that goes to
    whoever disproves comes back to the claimant, who knows the reject label
@@ -241,19 +300,36 @@ the deployed testnet4 vaults, and nothing was broadcast outside regtest.
    its bad instance.
 7. **The statement must bind the instance.** M14 pins one statement per garbling. If two
    desk vaults are set up for the same statement, one payment proof drains both
-   (`proof_replay_across_vaults`). Fold the vault outpoint into the statement.
+   (`proof_replay_across_vaults`; at M14 scale, `m14_statement_binding`). Fold the vault
+   outpoint into the statement.
+8. **The watcher chooses where a disproven vault goes.** The disprove leaf is
+   `SHA256 <H(reject)> EQUALVERIFY <W> CHECKSIG`, and `signed_disprove` signs at broadcast
+   with W's key alone. The refund to the desk is the code's choice, not something the
+   script enforces. A bribed or malicious W can pay the vault to itself whenever a false
+   claim appears. Because the claimant knows the reject label, a claimant and a W who
+   collude can stage a false claim and take the vault one block after the claim
+   (`disprove_watcher_redirect`). A desk presignature over the refund output (finding 3)
+   closes this as well.
+9. **The desk alone signs the payout.** The payout leaf `<6> CSV DROP <D> CHECKSIG` lets a
+   desk that kept its key re-sign the matured payout to itself (`desk_key_retained`). The
+   committee trust model in the IOB README depends on key deletion. Adding the claimant's
+   signature to the payout leaf removes the dependence for this path.
 
 ## Fidelity limits
 
 - The circuit is a 16-bit adder check, not a SNARK verifier, so the label counts and
   timings above are scaled. Proof soundness is not modelled: any `(a, b)` that sums to
   the statement is a valid proof.
-- The latency recipe's delay and the censorship bound are declared, not measured. The
-  garbled evaluation itself finishes instantly here.
+- In the toy track the latency recipe's delay and the censorship bound are declared, and
+  the garbled evaluation finishes instantly. The M14 track measures evaluation time, but
+  replays recorded runs instead of evaluating during the trajectory.
 - One test key stands for the desk committee, and every key is public and deterministic.
 - Window, bond and fee values are regtest parameters.
-- Replacement and package relay run through one node's mempool policy (Core 31.1:
-  full-RBF, TRUC, P2A, ephemeral dust). There is no network propagation, no competing
-  mempools, and no pinning beyond what that policy allows.
+- Replacement, package relay and pinning run through Core 31.1's mempool policy (full-RBF,
+  TRUC, P2A, ephemeral dust). Congestion is a declared fee floor that the miner applies to
+  ancestor packages, not a market of other users' transactions.
+- Propagation is real P2P relay between three owned nodes on loopback, and one topology
+  per profile. There is no latency model, no adversarial peer software beyond Core's
+  blocks-only mode, and no competing miners.
 - A miner is modelled by `generateblock`, which builds blocks with exactly the listed
   transactions. Hash power and bribery costs are outside the model.

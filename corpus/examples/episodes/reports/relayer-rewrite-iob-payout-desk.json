@@ -1,0 +1,528 @@
+{
+  "actions": [
+    {
+      "action": {
+        "args": {
+          "blocks": 9
+        },
+        "op": "wait"
+      },
+      "index": 0,
+      "result": {
+        "height": 111,
+        "ok": true
+      }
+    },
+    {
+      "action": {
+        "op": "observe"
+      },
+      "index": 1,
+      "result": {
+        "ok": true
+      }
+    },
+    {
+      "action": {
+        "args": {
+          "outputs": [
+            [
+              93000,
+              "relayer"
+            ]
+          ],
+          "tx": "@claim:payout"
+        },
+        "op": "rewrite"
+      },
+      "index": 2,
+      "result": {
+        "allowed": false,
+        "broadcast": false,
+        "hex": "02000000000101575fe0178bc868e5c6fbaf8affddfea1d74d1e942143c0fd73cd1a0038736ac900000000000600000001486b01000000000022512011378998898039726c68716682aef7d31a9b7954f1f27d58cf4decc189c18c730340ab274c9ef3b522373e326e9259fb1b092e4500075659314fce71f4491a3c14dcb15e5b9ef538f44d8b3a98bc4529004106a9626936a0f608413964c45a23dc6e2556b27520aeb1f37bd68b70ae51d98f5f5da9981c723ede1a1a6cf4d5a90edb80faf9634aac41c050929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0da9c636823b780060c913bb21c154791373960e76a361ff5f4b9bc7ad7777ef400000000",
+        "label": "relayer rewrite",
+        "ok": true,
+        "reject_reason": "mempool-script-verify-flag-failed (Invalid Schnorr signature)",
+        "txid": "c86c2d79ff3a91759c146e80a9b52ad4ca2ffec32972cc3bb0252090df31f33f"
+      }
+    },
+    {
+      "action": {
+        "args": {
+          "blocks": 3
+        },
+        "op": "wait"
+      },
+      "index": 3,
+      "result": {
+        "height": 114,
+        "ok": true
+      }
+    },
+    {
+      "action": {
+        "op": "end"
+      },
+      "index": 4,
+      "result": {
+        "ok": true
+      }
+    }
+  ],
+  "app": "iob-payout-desk",
+  "assumptions": {
+    "censorship_blocks": 8,
+    "claim_delay": 3,
+    "claim_proof": "honest",
+    "desk_online": true,
+    "watcher_latency": 1,
+    "watcher_online": true
+  },
+  "attacker": "relayer",
+  "capabilities": {
+    "miner": false
+  },
+  "config": {
+    "bond": false,
+    "bond_burn": false,
+    "claim_hash_type": 0,
+    "claim_internal": "nums",
+    "cut_and_choose": "none",
+    "disprove_fee": "included",
+    "disprove_mode": "watcher",
+    "labels_onchain": false,
+    "payout_cosigned": false,
+    "payout_csv": true,
+    "payout_hash_type": 0,
+    "payout_timelock": "csv",
+    "polarity": "reject",
+    "reclaim": 144,
+    "seed_reuse": false,
+    "statement_binding": "instance",
+    "tables_at": "setup",
+    "watcher_network": "independent",
+    "window": 6
+  },
+  "evidence_hash": "c02df555303140610f4d4d93f31634237e901029ca79d4fdf0170d466400421b",
+  "kind": "bitvm3-episode",
+  "outcome": {
+    "attack_success": false,
+    "attacker_net": 0,
+    "blocks_elapsed": 12,
+    "claim_confirmed": true,
+    "claimant_loss": -94000,
+    "diverted_sats": 0,
+    "entitled_party": "claimant",
+    "fees": 6000,
+    "honest": true,
+    "honest_claim_paid": true,
+    "nets": {
+      "burn": 0,
+      "claimant": 94000,
+      "desk": 0,
+      "other": 0,
+      "protocol": -100000,
+      "refund": 0,
+      "relayer": 0,
+      "watch": 0
+    },
+    "sats_burned": 0
+  },
+  "overrides": {},
+  "provenance": {
+    "binary_sha256": "f79eeb94e1379986df9f7be4c78c8fc8e18dc9be64a31cbaa8acad249d3db77a",
+    "chain": "regtest",
+    "p2p_network_active": false,
+    "subversion": "/Satoshi:31.1.0/",
+    "version": 310100
+  },
+  "schema_version": 1,
+  "steps": [
+    {
+      "accept_label_sha256": "f4e0e8790960b282b6f65c6fa5647a406f70f6ac59133f3cfbe9f43652bdf088",
+      "actor": "claimant",
+      "cltv_height": null,
+      "config": {
+        "bond": false,
+        "bond_burn": false,
+        "claim_hash_type": 0,
+        "claim_internal": "nums",
+        "cut_and_choose": "none",
+        "disprove_fee": "included",
+        "disprove_mode": "watcher",
+        "labels_onchain": false,
+        "payout_cosigned": false,
+        "payout_csv": true,
+        "payout_hash_type": 0,
+        "payout_timelock": "csv",
+        "polarity": "reject",
+        "reclaim": 144,
+        "seed_reuse": false,
+        "statement_binding": "instance",
+        "tables_at": "setup",
+        "watcher_network": "independent",
+        "window": 6
+      },
+      "desk_presigns": true,
+      "disprove_leaf_hash": "5310efb5dd1bcc680b9c23cda9e2445157f1c4f2e3ab8288422295ccd19fcbf1",
+      "height": 101,
+      "index": 0,
+      "kind": "offchain",
+      "label": "setup",
+      "log": {
+        "cut_and_choose": "not run (desk presigns the registered instance)"
+      },
+      "registered": "1a484f2e658989fb92351a693d4dd0553460d3964a583867502f53f006ecab7e",
+      "reject_label_sha256": "5310efb5dd1bcc680b9c23cda9e2445157f1c4f2e3ab8288422295ccd19fcbf1",
+      "statement": 48400
+    },
+    {
+      "actor": "evaluator",
+      "height": 102,
+      "index": 1,
+      "kind": "fund",
+      "label": "fund",
+      "outputs": {
+        "vault": {
+          "amount": 100000,
+          "script_pubkey": "5120999e3e3b623af3db15d958cf5cedb601808b6728e8d0b4dac57ac90e7a10a2a8",
+          "txid": "e1ef1c8766f8e4a77dc3aa868ba2dade8a150746f38f014d17dba5523f8f2e51",
+          "vout": 0
+        }
+      },
+      "raw_transaction": "02000000000101349fd4d9b7634164af07d8cb992caf4e8a11fa5f6290ccfdfb3856aeb191efd20000000000fdffffff02a086010000000000225120999e3e3b623af3db15d958cf5cedb601808b6728e8d0b4dac57ac90e7a10a2a85265042a0100000022512075a0795447f41df1fe83fb6429de732437ca807c98eeedf5b4b40843394ba6c80140f299a5e989535943810f752b99a7fb175f7f619e1bb3df18c61e1a94db1e1651d84115723d01b32b2e82e19c6fa78a0b8c617780b907b7ce24b0f813138ae4ea65000000",
+      "txid": "e1ef1c8766f8e4a77dc3aa868ba2dade8a150746f38f014d17dba5523f8f2e51"
+    },
+    {
+      "actor": "environment",
+      "blocks": 1,
+      "from_height": 102,
+      "height": 103,
+      "index": 2,
+      "kind": "mine",
+      "label": "mine 1",
+      "note": null
+    },
+    {
+      "actor": "environment",
+      "blocks": 1,
+      "from_height": 103,
+      "height": 104,
+      "index": 3,
+      "kind": "mine",
+      "label": "mine 1",
+      "note": null
+    },
+    {
+      "actor": "environment",
+      "blocks": 1,
+      "from_height": 104,
+      "height": 105,
+      "index": 4,
+      "kind": "mine",
+      "label": "mine 1",
+      "note": null
+    },
+    {
+      "actor": "claimant",
+      "height": 105,
+      "index": 5,
+      "kind": "offchain",
+      "label": "claim proof",
+      "labels_mode": "handover",
+      "proof": [
+        40000,
+        8400
+      ],
+      "statement": 48400,
+      "tables": "honest"
+    },
+    {
+      "actor": "claimant",
+      "allowed": true,
+      "blockhash": "6c00a9e3d9e997b92096e27b6813cab5ed14e2f5c5510a6da6b62900c7586b72",
+      "broadcast": true,
+      "confirmed": true,
+      "height": 105,
+      "index": 6,
+      "kind": "tx",
+      "label": "claim",
+      "mempool_result": {
+        "allowed": true,
+        "fees": {
+          "base": "0.00003000",
+          "effective-feerate": "0.00014423",
+          "effective-includes": [
+            "50af253d6f133a43a4df46304dfab303dec29b7689151c15651442d1310041e8"
+          ]
+        },
+        "txid": "c96a7338001acd73fdc04321941e4dd7a1feddff8aaffbc6e568c88b17e05f57",
+        "vsize": 208,
+        "wtxid": "50af253d6f133a43a4df46304dfab303dec29b7689151c15651442d1310041e8"
+      },
+      "note": null,
+      "prevouts": [
+        {
+          "amount": 100000,
+          "script_pubkey": "5120999e3e3b623af3db15d958cf5cedb601808b6728e8d0b4dac57ac90e7a10a2a8",
+          "txid": "e1ef1c8766f8e4a77dc3aa868ba2dade8a150746f38f014d17dba5523f8f2e51",
+          "vout": 0
+        }
+      ],
+      "proof": [
+        40000,
+        8400
+      ],
+      "raw_transaction": "02000000000101512e8f3f52a5db174d018ff34607158adedaa28b86aac37da7e4f866871cefe10000000000ffffffff02e87a0100000000002251207a0112092de48da83235aa61e3ee32ff816018dfa729a076554ce204ba78282e0000000000000000266a24494f4233b48d81cda6bb70c56c9f666d47f62f8a0643a5a3da144e8c32f22649f96c02220440a984bf9b3244842aede675feb499461f4c1019f27295bf6d5fb5028f9862272c66f6409968314e915f2a55f604a8cefc4854b2dd9524b707e2f74632e8b20bdd40312a9c8554645f3b3b482d4b0516378c14854dce6360468d474afee5b7272d485bb32502f788a06eb134eaf76b477bcfc6541f6a96093349d12a131870f111134420aeb1f37bd68b70ae51d98f5f5da9981c723ede1a1a6cf4d5a90edb80faf9634aad20fd9190d59557817f29c4c02374351652902785f704a1737f62b39d25d71d898cac41c150929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0a8ecb0e45303149c6a867228e2c7dee89eef353bb8d67011dbf87d80937646fe00000000",
+      "reject_reason": null,
+      "role": "claim",
+      "txid": "c96a7338001acd73fdc04321941e4dd7a1feddff8aaffbc6e568c88b17e05f57"
+    },
+    {
+      "actor": "claimant",
+      "height": 105,
+      "index": 7,
+      "kind": "offchain",
+      "label": "label handover",
+      "labels": [
+        "f7d5e9b9fbe60f639487c447eeb24663",
+        "2ab2544cf439cf79600337a0d2c70dbe",
+        "bd64afc510323653567ce076dd889521",
+        "f1298ecad1552d7cd7493125111c0418",
+        "396b1c79e0d043fd321d39810aee67f8",
+        "6308bbe2dd13afdf26ea14d47d21ce32",
+        "4ad51fe0e1071dc5b7c2964541683108",
+        "c74ddd2173ce00948df3052d6a7cac21",
+        "684d46a2eb982d24c5450145663d05ae",
+        "4ca4db4ba52356ae9b5d71efaa0dfa98",
+        "898bea2aa9559acbdc6128776cd5930a",
+        "4c5545d95304cfec53bdd257f172c5b2",
+        "f3f4ac8d2c8ea1635abb84235cba8059",
+        "e252fd4afd8b5f57902728b52b95ba74",
+        "96a41edbab984e641d1d01494149d774",
+        "441460646c2bde9d3d320ffe3c03aedf",
+        "a0f7dddee66e211e06220092bea6cbe7",
+        "ee880ccd26af285517d0fa66c620bc17",
+        "9330443fcd37f639195c7be3239ab225",
+        "8325e28d41bccec1d540d4c89eba82b5",
+        "4a9189f84c3c337555f7208c15e68f6f",
+        "8f0b4db11f6d20f34284d186ea16e152",
+        "a9e51dcb845364a57dedd86bc261fb8f",
+        "e2ab098bbb345888bc5da138687615c9",
+        "ccdda48bf7dc24b0a78753a4c8fefd9a",
+        "8e6d1d5e712f4e5bfcf81c1607426cb4",
+        "0dcdf259a39ca421e9ed99049c5325ad",
+        "c76acdce54a5f439c8938901fc519c65",
+        "72cf59da29ae947e0dcd77a71bb14208",
+        "ac124bb161690b54c548450382b18db3",
+        "a78ae17b97a32f45c9f8ad8ed1dc4548",
+        "255d967b995802f4bf0123848285d138"
+      ],
+      "to": [
+        "watch"
+      ]
+    },
+    {
+      "actor": "environment",
+      "blocks": 1,
+      "from_height": 105,
+      "height": 106,
+      "index": 8,
+      "kind": "mine",
+      "label": "mine 1",
+      "note": null
+    },
+    {
+      "actor": "environment",
+      "blocks": 1,
+      "from_height": 106,
+      "height": 107,
+      "index": 9,
+      "kind": "mine",
+      "label": "mine 1",
+      "note": null
+    },
+    {
+      "actor": "watch",
+      "height": 107,
+      "index": 10,
+      "kind": "offchain",
+      "label": "evaluate",
+      "labels": [
+        "f7d5e9b9fbe60f639487c447eeb24663",
+        "2ab2544cf439cf79600337a0d2c70dbe",
+        "bd64afc510323653567ce076dd889521",
+        "f1298ecad1552d7cd7493125111c0418",
+        "396b1c79e0d043fd321d39810aee67f8",
+        "6308bbe2dd13afdf26ea14d47d21ce32",
+        "4ad51fe0e1071dc5b7c2964541683108",
+        "c74ddd2173ce00948df3052d6a7cac21",
+        "684d46a2eb982d24c5450145663d05ae",
+        "4ca4db4ba52356ae9b5d71efaa0dfa98",
+        "898bea2aa9559acbdc6128776cd5930a",
+        "4c5545d95304cfec53bdd257f172c5b2",
+        "f3f4ac8d2c8ea1635abb84235cba8059",
+        "e252fd4afd8b5f57902728b52b95ba74",
+        "96a41edbab984e641d1d01494149d774",
+        "441460646c2bde9d3d320ffe3c03aedf",
+        "a0f7dddee66e211e06220092bea6cbe7",
+        "ee880ccd26af285517d0fa66c620bc17",
+        "9330443fcd37f639195c7be3239ab225",
+        "8325e28d41bccec1d540d4c89eba82b5",
+        "4a9189f84c3c337555f7208c15e68f6f",
+        "8f0b4db11f6d20f34284d186ea16e152",
+        "a9e51dcb845364a57dedd86bc261fb8f",
+        "e2ab098bbb345888bc5da138687615c9",
+        "ccdda48bf7dc24b0a78753a4c8fefd9a",
+        "8e6d1d5e712f4e5bfcf81c1607426cb4",
+        "0dcdf259a39ca421e9ed99049c5325ad",
+        "c76acdce54a5f439c8938901fc519c65",
+        "72cf59da29ae947e0dcd77a71bb14208",
+        "ac124bb161690b54c548450382b18db3",
+        "a78ae17b97a32f45c9f8ad8ed1dc4548",
+        "255d967b995802f4bf0123848285d138"
+      ],
+      "output_label": "b04d8bdc35ef4d0247ae0bd2893ffca6",
+      "tables_commitment": "1a484f2e658989fb92351a693d4dd0553460d3964a583867502f53f006ecab7e",
+      "tables_source": "setup",
+      "verdict": "accept"
+    },
+    {
+      "actor": "environment",
+      "blocks": 1,
+      "from_height": 107,
+      "height": 108,
+      "index": 11,
+      "kind": "mine",
+      "label": "mine 1",
+      "note": null
+    },
+    {
+      "actor": "environment",
+      "blocks": 1,
+      "from_height": 108,
+      "height": 109,
+      "index": 12,
+      "kind": "mine",
+      "label": "mine 1",
+      "note": null
+    },
+    {
+      "actor": "environment",
+      "blocks": 1,
+      "from_height": 109,
+      "height": 110,
+      "index": 13,
+      "kind": "mine",
+      "label": "mine 1",
+      "note": null
+    },
+    {
+      "actor": "environment",
+      "blocks": 1,
+      "from_height": 110,
+      "height": 111,
+      "index": 14,
+      "kind": "mine",
+      "label": "mine 1",
+      "note": null
+    },
+    {
+      "actor": "claimant",
+      "allowed": true,
+      "blockhash": "5a8d8a8695e1a1a9a927960177034262624bd4c016aafa7cf3420f58b3240d53",
+      "broadcast": true,
+      "confirmed": true,
+      "height": 111,
+      "index": 15,
+      "kind": "tx",
+      "label": "claim:payout",
+      "mempool_result": {
+        "allowed": true,
+        "fees": {
+          "base": "0.00003000",
+          "effective-feerate": "0.00021897",
+          "effective-includes": [
+            "4107e0ddaa90aa689fb8f2c17208546ced182719f379923a0aa8f242b6c8b8de"
+          ]
+        },
+        "txid": "453ebdadd1b031e2984161965c88d619a1c3f607b4de63f330bda991e8809202",
+        "vsize": 137,
+        "wtxid": "4107e0ddaa90aa689fb8f2c17208546ced182719f379923a0aa8f242b6c8b8de"
+      },
+      "note": null,
+      "prevouts": [
+        {
+          "amount": 97000,
+          "script_pubkey": "51207a0112092de48da83235aa61e3ee32ff816018dfa729a076554ce204ba78282e",
+          "txid": "c96a7338001acd73fdc04321941e4dd7a1feddff8aaffbc6e568c88b17e05f57",
+          "vout": 0
+        }
+      ],
+      "raw_transaction": "02000000000101575fe0178bc868e5c6fbaf8affddfea1d74d1e942143c0fd73cd1a0038736ac900000000000600000001306f0100000000002251201f445e10bbf30bfe3c8cc482364185201c40d5c169c748b49c77e9c407e8b1690340ab274c9ef3b522373e326e9259fb1b092e4500075659314fce71f4491a3c14dcb15e5b9ef538f44d8b3a98bc4529004106a9626936a0f608413964c45a23dc6e2556b27520aeb1f37bd68b70ae51d98f5f5da9981c723ede1a1a6cf4d5a90edb80faf9634aac41c050929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0da9c636823b780060c913bb21c154791373960e76a361ff5f4b9bc7ad7777ef400000000",
+      "reject_reason": null,
+      "txid": "453ebdadd1b031e2984161965c88d619a1c3f607b4de63f330bda991e8809202"
+    },
+    {
+      "actor": "relayer",
+      "allowed": false,
+      "broadcast": false,
+      "confirmed": false,
+      "height": 111,
+      "index": 16,
+      "kind": "tx",
+      "label": "relayer rewrite",
+      "mempool_result": {
+        "allowed": false,
+        "reject-details": "mempool-script-verify-flag-failed (Invalid Schnorr signature), input 0 of c86c2d79ff3a91759c146e80a9b52ad4ca2ffec32972cc3bb0252090df31f33f (wtxid bb6a86fbe910de3043a5a71ef3e29464c485a2a4143537a46e1be3a4305f104f), spending c96a7338001acd73fdc04321941e4dd7a1feddff8aaffbc6e568c88b17e05f57:0",
+        "reject-reason": "mempool-script-verify-flag-failed (Invalid Schnorr signature)",
+        "txid": "c86c2d79ff3a91759c146e80a9b52ad4ca2ffec32972cc3bb0252090df31f33f",
+        "wtxid": "bb6a86fbe910de3043a5a71ef3e29464c485a2a4143537a46e1be3a4305f104f"
+      },
+      "note": null,
+      "prevouts": [
+        {
+          "amount": 97000,
+          "script_pubkey": "51207a0112092de48da83235aa61e3ee32ff816018dfa729a076554ce204ba78282e",
+          "txid": "c96a7338001acd73fdc04321941e4dd7a1feddff8aaffbc6e568c88b17e05f57",
+          "vout": 0
+        }
+      ],
+      "raw_transaction": "02000000000101575fe0178bc868e5c6fbaf8affddfea1d74d1e942143c0fd73cd1a0038736ac900000000000600000001486b01000000000022512011378998898039726c68716682aef7d31a9b7954f1f27d58cf4decc189c18c730340ab274c9ef3b522373e326e9259fb1b092e4500075659314fce71f4491a3c14dcb15e5b9ef538f44d8b3a98bc4529004106a9626936a0f608413964c45a23dc6e2556b27520aeb1f37bd68b70ae51d98f5f5da9981c723ede1a1a6cf4d5a90edb80faf9634aac41c050929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0da9c636823b780060c913bb21c154791373960e76a361ff5f4b9bc7ad7777ef400000000",
+      "reject_reason": "mempool-script-verify-flag-failed (Invalid Schnorr signature)",
+      "rewrites": "453ebdadd1b031e2984161965c88d619a1c3f607b4de63f330bda991e8809202",
+      "txid": "c86c2d79ff3a91759c146e80a9b52ad4ca2ffec32972cc3bb0252090df31f33f"
+    },
+    {
+      "actor": "environment",
+      "blocks": 1,
+      "from_height": 111,
+      "height": 112,
+      "index": 17,
+      "kind": "mine",
+      "label": "mine 1",
+      "note": null
+    },
+    {
+      "actor": "environment",
+      "blocks": 1,
+      "from_height": 112,
+      "height": 113,
+      "index": 18,
+      "kind": "mine",
+      "label": "mine 1",
+      "note": null
+    },
+    {
+      "actor": "environment",
+      "blocks": 1,
+      "from_height": 113,
+      "height": 114,
+      "index": 19,
+      "kind": "mine",
+      "label": "mine 1",
+      "note": null
+    }
+  ],
+  "tag": "1"
+}

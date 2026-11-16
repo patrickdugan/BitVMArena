@@ -1,0 +1,6 @@
+{"op": "wait", "args": {"blocks": 4}}
+{"op": "observe"}
+{"op": "spend", "args": {"utxo": "claim", "path": "disprove", "outputs": [[94000, "watch"]]}}
+{"op": "spend", "args": {"utxo": "claim", "path": "disprove"}}
+{"op": "wait", "args": {"blocks": 3}}
+{"op": "end"}

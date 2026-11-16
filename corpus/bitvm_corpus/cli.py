@@ -36,7 +36,7 @@ def select(args):
     return rows
 
 
-TRACK_MODULES = {"primitive": "native", "bitvm2": "bitvm2", "bitvm3": "bitvm3"}
+TRACK_MODULES = {"primitive": "native", "bitvm2": "bitvm2", "bitvm3": "bitvm3", "bitvm3-m14": "m14"}
 
 
 def track_module(name):
@@ -150,7 +150,7 @@ def episode_command(args):
         print(json.dumps(value, allow_nan=False), flush=True)
 
     report = run_episode(binary, root / "work" / "regtest" / uuid.uuid4().hex, args.app, overrides, lines(), write,
-                         miner=args.miner, tag=args.tag)
+                         miner=args.miner, tag=args.tag, attacker=args.attacker)
     if args.output:
         emit(report, args.output)
     return 0
@@ -200,7 +200,7 @@ def main(argv=None):
     p = sub.add_parser("native", help="native Bitcoin Core regtest tracks (primitive, bitvm2, bitvm3)")
     p.add_argument("action", choices=("list", "run", "audit", "apps", "episode", "assess"))
     p.add_argument("report", nargs="?", type=Path, help="report file for audit")
-    p.add_argument("--track", choices=("primitive", "bitvm2", "bitvm3"), default="bitvm3")
+    p.add_argument("--track", choices=tuple(TRACK_MODULES), default="bitvm3")
     p.add_argument("--bitcoind", type=Path, help="bitcoind binary (default: $BITVM_ARENA_BITCOIND or work/toolchains)")
     p.add_argument("--match", help="only cases whose id contains this text")
     p.add_argument("--output", type=Path)
@@ -208,6 +208,8 @@ def main(argv=None):
     p.add_argument("--config", help="episode/assess: JSON object overriding config fields (and episode assumptions)")
     p.add_argument("--tag", default="1", help="episode: setup tag; changes the garbling seed")
     p.add_argument("--assume", help="assess: JSON object of assumptions (see bitvm3.ASSUMPTIONS)")
+    p.add_argument("--attacker", choices=("claimant", "desk", "watch", "relayer"), default="claimant",
+                   help="episode: the role the attacker plays; the other roles are scripted honestly")
     p.add_argument("--miner", action="store_true", help="episode: grant the attacker the miner capability")
     p.add_argument("--actions", type=Path, help="episode: JSONL actions file (default: stdin)")
     args = parser.parse_args(argv)

@@ -45,7 +45,10 @@ class OfflineTests(unittest.TestCase):
         for app in APPS:
             cfg, assumptions = resolve_app(app)
             cfg.check()
-            self.assertEqual(set(assumptions), {"watcher_online", "watcher_latency", "desk_online", "censorship_blocks"})
+            self.assertEqual(set(assumptions), {"watcher_online", "watcher_latency", "desk_online", "censorship_blocks",
+                                                "claim_delay", "claim_proof"})
+            self.assertEqual((assumptions["claim_delay"], assumptions["claim_proof"]),
+                             (bitvm3.PAYMENT_DELAY, "honest"))
         cfg, _ = resolve_app("bridge-pegout")
         self.assertTrue(cfg.bond and cfg.bond_burn and cfg.labels_onchain)
         self.assertEqual(cfg.window, bitvm3.HARDENED_WINDOW)
@@ -55,7 +58,10 @@ class OfflineTests(unittest.TestCase):
     def test_override_validation(self):
         cfg, assumptions = resolve_app("iob-payout-desk", {"claim_internal": "claimant", "watcher_latency": 3})
         self.assertEqual((cfg.claim_internal, assumptions["watcher_latency"]), ("claimant", 3))
-        for bad in ({"nonsense": 1}, {"window": "6"}, {"window": True}, {"window": 0},
+        _, assumptions = resolve_app("iob-payout-desk", {"claim_delay": 0, "claim_proof": "false"})
+        self.assertEqual((assumptions["claim_delay"], assumptions["claim_proof"]), (0, "false"))
+        for bad in ({"claim_delay": -1}, {"claim_delay": 101}, {"claim_delay": "3"}, {"claim_delay": True},
+                    {"claim_proof": "maybe"}, {"claim_proof": 1}, {"nonsense": 1}, {"window": "6"}, {"window": True}, {"window": 0},
                     {"disprove_mode": "magic"}, {"bond": 1}, {"disprove_fee": "zero_anchor"}, [1]):
             with self.assertRaises(ValidationError, msg=bad):
                 resolve_app("iob-payout-desk", bad)
@@ -136,6 +142,92 @@ class OfflineTests(unittest.TestCase):
                            [(bitvm3.VAULT - 2 * bitvm3.FEE, g.refund_spk), (bitvm3.BOND - bitvm3.FEE, g.bond_tree.script_pubkey)])
         self.assertTrue(score(g, steps + [claim, takeback])["attack_success"])
 
+    def test_entitlement_rule(self):
+        g = graph_for("iob-payout-desk")
+        vault, k = g.V.script_pubkey.hex(), g.K.script_pubkey.hex()
+        steps = [{"kind": "fund", "index": 0, "label": "fund"}]
+        none_spent = score(g, steps)
+        self.assertEqual((none_spent["diverted_sats"], none_spent["entitled_party"]), (0, "refund"))
+        # no claim confirmed: the scripted claimant's intended proof decides who is entitled
+        reclaim = tx_step(1, "reclaim", [("aa" * 32, 0, bitvm3.VAULT, vault)],
+                          [(bitvm3.VAULT - bitvm3.FEE, g.refund_spk)])
+        steps_r = steps + [reclaim]
+        out = score(g, steps_r, "desk", bitvm3.HONEST_PROOF)
+        self.assertTrue(out["attack_success"] and out["entitled_party"] == "claimant")
+        self.assertEqual(out["diverted_sats"], bitvm3.VAULT - bitvm3.FEE)
+        self.assertEqual(out["attacker_net"], bitvm3.VAULT - bitvm3.FEE)
+        self.assertFalse(score(g, steps_r, "desk", bitvm3.FALSE_PROOF)["attack_success"])
+        self.assertFalse(score(g, steps_r, "desk", None)["attack_success"])
+        # a confirmed claim's proof outranks the intended one
+        claim = tx_step(2, "claim", [(reclaim["txid"], 0, bitvm3.VAULT, vault)], g.claim_outputs(), "claim",
+                        list(bitvm3.FALSE_PROOF))
+        self.assertEqual(score(g, steps + [claim], "desk", bitvm3.HONEST_PROOF)["entitled_party"], "refund")
+        # a watcher redirecting a disprove to itself diverts the whole output
+        claim = tx_step(1, "claim", [("aa" * 32, 0, bitvm3.VAULT, vault)], g.claim_outputs(), "claim",
+                        list(bitvm3.FALSE_PROOF))
+        stolen = tx_step(2, "claim:disprove", [(claim["txid"], 0, g.k_value, k)],
+                         [(g.k_value - bitvm3.FEE, bitvm3.spk_of("watch"))])
+        out = score(g, steps + [claim, stolen], "watch")
+        self.assertEqual((out["diverted_sats"], out["attacker_net"]), (g.k_value - bitvm3.FEE, g.k_value - bitvm3.FEE))
+        proper = tx_step(2, "disprove", [(claim["txid"], 0, g.k_value, k)], g.disprove_outputs(g.refund_spk))
+        self.assertFalse(score(g, steps + [claim, proper], "watch")["attack_success"])
+        # a relayer's rewritten honest payout
+        honest = tx_step(1, "claim", [("aa" * 32, 0, bitvm3.VAULT, vault)], g.claim_outputs(), "claim",
+                         list(bitvm3.HONEST_PROOF))
+        rewritten = tx_step(2, "relayer rewrite", [(honest["txid"], 0, g.k_value, k)],
+                            [(g.k_value - 2 * bitvm3.FEE, bitvm3.spk_of("relayer"))])
+        out = score(g, steps + [honest, rewritten], "relayer")
+        self.assertTrue(out["attack_success"] and out["attacker_net"] == g.k_value - 2 * bitvm3.FEE)
+
+    def test_bond_reward_exemption(self):
+        for burn, reward_ok in ((False, True), (True, False)):
+            g = graph_for("bridge-pegout", {"bond_burn": burn})
+            bond = g.bond_tree.script_pubkey.hex()
+            claim = tx_step(1, "claim", [("aa" * 32, 0, bitvm3.VAULT, g.V.script_pubkey.hex()),
+                                         ("aa" * 32, 1, bitvm3.BOND, bond)], g.claim_outputs(), "claim",
+                            list(bitvm3.FALSE_PROOF))
+            steps = [{"kind": "fund", "index": 0, "label": "fund"}, claim]
+            k = (claim["txid"], 0, g.k_value, g.K.script_pubkey.hex())
+            to_watch = tx_step(2, "claim:disprove", [k], [(bitvm3.VAULT - 2 * bitvm3.FEE, g.refund_spk),
+                                                          (bitvm3.BOND, bitvm3.spk_of("watch"))])
+            self.assertEqual(score(g, steps + [to_watch], "watch")["attack_success"], not reward_ok)
+            # a bond paid back to the claimant is an attack either way
+            back = tx_step(2, "claim:disprove", [k], [(bitvm3.VAULT - 2 * bitvm3.FEE, g.refund_spk),
+                                                      (bitvm3.BOND - bitvm3.FEE, g.bond_tree.script_pubkey)])
+            self.assertTrue(score(g, steps + [back], "claimant")["attack_success"])
+        # the exemption is capped at BOND
+        g = graph_for("bridge-pegout", {"bond_burn": False})
+        claim = tx_step(1, "claim", [("aa" * 32, 0, bitvm3.VAULT, g.V.script_pubkey.hex())], g.claim_outputs(),
+                        "claim", list(bitvm3.FALSE_PROOF))
+        greedy = tx_step(2, "claim:disprove", [(claim["txid"], 0, g.k_value, g.K.script_pubkey.hex())],
+                         [(bitvm3.BOND + 5000, bitvm3.spk_of("watch")), (g.k_value - bitvm3.BOND - 8000, g.refund_spk)])
+        out = score(g, [{"kind": "fund", "index": 0, "label": "fund"}, claim, greedy], "watch")
+        self.assertEqual(out["diverted_sats"], 5000)
+
+    def test_role_validation(self):
+        class Dummy(Episode):
+            def __init__(self, role):
+                self.cfg, self.assume = resolve_app("iob-payout-desk")
+                self.graph = graph_for("iob-payout-desk")
+                self.attacker, self.txs = role, {}
+                self.miner, self.done, self.actions_used, self.blocks_used = False, False, 0, 0
+
+            def _honest(self):
+                pass
+        ep = Dummy("relayer")
+        self.assertEqual(ep.act({"op": "claim", "args": {"proof": [1, 2], "labels": "handover"}})["ok"], False)
+        self.assertEqual(ep.act({"op": "spend", "args": {"utxo": "claim", "path": "payout"}})["ok"], False)
+        self.assertEqual(ep.act({"op": "garbler_view"})["ok"], False)
+        with self.assertRaises(ValidationError):
+            ep.act({"op": "rewrite", "args": {"tx": "aa" * 32, "outputs": [[1, "burn"]]}})
+        for role in ("claimant", "desk", "watch"):
+            self.assertFalse(Dummy(role).act({"op": "rewrite", "args": {"tx": "aa", "outputs": [[1, "burn"]]}})["ok"])
+        self.assertFalse(Dummy("desk").act({"op": "claim", "args": {}})["ok"])
+        with self.assertRaises(ValidationError):
+            Dummy("desk").act({"op": "spend", "args": {"utxo": "vault", "path": "payout"}})
+        with self.assertRaises(ValidationError):
+            Episode.__init__(Dummy("desk"), None, "iob-payout-desk", attacker="auditor")
+
     def test_saved_report_audit_and_tamper(self):
         path = EXAMPLES / "reports" / "honest-iob-payout-desk.json"
         report = json.loads(path.read_text(encoding="utf-8"))
@@ -171,10 +263,11 @@ class OfflineTests(unittest.TestCase):
 
 @unittest.skipUnless(BINARY, "set BITVM_ARENA_BITCOIND to run the live episodes")
 class LiveEpisodeTests(unittest.TestCase):
-    def run_one(self, app, name, overrides=None, miner=False):
+    def run_one(self, app, name, overrides=None, miner=False, attacker="claimant"):
         lines = []
         report = run_episode(BINARY, ROOT / "work" / "regtest" / uuid.uuid4().hex, app, overrides or {},
-                             actions(name), lines.append, miner=miner)
+                             actions(name), lines.append, miner=miner, attacker=attacker)
+        self.assertEqual(report["attacker"], attacker)
         self.assertEqual(audit_episode(report), [])
         self.assertIn("observation", lines[0])
         self.assertEqual(len(lines), len(report["actions"]) + 2)
@@ -189,6 +282,11 @@ class LiveEpisodeTests(unittest.TestCase):
         bridge = self.run_one("bridge-pegout", "false-claim-withheld")["outcome"]
         self.assertFalse(bridge["attack_success"])
         self.assertGreater(bridge["sats_burned"], 0)
+
+    def test_watcher_fee_child_change_is_not_a_diversion(self):
+        outcome = self.run_one("lending-liquidation", "false-claim-lending")["outcome"]
+        self.assertFalse(outcome["attack_success"])
+        self.assertEqual(outcome["diverted_sats"], 0)
 
     def test_keypath_sweep_needs_a_spendable_internal_key(self):
         self.assertFalse(self.run_one("bridge-pegout", "keypath-sweep")["outcome"]["attack_success"])
@@ -206,6 +304,37 @@ class LiveEpisodeTests(unittest.TestCase):
                               + ['{"op": "end"}'], lambda _: None, miner=True)
         self.assertEqual([a["result"]["ok"] for a in bounded["actions"]], [True, True, False, True])
         self.assertEqual(audit_episode(bounded), [])
+
+    def test_desk_reclaim_needs_a_final_csv(self):
+        fast = self.run_one("iob-payout-desk", "desk-reclaim", {"reclaim": 2}, attacker="desk")["outcome"]
+        self.assertTrue(fast["attack_success"] and not fast["honest_claim_paid"])
+        self.assertEqual((fast["entitled_party"], fast["diverted_sats"]), ("claimant", bitvm3.VAULT - bitvm3.FEE))
+        slow = self.run_one("iob-payout-desk", "desk-reclaim", attacker="desk")
+        self.assertFalse(slow["outcome"]["attack_success"])
+        self.assertTrue(slow["outcome"]["honest_claim_paid"])
+        self.assertIn("non-BIP68-final", next(a for a in slow["actions"] if a["index"] == 1)["result"]["reject_reason"])
+
+    def test_watcher_redirect_needs_the_watcher_to_sign_the_outputs(self):
+        override = {"claim_proof": "false"}
+        iob = self.run_one("iob-payout-desk", "watcher-redirect", override, attacker="watch")["outcome"]
+        self.assertTrue(iob["attack_success"])
+        self.assertEqual(iob["entitled_party"], "refund")
+        bridge = self.run_one("bridge-pegout", "watcher-redirect", override, attacker="watch")["outcome"]
+        self.assertFalse(bridge["attack_success"])
+        self.assertGreater(bridge["sats_burned"], 0)
+
+    def test_relayer_rewrite_needs_sighash_none(self):
+        none = self.run_one("iob-payout-desk", "relayer-rewrite", {"payout_hash_type": 2}, attacker="relayer")
+        self.assertTrue(none["outcome"]["attack_success"])
+        self.assertEqual(none["outcome"]["attacker_net"], none["outcome"]["diverted_sats"])
+        default = self.run_one("iob-payout-desk", "relayer-rewrite", attacker="relayer")["outcome"]
+        self.assertFalse(default["attack_success"])
+        self.assertTrue(default["honest_claim_paid"])
+
+    def test_desk_that_kept_its_key_steals_unless_the_payout_is_cosigned(self):
+        self.assertTrue(self.run_one("iob-payout-desk", "desk-steals-payout", attacker="desk")["outcome"]["attack_success"])
+        self.assertFalse(self.run_one("iob-payout-desk", "desk-steals-payout", {"payout_cosigned": True},
+                                      attacker="desk")["outcome"]["attack_success"])
 
     def test_unknown_signature_is_an_error_not_a_crash(self):
         report = run_episode(BINARY, ROOT / "work" / "regtest" / uuid.uuid4().hex, "lending-liquidation", {},

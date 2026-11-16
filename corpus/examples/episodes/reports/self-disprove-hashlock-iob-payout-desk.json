@@ -16,11 +16,11 @@
       "result": {
         "allowed": true,
         "broadcast": true,
-        "hex": "020000000001010cb5b6a62642b7e4f677a368d8ee4f1d16c57930c9c1b102a11caca3484a3d7d0100000000ffffffff02e87a010000000000225120b6c2006bdff17847761d67f99add70da0b98a8e4c40e87576b1baba0a3fb47040000000000000000266a24494f4233b48d81cda6bb70c56c9f666d47f62f8a0643a5a3da144e8c32f22649f96c02220440d79ed795fb2bfa3ee4b9013c94d5182734bdf02677e5838c4dfc8ff68d835208340b05d83f22583febb4eac408cb7a97616826842f69c7d1c1a4cd98a1415b1840cfc3aa50fc731562d323017cecfd44bad8a4aa8daa61e7528824a5e73e1af6a20636bcd9df37bdf7b3647a786e3d43a3ca18b707c343fe9c2a3cf62883f666a04420aeb1f37bd68b70ae51d98f5f5da9981c723ede1a1a6cf4d5a90edb80faf9634aad20fd9190d59557817f29c4c02374351652902785f704a1737f62b39d25d71d898cac41c150929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0a8ecb0e45303149c6a867228e2c7dee89eef353bb8d67011dbf87d80937646fe00000000",
+        "hex": "0200000000010117eef284776ab8b2fa548869f87eb4ed73e6e9ae6bb882b45d3d596d674514d30100000000ffffffff02e87a010000000000225120b6c2006bdff17847761d67f99add70da0b98a8e4c40e87576b1baba0a3fb47040000000000000000266a24494f4233b48d81cda6bb70c56c9f666d47f62f8a0643a5a3da144e8c32f22649f96c02220440c80d119cf388556fcb67eaf751aacbd5b953c7db2d2167d8c74e458289f938156c5e6d4aaf9747ae60ddb9451901b3d66d0ec5b4987706871d9f089c76e669e440fdd2ae47b1de28ce0db0e98054196d8eac17bf23262d14edb3249a4fa9906bacb2f8afd625bdec45896ea169ba4de5402d3ff2784b358c1947c24009924363614420aeb1f37bd68b70ae51d98f5f5da9981c723ede1a1a6cf4d5a90edb80faf9634aad20fd9190d59557817f29c4c02374351652902785f704a1737f62b39d25d71d898cac41c150929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0a8ecb0e45303149c6a867228e2c7dee89eef353bb8d67011dbf87d80937646fe00000000",
         "label": "claim",
         "ok": true,
         "reject_reason": null,
-        "txid": "faba48bffe5adcf3370f645a0cbfcb0570c2c34ebde8f4e975b86286ab7c2bde"
+        "txid": "8a6f7aba59daf17fb9c32769e0b73296f9278b72e4737e8aa9ae19bc626324d9"
       }
     },
     {
@@ -49,11 +49,11 @@
       "result": {
         "allowed": true,
         "broadcast": true,
-        "hex": "02000000000101de2b7cab8662b875e9f4e8bd4ec3c27005cbbf0c5a640f37f3dc5afebf48bafa0000000000fdffffff01306f010000000000225120c02a160c8035a50e497402466cd1521fd9ad0da7ca0951aa418e9d23770eea88031069db88223be2b70c647eb25803be970323a8205310efb5dd1bcc680b9c23cda9e2445157f1c4f2e3ab8288422295ccd19fcbf18741c050929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0d14ed587ea8b719dc64591d3f207a9c5cd2f51692a8dc485a0a773baed126a4c00000000",
+        "hex": "02000000000101d9246362bc19aea98a7e73e4728b27f99632b7e06927c3b97ff1da59ba7a6f8a0000000000fdffffff01306f010000000000225120c02a160c8035a50e497402466cd1521fd9ad0da7ca0951aa418e9d23770eea88031069db88223be2b70c647eb25803be970323a8205310efb5dd1bcc680b9c23cda9e2445157f1c4f2e3ab8288422295ccd19fcbf18741c050929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0d14ed587ea8b719dc64591d3f207a9c5cd2f51692a8dc485a0a773baed126a4c00000000",
         "label": "claim:disprove",
         "ok": true,
         "reject_reason": null,
-        "txid": "34c0fa43ef5f04a389f2d17236ece58c49682bd0aed7e881a120594ddb051910"
+        "txid": "d9d666e9ffbce0c5d468166ddc1f38d02c6f4ac8b93f0f347d8e3992cf3f8bfc"
       }
     },
     {
@@ -82,6 +82,8 @@
   "app": "iob-payout-desk",
   "assumptions": {
     "censorship_blocks": 8,
+    "claim_delay": 3,
+    "claim_proof": "honest",
     "desk_online": true,
     "watcher_latency": 1,
     "watcher_online": true
@@ -99,6 +101,7 @@
     "disprove_fee": "included",
     "disprove_mode": "hashlock",
     "labels_onchain": false,
+    "payout_cosigned": false,
     "payout_csv": true,
     "payout_hash_type": 0,
     "payout_timelock": "csv",
@@ -107,29 +110,33 @@
     "seed_reuse": false,
     "statement_binding": "instance",
     "tables_at": "setup",
+    "watcher_network": "independent",
     "window": 6
   },
-  "evidence_hash": "7e7227f688ef366a21df1f480124927bde29b7db1f57045f34d9c835838adf17",
+  "evidence_hash": "021e0f586f63ad559feae7e19cf3e2679bfba44e6373a15257015782c868da12",
   "kind": "bitvm3-episode",
   "outcome": {
     "attack_success": true,
+    "attacker_net": 94000,
     "blocks_elapsed": 2,
     "claim_confirmed": true,
     "claimant_loss": -94000,
+    "diverted_sats": 94000,
+    "entitled_party": "refund",
     "fees": 6000,
     "honest": false,
     "honest_claim_paid": false,
     "nets": {
       "burn": 0,
       "claimant": 94000,
+      "desk": 0,
       "other": 0,
       "protocol": -100000,
       "refund": 0,
       "relayer": 0,
       "watch": 0
     },
-    "sats_burned": 0,
-    "vault_value_to_outsiders": 0
+    "sats_burned": 0
   },
   "overrides": {
     "disprove_mode": "hashlock"
@@ -156,6 +163,7 @@
         "disprove_fee": "included",
         "disprove_mode": "hashlock",
         "labels_onchain": false,
+        "payout_cosigned": false,
         "payout_csv": true,
         "payout_hash_type": 0,
         "payout_timelock": "csv",
@@ -164,6 +172,7 @@
         "seed_reuse": false,
         "statement_binding": "instance",
         "tables_at": "setup",
+        "watcher_network": "independent",
         "window": 6
       },
       "desk_presigns": true,
@@ -189,12 +198,12 @@
         "vault": {
           "amount": 100000,
           "script_pubkey": "5120999e3e3b623af3db15d958cf5cedb601808b6728e8d0b4dac57ac90e7a10a2a8",
-          "txid": "7d3d4a48a3ac1ca102b1c1c93079c5161d4feed868a377f6e4b74226a6b6b50c",
+          "txid": "d31445676d593d5db482b86baee9e673edb47ef8698854fab2b86a7784f2ee17",
           "vout": 1
         }
       },
-      "raw_transaction": "020000000001011930aa8036c37463a097a7eba7a5dadeccc0691b91d65b55e36bd0480fee52850000000000fdffffff025265042a01000000225120a9a8f86e45ae67beb6746f05f1215ef361657bdc55fbc9ffd61bf1f5a0104441a086010000000000225120999e3e3b623af3db15d958cf5cedb601808b6728e8d0b4dac57ac90e7a10a2a80140e1038dbbc27e237989ff2b9046a6a56aadfd772b98dc4ae93b229aa1d5345fd693b783ad0489ed29571b34ccf085366ebd6880414ae829dd53dee7c80c272dbe65000000",
-      "txid": "7d3d4a48a3ac1ca102b1c1c93079c5161d4feed868a377f6e4b74226a6b6b50c"
+      "raw_transaction": "0200000000010187c0be0c23264ac57aa7e2c645d5a4691bfc367988c51a20150ce26693b57ee00000000000fdffffff025265042a010000002251202777f96f7fbc0339a69d788b4b1774ac3e031b1e3830a7f16303bf3d4f403ee1a086010000000000225120999e3e3b623af3db15d958cf5cedb601808b6728e8d0b4dac57ac90e7a10a2a80140dc3a7fcf1f366c7ec7390b8896fc37ac5e555f75e2d7cb69748ac6c890cde5e260e2c8ac5e003b1cd907618499985ce5902eb353185564cf33e1d8f50765b8de65000000",
+      "txid": "d31445676d593d5db482b86baee9e673edb47ef8698854fab2b86a7784f2ee17"
     },
     {
       "actor": "claimant",
@@ -213,7 +222,7 @@
     {
       "actor": "claimant",
       "allowed": true,
-      "blockhash": "68c654695c6bba7e74144b6aa61ef63ac9bff1db8beb9c731a139c7057664b0b",
+      "blockhash": "4e2d51b681ae2f0520eac78af95322d3f75b23b831106d4dcb97dcd61a5924bf",
       "broadcast": true,
       "confirmed": true,
       "height": 102,
@@ -226,19 +235,19 @@
           "base": "0.00003000",
           "effective-feerate": "0.00014423",
           "effective-includes": [
-            "82106ee8c1ae75f9b1a4f170759075c31793a2394e271b9d512e46bef2f8ed4d"
+            "e016ac9c186319166aabb90aeb5e79a4b7289ec17ed95206327809b1f9008788"
           ]
         },
-        "txid": "faba48bffe5adcf3370f645a0cbfcb0570c2c34ebde8f4e975b86286ab7c2bde",
+        "txid": "8a6f7aba59daf17fb9c32769e0b73296f9278b72e4737e8aa9ae19bc626324d9",
         "vsize": 208,
-        "wtxid": "82106ee8c1ae75f9b1a4f170759075c31793a2394e271b9d512e46bef2f8ed4d"
+        "wtxid": "e016ac9c186319166aabb90aeb5e79a4b7289ec17ed95206327809b1f9008788"
       },
       "note": null,
       "prevouts": [
         {
           "amount": 100000,
           "script_pubkey": "5120999e3e3b623af3db15d958cf5cedb601808b6728e8d0b4dac57ac90e7a10a2a8",
-          "txid": "7d3d4a48a3ac1ca102b1c1c93079c5161d4feed868a377f6e4b74226a6b6b50c",
+          "txid": "d31445676d593d5db482b86baee9e673edb47ef8698854fab2b86a7784f2ee17",
           "vout": 1
         }
       ],
@@ -246,10 +255,10 @@
         40000,
         9400
       ],
-      "raw_transaction": "020000000001010cb5b6a62642b7e4f677a368d8ee4f1d16c57930c9c1b102a11caca3484a3d7d0100000000ffffffff02e87a010000000000225120b6c2006bdff17847761d67f99add70da0b98a8e4c40e87576b1baba0a3fb47040000000000000000266a24494f4233b48d81cda6bb70c56c9f666d47f62f8a0643a5a3da144e8c32f22649f96c02220440d79ed795fb2bfa3ee4b9013c94d5182734bdf02677e5838c4dfc8ff68d835208340b05d83f22583febb4eac408cb7a97616826842f69c7d1c1a4cd98a1415b1840cfc3aa50fc731562d323017cecfd44bad8a4aa8daa61e7528824a5e73e1af6a20636bcd9df37bdf7b3647a786e3d43a3ca18b707c343fe9c2a3cf62883f666a04420aeb1f37bd68b70ae51d98f5f5da9981c723ede1a1a6cf4d5a90edb80faf9634aad20fd9190d59557817f29c4c02374351652902785f704a1737f62b39d25d71d898cac41c150929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0a8ecb0e45303149c6a867228e2c7dee89eef353bb8d67011dbf87d80937646fe00000000",
+      "raw_transaction": "0200000000010117eef284776ab8b2fa548869f87eb4ed73e6e9ae6bb882b45d3d596d674514d30100000000ffffffff02e87a010000000000225120b6c2006bdff17847761d67f99add70da0b98a8e4c40e87576b1baba0a3fb47040000000000000000266a24494f4233b48d81cda6bb70c56c9f666d47f62f8a0643a5a3da144e8c32f22649f96c02220440c80d119cf388556fcb67eaf751aacbd5b953c7db2d2167d8c74e458289f938156c5e6d4aaf9747ae60ddb9451901b3d66d0ec5b4987706871d9f089c76e669e440fdd2ae47b1de28ce0db0e98054196d8eac17bf23262d14edb3249a4fa9906bacb2f8afd625bdec45896ea169ba4de5402d3ff2784b358c1947c24009924363614420aeb1f37bd68b70ae51d98f5f5da9981c723ede1a1a6cf4d5a90edb80faf9634aad20fd9190d59557817f29c4c02374351652902785f704a1737f62b39d25d71d898cac41c150929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0a8ecb0e45303149c6a867228e2c7dee89eef353bb8d67011dbf87d80937646fe00000000",
       "reject_reason": null,
       "role": "claim",
-      "txid": "faba48bffe5adcf3370f645a0cbfcb0570c2c34ebde8f4e975b86286ab7c2bde"
+      "txid": "8a6f7aba59daf17fb9c32769e0b73296f9278b72e4737e8aa9ae19bc626324d9"
     },
     {
       "actor": "claimant",
@@ -308,7 +317,7 @@
     {
       "actor": "claimant",
       "allowed": true,
-      "blockhash": "5d1698155dc1645e01ae8e82efb1191e1d869b6256f6cc32f631a5f0d6b38f93",
+      "blockhash": "4c71a4f24764278fb3e95563fd8d08ddde261b4e677936a1996c62349d650511",
       "broadcast": true,
       "confirmed": true,
       "height": 103,
@@ -321,25 +330,25 @@
           "base": "0.00003000",
           "effective-feerate": "0.00024000",
           "effective-includes": [
-            "450b04480f77bec079188d5af862b0badaf04ba15e4ad13b0f3fa68ba2401066"
+            "d18973790449561886f40db60c69d70b4395388ac95e7194845a07dac7078677"
           ]
         },
-        "txid": "34c0fa43ef5f04a389f2d17236ece58c49682bd0aed7e881a120594ddb051910",
+        "txid": "d9d666e9ffbce0c5d468166ddc1f38d02c6f4ac8b93f0f347d8e3992cf3f8bfc",
         "vsize": 125,
-        "wtxid": "450b04480f77bec079188d5af862b0badaf04ba15e4ad13b0f3fa68ba2401066"
+        "wtxid": "d18973790449561886f40db60c69d70b4395388ac95e7194845a07dac7078677"
       },
       "note": null,
       "prevouts": [
         {
           "amount": 97000,
           "script_pubkey": "5120b6c2006bdff17847761d67f99add70da0b98a8e4c40e87576b1baba0a3fb4704",
-          "txid": "faba48bffe5adcf3370f645a0cbfcb0570c2c34ebde8f4e975b86286ab7c2bde",
+          "txid": "8a6f7aba59daf17fb9c32769e0b73296f9278b72e4737e8aa9ae19bc626324d9",
           "vout": 0
         }
       ],
-      "raw_transaction": "02000000000101de2b7cab8662b875e9f4e8bd4ec3c27005cbbf0c5a640f37f3dc5afebf48bafa0000000000fdffffff01306f010000000000225120c02a160c8035a50e497402466cd1521fd9ad0da7ca0951aa418e9d23770eea88031069db88223be2b70c647eb25803be970323a8205310efb5dd1bcc680b9c23cda9e2445157f1c4f2e3ab8288422295ccd19fcbf18741c050929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0d14ed587ea8b719dc64591d3f207a9c5cd2f51692a8dc485a0a773baed126a4c00000000",
+      "raw_transaction": "02000000000101d9246362bc19aea98a7e73e4728b27f99632b7e06927c3b97ff1da59ba7a6f8a0000000000fdffffff01306f010000000000225120c02a160c8035a50e497402466cd1521fd9ad0da7ca0951aa418e9d23770eea88031069db88223be2b70c647eb25803be970323a8205310efb5dd1bcc680b9c23cda9e2445157f1c4f2e3ab8288422295ccd19fcbf18741c050929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0d14ed587ea8b719dc64591d3f207a9c5cd2f51692a8dc485a0a773baed126a4c00000000",
       "reject_reason": null,
-      "txid": "34c0fa43ef5f04a389f2d17236ece58c49682bd0aed7e881a120594ddb051910"
+      "txid": "d9d666e9ffbce0c5d468166ddc1f38d02c6f4ac8b93f0f347d8e3992cf3f8bfc"
     },
     {
       "actor": "environment",

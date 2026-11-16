@@ -195,7 +195,8 @@ class CatalogTests(unittest.TestCase):
                 self.assertNotIn(recipe, {f["recipe"] for f in hardened["findings"]})
         as_built = {f["recipe"] for f in bitvm3.assess(bitvm3.Config())["findings"]}
         self.assertEqual(as_built, {"labels_offchain_withheld", "garbling_unchecked", "disprove_censored_by_miner",
-                                    "single_watcher_disprove", "window_below_latency", "claimant_unbonded"})
+                                    "single_watcher_disprove", "window_below_latency", "claimant_unbonded",
+                                    "disprove_watcher_redirect", "desk_key_retained"})
         with self.assertRaises(ValidationError):
             bitvm3.assess(bitvm3.Config(), {"no_such_assumption": 1})
 
@@ -238,6 +239,33 @@ class CatalogTests(unittest.TestCase):
             rewritten = graph.claim_tx({"vault": vault}, [], outputs=[(graph.k_value, graph.payout_spk)])
             desk_sig = rewritten.inputs[0].witness[1]
             self.assertEqual(bitcoin.check_signature(rewritten, 0, graph.V.leaf(0), graph.D, desk_sig), works, profile)
+
+    def test_bitvm3_trust_and_pinning_shapes(self):
+        claim = None
+        for profile, cosigned in (("hardened", True), ("mutant", False)):
+            _, _, graph = self._graph("desk_key_retained", profile)
+            claim = self._claim(graph)
+            self.assertEqual(graph.K.scripts[0].count(bytes([0xad])), 1 if cosigned else 0)
+            steal = graph.desk_payout_tx(claim, graph.refund_spk)
+            sig = steal.inputs[0].witness[-3]
+            self.assertTrue(bitcoin.check_signature(steal, 0, graph.K.leaf(0), graph.D, sig))
+            if cosigned:   # the desk can only put its own signature in the claimant's slot
+                self.assertFalse(bitcoin.check_signature(steal, 0, graph.K.leaf(0), graph.C, steal.inputs[0].witness[0]))
+        for profile, version in (("hardened", 3), ("mutant", 2)):
+            _, prep, graph = self._graph("disprove_anchor_pinned", profile)
+            claim = self._claim(graph)
+            parent = graph.disprove_tx(claim, prep.garbling.reject_label, "claimant")
+            self.assertEqual((parent.version, parent.outputs[1]), (version, (0, bitcoin.P2A)))
+            coin = {"txid": "44" * 32, "vout": 0, "amount": bitvm3.PIN_COIN,
+                    "script_pubkey": bitcoin.p2tr_key(graph.C).script_pubkey.hex()}
+            pin = graph.pin_child(parent, coin, bitvm3.PIN_OUTPUTS, bitvm3.PIN_FEE)
+            self.assertGreater(pin.vsize, 40_000)                      # far above TRUC's 1,000 vB child limit
+            self.assertLess(bitvm3.PIN_FEE / (pin.vsize + parent.vsize), bitvm3.PIN_FLOOR)
+            self.assertGreater(bitvm3.PIN_FEE, bitvm3.WATCH_FUNDS)      # outbidding it costs more than the watcher holds
+        _, _, graph = self._graph("disprove_watcher_redirect", "mutant")
+        claim = self._claim(graph)
+        steal = graph.disprove_tx(claim, bytes(16), "watch", outputs=[(graph.k_value - bitvm3.FEE, bitvm3.spk_of("watch"))])
+        self.assertTrue(bitcoin.check_signature(steal, 0, graph.K.leaf(1), graph.W, steal.inputs[0].witness[0]))
 
     def test_bitvm3_anchor_and_burn_shapes(self):
         _, _, graph = self._graph("disprove_unbumpable", "hardened")
@@ -365,7 +393,8 @@ class LiveCoreTests(unittest.TestCase):
     def test_live_subset(self):
         binary = Path(os.environ["BITVM_ARENA_BITCOIND"])
         for module, match in ((native, "selector_unbound"), (bitvm3, "seed_reuse_across_claims"),
-                              (bitvm3, "disprove_unbumpable"), (bitvm3, "disprove_censored_by_miner")):
+                              (bitvm3, "disprove_unbumpable"), (bitvm3, "disprove_censored_by_miner"),
+                              (bitvm3, "disprove_anchor_pinned"), (bitvm3, "disprove_partitioned")):
             rows = [r for r in module.catalog() if match in r["id"]]
             report = module.execute(binary, ROOT / "work" / "regtest" / uuid.uuid4().hex, rows)
             self.assertEqual(report["summary"]["expectation_failures"], [])

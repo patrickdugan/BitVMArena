@@ -28,8 +28,19 @@ def safe_json(value):
     return value
 
 
+def free_port():
+    with socket.socket() as probe:
+        probe.bind(("127.0.0.1", 0))
+        return probe.getsockname()[1]
+
+
 class Regtest:
-    def __init__(self, binary, directory, *, timeout=30):
+    """An owned regtest node. By default P2P is off. With `p2p` it joins a cluster of other
+    owned nodes only: it listens on 127.0.0.1:`p2p["port"]` and connects to exactly the listed
+    127.0.0.1 ports, with DNS seeds, fixed seeds, discovery and NAT mapping off. Start refuses a
+    peer that is not one of those loopback connections."""
+
+    def __init__(self, binary, directory, *, timeout=30, p2p=None):
         self.binary, self.directory = Path(binary).resolve(), Path(directory).resolve()
         if not self.binary.is_file():
             raise CoreError("provide an existing bitcoind binary")
@@ -42,16 +53,25 @@ class Regtest:
         self.process = None
         self.log = None
         self.cookie = self.directory / "regtest/.cookie"
-        with socket.socket() as probe:
-            probe.bind(("127.0.0.1", 0))
-            self.port = probe.getsockname()[1]
+        self.port = free_port()
+        self.p2p = None
+        if p2p is not None:
+            connect = [int(port) for port in p2p.get("connect", ())]
+            self.p2p = {"port": int(p2p["port"]), "connect": connect, "blocksonly": bool(p2p.get("blocksonly"))}
 
     def start(self):
         self.log = (self.directory / "process.log").open("wb")
-        command = [str(self.binary), "-regtest=1", "-server=1", "-networkactive=0", "-listen=0",
-                   "-dnsseed=0", "-discover=0", "-txindex=1", "-fallbackfee=0.0001",
-                   f"-datadir={self.directory}", f"-rpcport={self.port}", "-rpcbind=127.0.0.1",
-                   "-rpcallowip=127.0.0.1", "-printtoconsole=0"]
+        command = [str(self.binary), "-regtest=1", "-server=1", "-dnsseed=0", "-discover=0", "-txindex=1",
+                   "-fallbackfee=0.0001", f"-datadir={self.directory}", f"-rpcport={self.port}",
+                   "-rpcbind=127.0.0.1", "-rpcallowip=127.0.0.1", "-printtoconsole=0"]
+        if self.p2p is None:
+            command += ["-networkactive=0", "-listen=0"]
+        else:
+            command += ["-listen=1", f"-bind=127.0.0.1:{self.p2p['port']}", f"-port={self.p2p['port']}",
+                        "-fixedseeds=0", "-natpmp=0", "-listenonion=0", "-onlynet=ipv4"]
+            command += [f"-connect=127.0.0.1:{port}" for port in self.p2p["connect"]] or ["-connect=0"]
+            if self.p2p["blocksonly"]:
+                command.append("-blocksonly=1")
         self.process = subprocess.Popen(command, stdout=self.log, stderr=subprocess.STDOUT,
                                         creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0)
         deadline = time.monotonic() + self.timeout
@@ -63,8 +83,10 @@ class Regtest:
                 if chain["chain"] != "regtest":
                     raise CoreError("refusing a non-regtest chain")
                 network = self.rpc("getnetworkinfo")
-                if network["networkactive"] or network["connections"]:
+                if self.p2p is None and (network["networkactive"] or network["connections"]):
                     raise CoreError("test node must have P2P networking disabled")
+                if self.p2p is not None:
+                    self.check_peers()
                 return self
             except (OSError, CoreError):
                 time.sleep(0.1)
@@ -94,6 +116,17 @@ class Regtest:
         if result.get("id") != self.counter:
             raise CoreError("RPC response ID mismatch")
         return result["result"]
+
+    def check_peers(self, allowed_ports=()):
+        """Every peer must be a loopback connection: an outbound one to a listed port, or an
+        inbound one (from another owned node's ephemeral port)."""
+        allowed = set(self.p2p["connect"]) | set(allowed_ports)
+        peers = self.rpc("getpeerinfo")
+        for peer in peers:
+            host, _, port = peer["addr"].rpartition(":")
+            if host != "127.0.0.1" or (not peer["inbound"] and int(port) not in allowed):
+                raise CoreError(f"unexpected peer {peer['addr']}; refusing")
+        return peers
 
     def initialize_wallet(self):
         self.rpc("createwallet", "arena")

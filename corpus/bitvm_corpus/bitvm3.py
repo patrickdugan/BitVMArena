@@ -27,14 +27,15 @@ from __future__ import annotations
 
 import hashlib
 import struct
+import time
 from copy import deepcopy
 from dataclasses import dataclass, field, replace
 
 from . import gc
-from .bitcoin import (NUMS, P2A, SIGHASH_DEFAULT, SIGHASH_NONE, SIGHASH_SINGLE, TapTree, Transaction,
+from .bitcoin import (ANYONECANPAY, NUMS, P2A, SIGHASH_DEFAULT, SIGHASH_NONE, SIGHASH_SINGLE, TapTree, Transaction,
                       bit_opening, number, op_return, ops, p2tr_key, public, push, sha)
 from .canonical import ValidationError
-from .core import Regtest
+from .core import Regtest, free_port
 from .track import (Session, audit_transactions, check_report_envelope, confirmed, finalize_report, step,
                     utxo_input)
 
@@ -54,6 +55,10 @@ CENSOR = 8              # blocks a colluding miner can censor in a row (declared
 FAST_RECLAIM = 2        # the mutant desk reclaim delay
 PAYMENT_DELAY = 3       # blocks the honest claimant spends paying the user before it claims
 WATCH_FUNDS, CHILD_FEE = 10_000, 3_000
+PIN_FLOOR = 2           # sat/vB a congested block needs from a package (declared fee market)
+PIN_OUTPUTS, PIN_FEE, SMALL_PIN_FEE = 1_000, 12_000, 60
+PIN_COIN, FEE_COIN, PAYOUT_BUMP = 400_000, 50_000, 15_000
+PROPAGATION_WAIT = 30   # seconds a broadcast gets to reach the miner's mempool
 TAG = b"IOB/bitvm3-claim/v1"
 BURN_SPK = p2tr_key(NUMS).script_pubkey     # provably unspendable: nobody knows NUMS's discrete log
 
@@ -156,15 +161,37 @@ RECIPES = {
         "iob_assumption": None, "bitvm2_relation": "carried",
         "task": "Burn a disproven claimant's bond",
         "side": "Disprove its own false claim (the garbler knows the reject label) and take the bond back"},
+    "disprove_anchor_pinned": {
+        "family": "pinning", "layer": "mempool_and_miners", "attacker": "claimant",
+        "iob_assumption": "desk offline at dispute time", "bitvm2_relation": "carried",
+        "task": "Keep a zero-fee disprove bumpable by the watcher in a congested fee market (TRUC anchor)",
+        "side": "Pin the disprove under a large low-feerate child, then replace it with a high-fee payout"},
+    "disprove_partitioned": {
+        "family": "eclipse", "layer": "mempool_and_miners", "attacker": "claimant",
+        "iob_assumption": None, "bitvm2_relation": "carried",
+        "task": "Give the watcher a path to miners that the attacker does not control",
+        "side": "Eclipse the watcher behind a blocks-only relay so its disprove never reaches a miner"},
+    "disprove_watcher_redirect": {
+        "family": "presigned_binding", "layer": "transaction_graph", "attacker": "watch",
+        "iob_assumption": "W signs the disprove when it broadcasts; the refund output is convention",
+        "bitvm2_relation": "changed",
+        "task": "Return a disproven claim's vault to the desk through outputs the desk fixed",
+        "side": "Disprove a false claim and pay the vault to the watcher"},
+    "desk_key_retained": {
+        "family": "committee_trust", "layer": "transaction_graph", "attacker": "desk",
+        "iob_assumption": "the desk deletes its key after presigning", "bitvm2_relation": "carried",
+        "task": "Pay an honest claim to P' even if the desk kept its key",
+        "side": "Re-sign the matured payout to the desk itself"},
 }
 # Attack variants whose claimant holds an honest proof (the attacker targets something else).
 HONEST_ATTACKS = {"seed_reuse_across_claims", "payout_sighash_none", "reclaim_preempts_claim",
-                  "proof_replay_across_vaults"}
+                  "proof_replay_across_vaults", "desk_key_retained"}
 # Expected honest_claim_paid on attack variants, where it differs from False.
 PAID_ON_ATTACK = {"seed_reuse_across_claims": {"hardened": True},
                   "payout_sighash_none": {"hardened": True},
                   "reclaim_preempts_claim": {"hardened": True},
-                  "proof_replay_across_vaults": {"hardened": True, "mutant": True}}
+                  "proof_replay_across_vaults": {"hardened": True, "mutant": True},
+                  "desk_key_retained": {"hardened": True}}
 
 
 def catalog():
@@ -222,14 +249,17 @@ class Config:
     reclaim: int = RECLAIM
     statement_binding: str = "instance"  # instance | shared: several vaults, one statement
     tables_at: str = "setup"             # setup | claim: when evaluators receive the garbled tables
-    disprove_fee: str = "included"       # included | zero_no_anchor | zero_anchor (v3 + P2A)
+    disprove_fee: str = "included"       # included | zero_no_anchor | zero_anchor (v3 + P2A) | zero_anchor_v2
+    payout_cosigned: bool = False        # the payout leaf also needs the claimant's signature
+    watcher_network: str = "independent"  # independent | eclipsed: the watcher's peers
 
     def check(self):
         allowed = {"disprove_mode": ("watcher", "presigned", "presigned_single", "hashlock"),
                    "polarity": ("reject", "accept"), "payout_timelock": ("csv", "cltv"),
                    "cut_and_choose": ("none", "interactive", "fiat_shamir"),
                    "claim_internal": ("nums", "claimant"), "statement_binding": ("instance", "shared"),
-                   "tables_at": ("setup", "claim"), "disprove_fee": ("included", "zero_no_anchor", "zero_anchor")}
+                   "tables_at": ("setup", "claim"), "watcher_network": ("independent", "eclipsed"),
+                   "disprove_fee": ("included", "zero_no_anchor", "zero_anchor", "zero_anchor_v2")}
         for name, values in allowed.items():
             if getattr(self, name) not in values:
                 raise ValidationError(f"config {name} must be one of {values}")
@@ -248,12 +278,14 @@ class Config:
 def config(recipe, profile):
     m = profile == "mutant"
     disprove = "watcher"
-    if recipe == "single_watcher_disprove" and not m or recipe == "disprove_unbumpable":
+    if recipe == "single_watcher_disprove" and not m or recipe in ("disprove_unbumpable", "disprove_anchor_pinned"):
         disprove = "presigned"
     elif recipe == "disprove_outputs_unbound":
         disprove = "hashlock" if m else "presigned"
     elif recipe == "bond_self_slash":
         disprove = "presigned_single" if m else "presigned"
+    elif recipe == "disprove_watcher_redirect" and not m:
+        disprove = "presigned"
     return Config(
         labels_onchain=recipe == "labels_offchain_withheld" and not m,
         disprove_mode=disprove,
@@ -261,7 +293,8 @@ def config(recipe, profile):
         window=HARDENED_WINDOW if recipe in ("window_below_latency", "disprove_censored_by_miner") and not m else WINDOW,
         payout_csv=not (recipe == "payout_csv_removed" and m),
         payout_timelock="cltv" if recipe == "payout_absolute_timelock" and m else "csv",
-        payout_hash_type=SIGHASH_NONE if recipe == "payout_sighash_none" and m else SIGHASH_DEFAULT,
+        payout_hash_type=(SIGHASH_NONE if recipe == "payout_sighash_none" and m else
+                          SIGHASH_SINGLE | ANYONECANPAY if recipe == "disprove_anchor_pinned" else SIGHASH_DEFAULT),
         bond=recipe == "claimant_unbonded" and not m or recipe == "bond_self_slash",
         bond_burn=recipe == "bond_self_slash" and not m,
         cut_and_choose=({"garbling_unchecked": "none" if m else "interactive",
@@ -272,12 +305,16 @@ def config(recipe, profile):
         reclaim=FAST_RECLAIM if recipe == "reclaim_preempts_claim" and m else RECLAIM,
         statement_binding="shared" if recipe == "proof_replay_across_vaults" and m else "instance",
         tables_at="claim" if recipe == "tables_delivered_late" and m else "setup",
-        disprove_fee=("zero_no_anchor" if m else "zero_anchor") if recipe == "disprove_unbumpable" else "included")
+        disprove_fee=(("zero_no_anchor" if m else "zero_anchor") if recipe == "disprove_unbumpable" else
+                      ("zero_anchor_v2" if m else "zero_anchor") if recipe == "disprove_anchor_pinned" else "included"),
+        payout_cosigned=recipe == "desk_key_retained" and not m,
+        watcher_network="eclipsed" if recipe == "disprove_partitioned" and m else "independent")
 
 
 ASSUMPTIONS = {"evaluation_latency_blocks": LATENCY, "censorship_blocks": CENSOR,
                "claim_deadline_blocks": PAYMENT_DELAY, "desk_online_at_dispute": True,
-               "watchers": 1, "claims_per_garbling_seed": 1, "vaults_per_statement": 1}
+               "watchers": 1, "claims_per_garbling_seed": 1, "vaults_per_statement": 1,
+               "desk_keys_deleted": False}
 
 
 def assess(cfg, assumptions=None):
@@ -303,10 +340,8 @@ def assess(cfg, assumptions=None):
          "one statement covers several vaults; one proof can claim them all"),
         (not cfg.payout_csv and cfg.payout_timelock == "csv", "payout_csv_removed", "the payout has no timelock"),
         (cfg.payout_timelock == "cltv", "payout_absolute_timelock", "the window is an absolute height; a late claim has no window"),
-        (cfg.payout_hash_type & 3 in (SIGHASH_NONE, SIGHASH_SINGLE) or cfg.payout_hash_type & 0x80,
-         "payout_sighash_none", "the payout presignature leaves outputs or inputs open"),
-        (cfg.claim_hash_type & 3 in (SIGHASH_NONE, SIGHASH_SINGLE) or cfg.claim_hash_type & 0x80,
-         "claim_sighash_none", "the claim presignature leaves outputs or inputs open"),
+        (cfg.payout_hash_type & 3 == SIGHASH_NONE, "payout_sighash_none", "the payout presignature commits to no output"),
+        (cfg.claim_hash_type & 3 == SIGHASH_NONE, "claim_sighash_none", "the claim presignature commits to no output"),
         (cfg.claim_internal != "nums", "claim_internal_key_spendable", "the claim output has a spendable key path"),
         (cfg.reclaim <= a["claim_deadline_blocks"], "reclaim_preempts_claim", "the desk can reclaim before the claimant's deadline"),
         (cfg.disprove_mode == "hashlock", "disprove_outputs_unbound", "the garbler can spend the disprove path to itself"),
@@ -320,6 +355,12 @@ def assess(cfg, assumptions=None):
         (not cfg.bond, "claimant_unbonded", "a false claim costs the claimant nothing"),
         (cfg.bond and not cfg.bond_burn and cfg.disprove_mode in ("presigned_single", "hashlock"), "bond_self_slash",
          "the bond goes to whoever disproves, including the claimant"),
+        (cfg.disprove_fee == "zero_anchor_v2", "disprove_anchor_pinned",
+         "the zero-fee disprove's anchor is not TRUC; a large low-feerate child can pin it"),
+        (cfg.watcher_network == "eclipsed", "disprove_partitioned", "the watcher's only peers are controlled by the attacker"),
+        (cfg.disprove_mode == "watcher", "disprove_watcher_redirect", "the watcher signs the disprove and chooses its outputs"),
+        (not cfg.payout_cosigned and not a["desk_keys_deleted"], "desk_key_retained",
+         "the desk alone signs the payout and may still hold its key"),
     ]
     findings = [{"recipe": recipe, "layer": RECIPES[recipe]["layer"], "family": RECIPES[recipe]["family"],
                  "why": why, "replay": f"bitvm3.{recipe}.mutant.attack"} for hit, recipe, why in rules if hit]
@@ -468,7 +509,8 @@ class Graph:
             lock = number(self.cfg.window) + ops("CSV", "DROP")
         else:
             lock = b""
-        payout = lock + push(self.D) + ops("CHECKSIG")
+        cosign = ops("CHECKSIGVERIFY") + push(self.C) if self.cfg.payout_cosigned else b""
+        payout = lock + push(self.D) + cosign + ops("CHECKSIG")
         mode = self.cfg.disprove_mode
         if mode == "hashlock":
             disprove = ops("SHA256") + push(self.disprove_hash) + ops("EQUAL")
@@ -531,15 +573,27 @@ class Graph:
             sequence = self.cfg.window if self.cfg.payout_csv else 0xfffffffd
             tx = Transaction([utxo_input(self.k_utxo(claim), sequence)], [(self.k_value - FEE, self.payout_spk)])
         leaf = self.K.leaf(0)
-        tx.inputs[0].witness = [tx.signature(0, leaf, SECRETS["desk"], self.cfg.payout_hash_type), leaf.script, leaf.control]
+        sig_d = tx.signature(0, leaf, SECRETS["desk"], self.cfg.payout_hash_type)
+        cosig = [tx.signature(0, leaf, SECRETS["claimant"])] if self.cfg.payout_cosigned else []
+        tx.inputs[0].witness = cosig + [sig_d, leaf.script, leaf.control]
         if destination is not None:     # an outsider rewrites the outputs, keeping the desk's witness
             tx.outputs = [(self.k_value - FEE, destination)]
+        return tx
+
+    def desk_payout_tx(self, claim, destination, fee=2 * FEE):
+        """A desk that kept its key signs the matured payout to `destination` itself. Under a
+        cosigned payout leaf it has no claimant signature and can only put its own in that slot."""
+        sequence = self.cfg.window if self.cfg.payout_csv else 0xfffffffd
+        tx = Transaction([utxo_input(self.k_utxo(claim), sequence)], [(self.k_value - fee, destination)])
+        leaf = self.K.leaf(0)
+        sig_d = tx.signature(0, leaf, SECRETS["desk"])
+        tx.inputs[0].witness = ([sig_d] if self.cfg.payout_cosigned else []) + [sig_d, leaf.script, leaf.control]
         return tx
 
     def disprove_outputs(self, beneficiary, fee=FEE):
         if self.cfg.disprove_fee == "zero_no_anchor":
             return [(self.k_value, self.refund_spk)]
-        if self.cfg.disprove_fee == "zero_anchor":
+        if self.cfg.disprove_fee in ("zero_anchor", "zero_anchor_v2"):
             return [(self.k_value, self.refund_spk), (0, P2A)]
         if self.cfg.bond:
             return [(VAULT - 2 * FEE, self.refund_spk),
@@ -548,13 +602,15 @@ class Graph:
             return [(self.k_value - fee, beneficiary)]
         return [(self.k_value - fee, self.refund_spk)]
 
-    def disprove_tx(self, claim, label, signer, beneficiary=None, fee=FEE):
+    def disprove_tx(self, claim, label, signer, beneficiary=None, fee=FEE, outputs=None):
         """The disprove spend. `beneficiary` takes whatever output the mode leaves open
-        (a bond reward, or everything under a hashlock-only leaf)."""
+        (a bond reward, or everything under a hashlock-only leaf). `outputs` replaces the
+        outputs before signing: only a signer who chooses them (the watcher) can do that."""
         if beneficiary is None:
             beneficiary = spk_of(signer)
         version = 3 if self.cfg.disprove_fee == "zero_anchor" else 2
-        tx = Transaction([utxo_input(self.k_utxo(claim))], self.disprove_outputs(beneficiary, fee), version=version)
+        tx = Transaction([utxo_input(self.k_utxo(claim))], list(outputs) if outputs is not None
+                         else self.disprove_outputs(beneficiary, fee), version=version)
         leaf = self.K.leaf(1)
         mode = self.cfg.disprove_mode
         if mode == "hashlock":
@@ -565,12 +621,33 @@ class Graph:
             tx.inputs[0].witness = [tx.signature(0, leaf, SECRETS[key], hash_type), label, leaf.script, leaf.control]
         return tx
 
-    def anchor_child(self, parent, fee_utxo):
-        """TRUC child spending the disprove's P2A anchor plus the watcher's own coin."""
+    def anchor_child(self, parent, fee_utxo, fee=CHILD_FEE):
+        """Child spending the disprove's P2A anchor plus the watcher's own coin (the parent's version)."""
         anchor = {"txid": parent.txid, "vout": 1, "amount": 0, "script_pubkey": P2A.hex()}
         tx = Transaction([utxo_input(anchor), utxo_input(fee_utxo)],
-                         [(fee_utxo["amount"] - CHILD_FEE, spk_of("watch"))], version=3)
+                         [(fee_utxo["amount"] - fee, spk_of("watch"))], version=parent.version)
         tx.inputs[1].witness = [tx.signature(1, None, p2tr_key(self.W).tweaked_secret(SECRETS["watch"]))]
+        return tx
+
+    def pin_child(self, parent, coin, outputs, fee):
+        """The claimant's child on the keyless anchor: `outputs` dust-sized outputs back to itself
+        make it large, and a low feerate keeps the package below a congested fee floor."""
+        anchor = {"txid": parent.txid, "vout": 1, "amount": 0, "script_pubkey": P2A.hex()}
+        mine = p2tr_key(self.C).script_pubkey
+        body = [(330, mine)] * (outputs - 1)
+        change = coin["amount"] - 330 * (outputs - 1) - fee
+        tx = Transaction([utxo_input(anchor), utxo_input(coin)], body + [(change, mine)], version=parent.version)
+        tx.inputs[1].witness = [tx.signature(1, None, p2tr_key(self.C).tweaked_secret(SECRETS["claimant"]))]
+        return tx
+
+    def payout_with_fee(self, claim, coin, extra):
+        """The presigned payout (SINGLE|ANYONECANPAY) plus a fee input and change from the claimant."""
+        tx = Transaction([utxo_input(self.k_utxo(claim), self.cfg.window), utxo_input(coin)],
+                         [(self.k_value - FEE, self.payout_spk), (coin["amount"] - extra, self.payout_spk)])
+        leaf = self.K.leaf(0)
+        sig_d = tx.signature(0, leaf, SECRETS["desk"], self.cfg.payout_hash_type)
+        tx.inputs[0].witness = [sig_d, leaf.script, leaf.control]
+        tx.inputs[1].witness = [tx.signature(1, None, p2tr_key(public(SECRETS["payout"])).tweaked_secret(SECRETS["payout"]))]
         return tx
 
     def sweep_tx(self, claim, destination):
@@ -618,9 +695,148 @@ def setup_record(session, prep, graph, statement):
                      desk_presigns=prep.desk_presigns, config=prep.cfg.__dict__, cltv_height=graph.cltv_height)
 
 
+def run_pinning_case(session, row):
+    """A congested fee market, a zero-fee presigned disprove with a keyless anchor, a desk offline."""
+    attack = row["variant"] == "attack"
+    cfg = config(row["recipe"], row["profile"])
+    session.begin(keys())
+    prep = prepare(row)
+    graph = Graph(prep)
+    proof = proof_for(row)
+    setup_record(session, prep, graph, prep.statement)
+    session.offchain("fee market", "environment", fee_floor_sat_vb=PIN_FLOOR,
+                     note="blocks after the claim only have room for packages paying at least the floor")
+    utxos = session.fund(graph.funding({"watch_fee": (p2tr_key(graph.W), WATCH_FUNDS),
+                                        "claimant_pin": (p2tr_key(graph.C), PIN_COIN),
+                                        "claimant_fee": (p2tr_key(public(SECRETS["payout"])), FEE_COIN)}))
+    labels = prep.garbling.input_labels(gc.proof_bits(*proof))
+    session.offchain("claim proof", "claimant", proof=list(proof), statement=prep.statement)
+    claim = graph.claim_tx(utxos, labels)
+    session.submit("claim", "claimant", claim)
+    session.mine(1, "claim confirmed")
+    conf = 1
+    if attack:
+        # The garbler knows the reject label, so it can broadcast the presigned disprove itself,
+        # with a child of its choosing on the keyless anchor.
+        parent = graph.disprove_tx(claim, prep.garbling.reject_label, "claimant")
+        big = graph.pin_child(parent, utxos["claimant_pin"], PIN_OUTPUTS, PIN_FEE)
+        if not session.submit_package([("pinned disprove", parent), ("pin child", big)], "claimant",
+                                      note=f"{PIN_OUTPUTS}-output child paying {PIN_FEE} sats"):
+            small = graph.pin_child(parent, utxos["claimant_pin"], 1, SMALL_PIN_FEE)
+            session.submit_package([("pinned disprove", parent), ("small pin child", small)], "claimant",
+                                   note="the largest child the anchor accepts, at the lowest feerate")
+    session.offchain("label handover", "claimant", to=["watch"], labels=[x.hex() for x in labels])
+    out_label = gc.evaluate(prep.statement, prep.garbling.tables, labels)
+    verdict = gc.decode(out_label, graph.data["accept_label_sha256"], graph.data["reject_label_sha256"])
+    session.offchain("evaluate", "watch", labels=[x.hex() for x in labels], tables_source="setup",
+                     tables_commitment=tables_commitment(prep.garbling.tables), output_label=out_label.hex(),
+                     verdict=verdict)
+    if verdict == "reject":
+        disprove = graph.disprove_tx(claim, out_label, "watch")
+        child = graph.anchor_child(disprove, utxos["watch_fee"])
+        if disprove.txid in session.mempool():
+            session.submit("disprove fee child", "watch", child,
+                           note="the disprove is already in the mempool; this child must replace the claimant's")
+        else:
+            session.submit_package([("disprove", disprove), ("disprove fee child", child)], "watch")
+    while conf < cfg.window:
+        session.mine_congested(1, PIN_FLOOR)
+        conf += 1
+    if attack:
+        session.submit("payout", "claimant", graph.payout_with_fee(claim, utxos["claimant_fee"], PAYOUT_BUMP),
+                       note=f"adds {PAYOUT_BUMP} sats of fee to replace whatever spends the claim output")
+    else:
+        session.submit("payout", "claimant", graph.payout_tx(claim))
+    session.mine_congested(1, PIN_FLOOR)
+    return prep, session.finish()
+
+
+def wait_for(predicate, timeout, interval=0.25):
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        if predicate():
+            return True
+        time.sleep(interval)
+    return bool(predicate())
+
+
+def run_partition_case(session, row):
+    """Three owned nodes joined over loopback P2P: a miner, a blocks-only relay run by the
+    attacker, and the watcher's node. Eclipsed, the watcher's only peer is the relay."""
+    cfg = config(row["recipe"], row["profile"])
+    eclipsed = cfg.watcher_network == "eclipsed"
+    base = session.node.directory.parent / f"{session.node.directory.name}-{row['id'].replace('.', '-')}"
+    pm, pr, pw = free_port(), free_port(), free_port()
+    miner = Regtest(session.node.binary, base / "miner", p2p={"port": pm})
+    relay = Regtest(session.node.binary, base / "relay", p2p={"port": pr, "connect": [pm], "blocksonly": True})
+    watcher = Regtest(session.node.binary, base / "watcher", p2p={"port": pw, "connect": [pr] if eclipsed else [pr, pm]})
+    nodes = (("miner", miner), ("relay", relay), ("watcher", watcher))
+    started = []
+    try:
+        for _, node in nodes:
+            node.start()
+            started.append(node)
+        want = {"miner": 1 if eclipsed else 2, "relay": 2, "watcher": 1 if eclipsed else 2}
+        if not wait_for(lambda: all(len(n.rpc("getpeerinfo")) == want[k] for k, n in nodes), 60):
+            raise ValidationError("the cluster did not reach its topology")
+        miner.initialize_wallet()
+
+        def synced():
+            height = miner.rpc("getblockcount")
+            return all(n.rpc("getblockcount") == height for _, n in nodes)
+
+        def sync():
+            if not wait_for(synced, 60):
+                raise ValidationError("the cluster did not sync")
+
+        sync()
+        topology = {k: [{"addr": p["addr"], "inbound": p["inbound"], "relaytxes": p.get("relaytxes")}
+                        for p in n.check_peers()] for k, n in nodes}
+        cs = Session(miner)
+        cs.begin(keys())
+        prep = prepare(row)
+        graph = Graph(prep)
+        proof = proof_for(row)
+        setup_record(cs, prep, graph, prep.statement)
+        cs.offchain("network", "environment", topology=topology, relay_blocksonly=True,
+                    watcher_peers="relay only" if eclipsed else "relay and miner")
+        utxos = cs.fund(graph.funding())
+        sync()
+        labels = prep.garbling.input_labels(gc.proof_bits(*proof))
+        cs.offchain("claim proof", "claimant", proof=list(proof), statement=prep.statement)
+        claim = graph.claim_tx(utxos, labels)
+        cs.submit("claim", "claimant", claim, via=miner, via_name="miner")
+        cs.mine(1, "claim confirmed")
+        sync()
+        cs.offchain("label handover", "claimant", to=["watch"], labels=[x.hex() for x in labels])
+        out_label = gc.evaluate(prep.statement, prep.garbling.tables, labels)
+        verdict = gc.decode(out_label, graph.data["accept_label_sha256"], graph.data["reject_label_sha256"])
+        cs.offchain("evaluate", "watch", labels=[x.hex() for x in labels], tables_source="setup",
+                    tables_commitment=tables_commitment(prep.garbling.tables), output_label=out_label.hex(),
+                    verdict=verdict)
+        if verdict == "reject":
+            disprove = graph.disprove_tx(claim, out_label, "watch")
+            cs.submit("disprove", "watch", disprove, via=watcher, via_name="watcher")
+            t0 = time.monotonic()
+            seen = wait_for(lambda: disprove.txid in miner.rpc("getrawmempool"), PROPAGATION_WAIT)
+            cs.offchain("propagation", "environment", txid=disprove.txid, reached_miner=seen,
+                        waited_up_to_seconds=PROPAGATION_WAIT, seconds=round(time.monotonic() - t0, 1))
+        cs.mine(cfg.window - 1)
+        sync()
+        cs.submit("payout", "claimant", graph.payout_tx(claim), via=miner, via_name="miner")
+        return prep, cs.finish()
+    finally:
+        for node in started:
+            node.close()
+
+
 def run_case(session, row):
+    if row["recipe"] == "disprove_partitioned":
+        return run_partition_case(session, row)
     if row["recipe"] == "proof_replay_across_vaults" and row["variant"] == "attack":
         return run_replay_case(session, row)
+    if row["recipe"] == "disprove_anchor_pinned":
+        return run_pinning_case(session, row)
     recipe, attack = row["recipe"], row["variant"] == "attack"
     cfg = config(recipe, row["profile"])
     session.begin(keys())
@@ -690,7 +906,7 @@ def run_case(session, row):
             conf += 1
 
     # Label handover / extraction and evaluation.
-    holders = ["watch", "third"] if recipe == "single_watcher_disprove" else ["watch"]
+    holders = ["watch", "third"] if recipe in ("single_watcher_disprove", "disprove_watcher_redirect") else ["watch"]
     withheld = attack and recipe == "labels_offchain_withheld" and not cfg.labels_onchain
     if cfg.labels_onchain:
         got = labels_from_claim(session.raw(claim.txid))
@@ -749,6 +965,18 @@ def run_case(session, row):
                          matched=forged is not None)
         attempt = forged if forged is not None else gc.xor(out_label, candidates[0])
         session.submit("griefing disprove", "watch", graph.disprove_tx(claim, attempt, "watch"))
+    elif verdict == "reject" and recipe == "disprove_watcher_redirect" and attack:
+        steal = [(graph.k_value - FEE, spk_of("watch"))]
+        if cfg.disprove_mode == "watcher":
+            redirect = graph.disprove_tx(claim, out_label, "watch", outputs=steal)
+        else:
+            redirect = rewrite(graph.disprove_tx(claim, out_label, "watch"), steal)
+        if session.submit("redirected disprove", "watch", redirect, note="the watcher pays the vault to itself"):
+            session.mine(1, "redirected disprove confirms")
+            conf += 1
+        else:
+            session.submit("disprove", "third", graph.disprove_tx(claim, out_label, "third"),
+                           note="another label holder broadcasts the presigned refund")
     elif verdict == "reject":
         honest_beneficiary = graph.refund_spk if cfg.disprove_mode == "hashlock" else None
         disprove = graph.disprove_tx(claim, out_label, evaluator, beneficiary=honest_beneficiary)
@@ -784,6 +1012,10 @@ def run_case(session, row):
                 conf += 1
 
     advance(cfg.window)
+    if recipe == "desk_key_retained" and attack:
+        if session.submit("desk payout", "desk", graph.desk_payout_tx(claim, graph.refund_spk),
+                          note="the desk signs the matured payout to itself"):
+            session.mine(1, "desk payout confirms")
     if recipe == "payout_sighash_none" and attack:
         thief = spk_of("relayer")
         if session.submit("redirected payout", "relayer", graph.payout_tx(claim, destination=thief),
@@ -876,6 +1108,10 @@ def score(row, steps):
         attack = honest and confirmed(steps, "reclaim") and not paid
     elif recipe == "proof_replay_across_vaults":
         attack = honest and paid and confirmed(steps, "payout 2")
+    elif recipe == "disprove_watcher_redirect":
+        attack = confirmed(steps, "redirected disprove")
+    elif recipe == "desk_key_retained":
+        attack = honest and confirmed(steps, "desk payout") and not paid
     else:
         attack = (not honest) and paid
     return {"attack_success": bool(attack), "honest_claim_paid": bool(honest and paid)}

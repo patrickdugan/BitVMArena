@@ -1,0 +1,17 @@
+{
+  "accept_label_sha256": "1b2bb496a5e6280d162bd9ee4154e525ec4ae16d459411dc74c928dbf347fd8d",
+  "ciphertext_commitment_blake3": "249ef46567a63ae9228acdb5ebb23e7f6d873c78fa686a0b514dba38e5d9bddb",
+  "ciphertexts": 785442492,
+  "evaluator_commitment_blake3": "249ef46567a63ae9228acdb5ebb23e7f6d873c78fa686a0b514dba38e5d9bddb",
+  "flipped_input_bit": null,
+  "input_bits": 8635080,
+  "output_label": "d49790c91b2e5ac6b0922c861e49c111",
+  "output_label_sha256": "a995fd3cbb9d0d40698b714ddc3d9834c4ac57d465670fe789b3b1b27da8565f",
+  "proof_sha256": "97871e86cd0809e4b21d744343c43737cb56073f65e671da727e9db6051326e3",
+  "reject_label_sha256": "a995fd3cbb9d0d40698b714ddc3d9834c4ac57d465670fe789b3b1b27da8565f",
+  "seconds": 626.737966942,
+  "seed_sha256": "1bf33551e5f10a363ed33683133ee6e27f9fe1b25962f48f0e76271ca9d2da1d",
+  "statement_sha256": "b067530766a312b29476e6a8e21006b14112fecd1c4a85fe8d38a453cad6c386",
+  "tool": "m14-claim evaluate",
+  "verdict": "reject"
+}

@@ -533,7 +533,11 @@
         "zero-fee disprove without an anchor",
         "miner censorship of the disprove",
         "bond recovered by self-disprove",
-        "presigned payout timelock and sighash scope"
+        "presigned payout timelock and sighash scope",
+        "watcher-chosen disprove outputs",
+        "desk key retained after presigning",
+        "anchor pinning in a congested fee market",
+        "eclipsed watcher node"
       ],
       "invariants": [
         "A false claim cannot be paid while an honest evaluator can disprove it within the window.",
@@ -544,24 +548,31 @@
       "local_reconstruction": {
         "path": "corpus/bitvm_corpus/bitvm3.py",
         "track": "bitvm3",
-        "receipts": "corpus/examples/native/bitvm3-core31.1.json"
+        "receipts": "corpus/examples/native/bitvm3-core31.1.json",
+        "m14_track": {
+          "path": "corpus/bitvm_corpus/m14.py",
+          "track": "bitvm3-m14",
+          "receipts": "corpus/examples/native/bitvm3-m14-core31.1.json",
+          "m14_runs": "corpus/examples/m14/"
+        }
       },
       "next_acceptance_gates": [
-        "Scale the garbled statement toward the M14 verifier's input size and measure evaluation latency against the window.",
+        "Seed reuse, window and censorship recipes at M14 scale, with evaluation time measured on the watcher hardware a deployment expects.",
         "Replay hardened profiles on testnet4 only with an explicit broadcast approval."
       ],
       "limits": [
-        "The garbled circuit is a 16-bit adder statement (103 gates, 32 AND) using free-XOR and half-gates, not the M14 verifier circuit.",
+        "The bitvm3 track's garbled circuit is a 16-bit adder statement (103 gates, 32 AND) using free-XOR and half-gates; the bitvm3-m14 track uses the real M14 verifier (785,442,492 gates) but replays recorded evaluations.",
         "Cut-and-choose is modelled with k=4 instances."
       ],
       "sources": [
         "https://github.com/patrickdugan/Spiral/blob/76071a0195f48961386e46d56df7b5e0276637fc/in-and-out-burger/iob/bitvm3.py"
       ],
       "completed_checks": [
-        "Vault, claim, label handover, garbled evaluation, disprove and payout judged by Bitcoin Core 31.1 on regtest, including submitpackage (P2A/TRUC), full-RBF replacement and miner-built blocks",
-        "20 recipes x hardened/mutant x benign/attack: 80/80 expectations met, 159 confirmed and 43 rejected transactions",
-        "Same per-step verdicts on Bitcoin Core 31.2 for all 80 trajectories",
-        "Offline audit re-runs every garbled evaluation, script-path and key-path signature check and double-spend check; 0 problems"
+        "Vault, claim, label handover, garbled evaluation, disprove and payout judged by Bitcoin Core 31.1 on regtest, including submitpackage (P2A/TRUC), full-RBF replacement and pinning, miner-built and congested blocks, and P2P relay between three owned loopback nodes",
+        "24 recipes x hardened/mutant x benign/attack: 96/96 expectations met, 192 confirmed and 53 rejected transactions",
+        "Same per-step verdicts on Bitcoin Core 31.2 for all 96 trajectories",
+        "Offline audit re-runs every garbled evaluation, script-path and key-path signature check and double-spend check; 0 problems",
+        "M14 scale: 5 m14-claim runs of the full final verifier (04b6d3e) on the M16 mainnet proof; honest accept, tampered reject with the setup-committed label, wrong-statement reject, shared-statement accept; 8/8 Core trajectories met, audit 0 problems"
       ]
     }
   ]

@@ -29,7 +29,7 @@ Benchmark outputs contain deterministic event traces and a JSON summary.
 | ControlArena adapter | Typed tools, sample-local state, replay scoring, honest and attack modes | Actual SDK integration tests with scripted agents |
 | Authority enumeration | 1,851 canonical NAND programs, 32 compiled authorities, 256 Python Script-oracle executions | Reproduced pinned CPA research |
 | Historical recovery | Nine reconstructed files from the original local Arena | Archived source captures with per-file provenance |
-| [Corruption corpus](corpus/README.md) | 168 model trajectories; Core-judged native tracks: BitVM3 claim graph (80, seven layers from garbling to miners), BitVM2 bridge graph (32), Script and settlement primitives (56); interactive BitVM3 red-team episodes against application presets | Bitcoin Core 31.1 regtest receipts, audited offline; CI reruns the tracks on Linux Core |
+| [Corruption corpus](corpus/README.md) | 168 model trajectories; Core-judged native tracks: BitVM3 claim graph (96, seven layers from garbling to miners, plus the graph decided by the real M14 garbled verifier), BitVM2 bridge graph (32), Script and settlement primitives (56); interactive BitVM3 red-team episodes against application presets | Bitcoin Core 31.1 regtest receipts, audited offline; CI reruns the tracks on Linux Core |
 | Campaign map | Eight lanes covering the simulator, CPA, Keyless-CHECKSIG, MULADDMOD, UTXORef, BitVM2 and BitVM3 | Source-pinned plan; each lane declares its adapter status |
 
 The active engine executes a bounded optimistic dispute model. Its arithmetic
@@ -49,7 +49,7 @@ BitVM/BitVM bridge graph and is the baseline for
 [the BitVM2-to-BitVM3 comparison](corpus/docs/BITVM3.md).
 
 For applications built on BitVM3 (bridges, payout desks, liquidations, settlement),
-the corpus provides three tools. The 80-trajectory catalog shows each failure mode
+the corpus provides three tools. The 96-trajectory catalog shows each failure mode
 alone, from garbling and data availability to presigned transactions, package relay
 and miner censorship, along with an application threat matrix. `native assess` maps
 an application's graph design to the failure modes it is exposed to. `native episode`

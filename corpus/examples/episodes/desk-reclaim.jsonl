@@ -1,0 +1,4 @@
+{"op": "wait", "args": {"blocks": 1}}
+{"op": "spend", "args": {"utxo": "vault", "path": "reclaim"}}
+{"op": "wait", "args": {"blocks": 12}}
+{"op": "end"}

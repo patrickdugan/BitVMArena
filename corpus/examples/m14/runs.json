@@ -1,0 +1,48 @@
+{
+  "binary_sha256": "9624c2adfbc5468083587867b7e740278060bd308a3255fc199ed110ee6184ad",
+  "commit": "04b6d3e",
+  "repository": "patrickdugan/garbled-snark-verifier",
+  "runs": {
+    "eval-honest": {
+      "exit_status": 0,
+      "m14_claim_seconds": 1328.77,
+      "max_rss_kib": 18218672,
+      "seed_hex": "ff1f476222dbfe9f",
+      "verdict": "accept",
+      "wall_seconds": 1329.7
+    },
+    "eval-shared-statement": {
+      "exit_status": 0,
+      "m14_claim_seconds": 768.27,
+      "max_rss_kib": 16683384,
+      "seed_hex": "e0565615e94b67bf",
+      "verdict": "accept",
+      "wall_seconds": 768.76
+    },
+    "eval-tampered": {
+      "exit_status": 0,
+      "m14_claim_seconds": 1071.27,
+      "max_rss_kib": 18343220,
+      "seed_hex": "9844fd70de494d96",
+      "verdict": "reject",
+      "wall_seconds": 1072.6
+    },
+    "eval-wrong-statement": {
+      "exit_status": 0,
+      "m14_claim_seconds": 626.74,
+      "max_rss_kib": 18608428,
+      "seed_hex": "582c650d84926d21",
+      "verdict": "reject",
+      "wall_seconds": 627.24
+    },
+    "setup-tampered": {
+      "exit_status": 0,
+      "m14_claim_seconds": 415.76,
+      "max_rss_kib": 10563620,
+      "seed_hex": "9844fd70de494d96",
+      "verdict": null,
+      "wall_seconds": 416.29
+    }
+  },
+  "tool": "m14-claim"
+}

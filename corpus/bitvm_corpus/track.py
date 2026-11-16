@@ -59,20 +59,23 @@ class Session:
                      raw_transaction=funding["hex"], outputs=utxos)
         return utxos
 
-    def submit(self, label, actor, tx, *, broadcast=True, note=None):
+    def submit(self, label, actor, tx, *, broadcast=True, note=None, via=None, via_name=None):
+        """Mempool test then broadcast. `via` submits through another owned node of a cluster."""
+        node = via or self.node
         raw = tx.serialize().hex()
-        result = self.node.rpc("testmempoolaccept", [raw])[0]
+        result = node.rpc("testmempoolaccept", [raw])[0]
         allowed = bool(result["allowed"])
         sent = False
         if allowed and broadcast:
-            if self.node.rpc("sendrawtransaction", raw) != tx.txid:
+            if node.rpc("sendrawtransaction", raw) != tx.txid:
                 raise CoreError("Core txid disagrees with local serialization")
             sent = True
+        extra = {"submitted_to": via_name} if via_name else {}
         self._record(kind="tx", label=label, actor=actor, raw_transaction=raw, txid=tx.txid,
                      prevouts=[{"txid": i.txid, "vout": i.vout, "amount": i.amount,
                                 "script_pubkey": i.script_pubkey.hex()} for i in tx.inputs],
                      allowed=allowed, reject_reason=result.get("reject-reason"),
-                     mempool_result=safe_json(result), broadcast=sent, note=note)
+                     mempool_result=safe_json(result), broadcast=sent, note=note, **extra)
         return allowed
 
     def submit_package(self, entries, actor, *, note=None):
@@ -131,6 +134,24 @@ class Session:
         self.node.mine(count)
         self._record(kind="mine", label=f"mine {count}", actor="environment", blocks=count,
                      from_height=start, note=note)
+
+    def mine_congested(self, count, floor_sat_vb, note=None):
+        """Blocks from a congested fee market: each includes only the mempool transactions whose
+        ancestor package pays at least `floor_sat_vb`, as if higher-paying traffic filled the rest."""
+        start, included = self.height(), []
+        for _ in range(count):
+            pool = self.node.rpc("getrawmempool", True)
+            chosen = set()
+            for txid, entry in pool.items():
+                rate = Decimal(entry["fees"]["ancestor"]) * SATS / entry["ancestorsize"]
+                if rate >= floor_sat_vb:
+                    chosen.add(txid)
+                    chosen.update(self.node.rpc("getmempoolancestors", txid))
+            ordered = sorted(chosen, key=lambda t: pool[t]["ancestorcount"])
+            self.node.rpc("generateblock", self.node.miner, ordered)
+            included.append(ordered)
+        self._record(kind="mine", label=f"mine {count} congested", actor="environment", blocks=count,
+                     from_height=start, fee_floor_sat_vb=str(floor_sat_vb), included=included, note=note)
 
     def mine_empty(self, count, actor, note=None):
         """A censoring miner produces `count` blocks that include no mempool transaction."""

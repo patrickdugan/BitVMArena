@@ -6,10 +6,17 @@ Each track runs on a regtest node the harness starts itself: a fresh empty datad
 disabled, RPC on 127.0.0.1 with a random port. It refuses non-empty datadirs and
 non-regtest chains, and never attaches to an existing node.
 
+One recipe, `disprove_partitioned`, needs transaction relay between nodes. For each of its
+cases the harness starts three more owned regtest nodes: a miner, a blocks-only relay and
+the watcher's node. They listen on 127.0.0.1 only and connect only to each other's listed
+ports (`-connect`), with DNS seeds, fixed seeds, discovery and NAT mapping off. Each node
+refuses to start if it sees a peer that is not one of those loopback connections.
+
 | Track | Module | Cases | What a case is |
 | --- | --- | --- | --- |
 | `primitive` | [`native.py`](../bitvm_corpus/native.py) | 56 = 14 recipes x 4 | Fund one contract, optionally spend a challenge connector or wait out a timelock, then attempt one spend |
-| `bitvm3` | [`bitvm3.py`](../bitvm_corpus/bitvm3.py) | 80 = 20 recipes x 4 | A garbled-circuit claim graph: setup, claim, label handover, evaluation, disprove, payout, across seven layers from garbling to miners ([BITVM3.md](BITVM3.md)). Interactive attacker-driven episodes run on the same graph ([EPISODES.md](EPISODES.md)) |
+| `bitvm3` | [`bitvm3.py`](../bitvm_corpus/bitvm3.py) | 96 = 24 recipes x 4 | A garbled-circuit claim graph: setup, claim, label handover, evaluation, disprove, payout, across seven layers from garbling to miners ([BITVM3.md](BITVM3.md)). Interactive attacker-driven episodes run on the same graph ([EPISODES.md](EPISODES.md)) |
+| `bitvm3-m14` | [`m14.py`](../bitvm_corpus/m14.py) | 8 = 2 recipes x 4 | The same claim graph decided by the real M14 garbled verifier (785,442,492 gates) on the M16 mainnet payment proof, replaying recorded `m14-claim` runs ([BITVM3.md](BITVM3.md#bitvm3-at-m14-scale)) |
 | `bitvm2` | [`bitvm2.py`](../bitvm_corpus/bitvm2.py) + [`wots.py`](../bitvm_corpus/wots.py) | 32 = 8 recipes x 4 | The BitVM2 bridge graph at BitVM/BitVM `c620dbfa`: kick-off, challenge, take 1, assert with Winternitz commitments, disprove, take 2. It is the baseline for the comparison in [BITVM3.md](BITVM3.md) |
 
 The four combinations per recipe are `hardened` or `mutant` crossed with `benign` or
@@ -39,6 +46,7 @@ A report records, for each case, every step:
 
 - **Transactions:** raw hex, txid, the prevouts spent, Core's `testmempoolaccept`
   result and reject reason, whether it was broadcast, and its confirmation block.
+  Transactions sent through another node of a cluster record which one (`submitted_to`).
   Package submissions (`submitpackage`, for CPFP through a P2A anchor) also record each
   transaction's result alone and in the package. Transactions a miner put straight into
   a block (`generateblock`) record both the mempool verdict and the block verdict. A
@@ -46,7 +54,8 @@ A report records, for each case, every step:
   `displaced`.
 - **Off-chain actions:** garbling commitments, cut-and-choose openings, label handover,
   evaluation results.
-- **Mining:** the blocks mined between steps, including empty blocks from a censoring miner.
+- **Mining:** the blocks mined between steps, including empty blocks from a censoring miner
+  and congested blocks that only include packages above a declared fee floor.
 
 The report also carries Core's version, subversion and binary SHA-256, and a hash over
 the whole body.
@@ -98,14 +107,16 @@ even after the attacker recomputes the body hash.
 | File | Core | Result |
 | --- | --- | --- |
 | [`examples/native/primitive-core31.1.json`](../examples/native/primitive-core31.1.json) | 31.1.0 | 56/56 met; 42 confirmed, 16 rejected transactions |
-| [`examples/native/bitvm3-core31.1.json`](../examples/native/bitvm3-core31.1.json) | 31.1.0 | 80/80 met; 159 confirmed, 43 rejected transactions |
+| [`examples/native/bitvm3-core31.1.json`](../examples/native/bitvm3-core31.1.json) | 31.1.0 | 96/96 met; 192 confirmed, 53 rejected transactions |
 | [`examples/native/bitvm2-core31.1.json`](../examples/native/bitvm2-core31.1.json) | 31.1.0 | 32/32 met; 106 confirmed, 27 rejected transactions |
+| [`examples/native/bitvm3-m14-core31.1.json`](../examples/native/bitvm3-m14-core31.1.json) | 31.1.0 | 8/8 met; 20 confirmed, 2 rejected transactions |
 
 Core 31.1 was installed from bitcoincore.org with its SHA-256 checked against
 SHA256SUMS and five builder GPG signatures verified (binary SHA-256 `f79eeb94…d3db77a`).
 The BitVM3 track was also run on Core 31.2 (binary `286e32ee…c95801`, archive
-checksum-matched only). All 80 trajectories met their expectations, and every per-step
-verdict was identical to 31.1.
+checksum-matched only). All 96 trajectories met their expectations, and every per-step
+verdict was identical to 31.1. One reject reason (`TRUC-violation`) names the rejected
+transaction's own txid, which differs between runs.
 
 The repository's CI audits these files offline on every push. Its
 `corpus-regtest` job also downloads the Core 31.1 Linux archive, checks it

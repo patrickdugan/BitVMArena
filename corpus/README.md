@@ -24,12 +24,15 @@ There are two evidence levels, and the library labels which one each result has:
 - **Native tracks.** Trajectories executed as real Taproot transactions on an owned
   Bitcoin Core regtest node, where Core decides every step:
   - the **BitVM3** track: a garbled-circuit claim graph mirroring the In-and-Out-Burger
-    BitVM3 graph, with a real half-gates garbled circuit deciding each claim. Its 80
+    BitVM3 graph, with a real half-gates garbled circuit deciding each claim. Its 96
     trajectories cover garbling, data availability, statement binding, the presigned
     transaction graph, mempool and miners (package relay, replacement, censorship),
     liveness and economics, with a threat matrix for applications built on BitVM3.
     Interactive episodes let a red-team agent attack an application design against
     Core ([episodes](docs/EPISODES.md));
+  - **BitVM3 at M14 scale** (`bitvm3-m14`, 8 trajectories): the same graph decided by the
+    real M14 garbled verifier on the M16 mainnet payment proof, from recorded `m14-claim`
+    runs;
   - the **BitVM2** baseline: the BitVM/BitVM bridge graph with Winternitz commitments
     (32 trajectories), used to see which weaknesses BitVM3 introduces, removes or
     carries over;

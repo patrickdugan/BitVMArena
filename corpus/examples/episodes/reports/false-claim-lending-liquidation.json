@@ -16,11 +16,11 @@
       "result": {
         "allowed": true,
         "broadcast": true,
-        "hex": "02000000000101cd70450676ae15a03d7b175555530e8e45dac21d2f673c9aa9357f618557053f0200000000ffffffff02e87a0100000000002251209e005d8f4c511a5f24d61fb957a10a10a3de8f0fc8c60aff03db27bea749b5010000000000000000266a24494f42339e363c0cbf18c5b30b25f1b4a6e54a5e6f133dbff7f673fe979b25998d2bb27b044054be6604d4e388033e628d723c273cfc99b4ea94a70ec4048e45cd47977138d862b8118dfc544fbb69bc0226822bf86a5f3b13768a81b83214557d20316198d040b4ac02d48c0d7b86d15954271be82bb0e3e3f705ca21ac76c54945afd3bde8dc8dc552ab8c36d8632ac45d9d0e8aff9a98d6f0dd6926d8d70839e06c57c49d544420aeb1f37bd68b70ae51d98f5f5da9981c723ede1a1a6cf4d5a90edb80faf9634aad20fd9190d59557817f29c4c02374351652902785f704a1737f62b39d25d71d898cac41c150929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0a8ecb0e45303149c6a867228e2c7dee89eef353bb8d67011dbf87d80937646fe00000000",
+        "hex": "02000000000101ac80ba870868b3d59afbffeb06741e96cbd82b04932051025f34b96056e3cb1c0100000000ffffffff02e87a0100000000002251209e005d8f4c511a5f24d61fb957a10a10a3de8f0fc8c60aff03db27bea749b5010000000000000000266a24494f42339e363c0cbf18c5b30b25f1b4a6e54a5e6f133dbff7f673fe979b25998d2bb27b044089fa2565d408fb3e9d3b95d7834ae7fc8bdd037c6f3e2e9b8012392cecc2f87fbd5984dd9ced74552aa415715929b0e61088bfb9f717e853aea1d8757a44c91a40a845a62ded69c4c4e6acce3667f4d83389a8de33f721ee3b57990a541af7c42c40cd37df3049862c3e0e053606d70a5a01188968a1a13fc79eaf5a8c83ba0edb4420aeb1f37bd68b70ae51d98f5f5da9981c723ede1a1a6cf4d5a90edb80faf9634aad20fd9190d59557817f29c4c02374351652902785f704a1737f62b39d25d71d898cac41c150929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0a8ecb0e45303149c6a867228e2c7dee89eef353bb8d67011dbf87d80937646fe00000000",
         "label": "claim",
         "ok": true,
         "reject_reason": null,
-        "txid": "97f95e6c9ca33442a2ae1da13fb1c1c5a3239b43335789d3fc49d0798ff8be93"
+        "txid": "52c60f5115d7b16bf0337f7e482ee245e041feec4b88c6faebeb0912f451f03f"
       }
     },
     {
@@ -48,11 +48,11 @@
       "result": {
         "allowed": false,
         "broadcast": false,
-        "hex": "0200000000010193bef88f79d049fcd3895733439b23a3c5c1b13fa11daea24234a39c6c5ef99700000000000c00000001306f0100000000002251201f445e10bbf30bfe3c8cc482364185201c40d5c169c748b49c77e9c407e8b1690340ddb2456fc98bf0ffda48ec5dcf03c466b45fac18f39fab71640cd90314e7d31e2394920c1c3519aaa5e9a792605ee6f2cde937510d02fd2ab09c90735f7d9b62255cb27520aeb1f37bd68b70ae51d98f5f5da9981c723ede1a1a6cf4d5a90edb80faf9634aac41c050929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac03c210a1ad93f656b5ddd4faa79d083187ed036dce93adda47911494975b3e76500000000",
+        "hex": "020000000001013ff051f41209ebebfac6884becfe41e045e22e487e7f33f06bb1d715510fc65200000000000c00000001306f0100000000002251201f445e10bbf30bfe3c8cc482364185201c40d5c169c748b49c77e9c407e8b169034047dad214a32488f3aff7a3f724bebedb311148c539984c2afd5a6e9e3a67bca53ab2c6436bab7c6b200694ba816b94c5704290a572450fcf7c14902b72e17882255cb27520aeb1f37bd68b70ae51d98f5f5da9981c723ede1a1a6cf4d5a90edb80faf9634aac41c050929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac03c210a1ad93f656b5ddd4faa79d083187ed036dce93adda47911494975b3e76500000000",
         "label": "claim:payout",
         "ok": true,
         "reject_reason": "missing-inputs",
-        "txid": "6a7b6f68743c2432a0200560655d45c8ce50724bcfb1011d1599510a4bbcbd7a"
+        "txid": "166eb58ed534061bc6a2ef4330ce65addad6480cbf67d73e270689d1db10c669"
       }
     },
     {
@@ -68,6 +68,8 @@
   "app": "lending-liquidation",
   "assumptions": {
     "censorship_blocks": 8,
+    "claim_delay": 3,
+    "claim_proof": "honest",
     "desk_online": false,
     "watcher_latency": 1,
     "watcher_online": true
@@ -85,6 +87,7 @@
     "disprove_fee": "zero_anchor",
     "disprove_mode": "presigned",
     "labels_onchain": false,
+    "payout_cosigned": false,
     "payout_csv": true,
     "payout_hash_type": 0,
     "payout_timelock": "csv",
@@ -93,29 +96,33 @@
     "seed_reuse": false,
     "statement_binding": "instance",
     "tables_at": "setup",
+    "watcher_network": "independent",
     "window": 12
   },
-  "evidence_hash": "0a7726d46234c97c5ea01df24fb3d8b991bbaed9cb937c808d668daa3c7e6955",
+  "evidence_hash": "b157846209674c285b8d1b832d5ac5413c48573b8cf02aba8d3039ee1a138f8e",
   "kind": "bitvm3-episode",
   "outcome": {
     "attack_success": false,
+    "attacker_net": 0,
     "blocks_elapsed": 12,
     "claim_confirmed": true,
     "claimant_loss": 0,
+    "diverted_sats": 0,
+    "entitled_party": "refund",
     "fees": 6000,
     "honest": false,
     "honest_claim_paid": false,
     "nets": {
       "burn": 0,
       "claimant": 0,
+      "desk": 0,
       "other": 0,
       "protocol": -100000,
       "refund": 97000,
       "relayer": 0,
       "watch": -3000
     },
-    "sats_burned": 0,
-    "vault_value_to_outsiders": 0
+    "sats_burned": 0
   },
   "overrides": {},
   "provenance": {
@@ -140,6 +147,7 @@
         "disprove_fee": "zero_anchor",
         "disprove_mode": "presigned",
         "labels_onchain": false,
+        "payout_cosigned": false,
         "payout_csv": true,
         "payout_hash_type": 0,
         "payout_timelock": "csv",
@@ -148,6 +156,7 @@
         "seed_reuse": false,
         "statement_binding": "instance",
         "tables_at": "setup",
+        "watcher_network": "independent",
         "window": 12
       },
       "desk_presigns": true,
@@ -173,18 +182,18 @@
         "vault": {
           "amount": 100000,
           "script_pubkey": "5120999e3e3b623af3db15d958cf5cedb601808b6728e8d0b4dac57ac90e7a10a2a8",
-          "txid": "3f055785617f35a99a3c672f1dc2da458e0e535555177b3da015ae76064570cd",
-          "vout": 2
+          "txid": "1ccbe35660b9345f02512093042bd8cb961e7406ebfffb9ad5b3680887ba80ac",
+          "vout": 1
         },
         "watch_fee": {
           "amount": 10000,
           "script_pubkey": "5120a52bbf0002b4e5e110d0dce690686302c9cb9e903216c0f234ee991f686a297e",
-          "txid": "3f055785617f35a99a3c672f1dc2da458e0e535555177b3da015ae76064570cd",
-          "vout": 0
+          "txid": "1ccbe35660b9345f02512093042bd8cb961e7406ebfffb9ad5b3680887ba80ac",
+          "vout": 2
         }
       },
-      "raw_transaction": "0200000000010127c533b7275398f9a62e96859c0b31498d1b030681602673b933f665078560140000000000fdffffff031027000000000000225120a52bbf0002b4e5e110d0dce690686302c9cb9e903216c0f234ee991f686a297e943c042a010000002251200b68162dee75bb860f9c63d6a361a56c0e416f2dc0b3a76d4f9d493f65ad9ddca086010000000000225120999e3e3b623af3db15d958cf5cedb601808b6728e8d0b4dac57ac90e7a10a2a801402dffdbda417cdbba28a55d594c46d3a43518edbcca0328fb46f65e050eab084e57b91712382425f00ce5c3c30adfbffac2194fd5318807f54a77e2b1199737f765000000",
-      "txid": "3f055785617f35a99a3c672f1dc2da458e0e535555177b3da015ae76064570cd"
+      "raw_transaction": "020000000001014e0ceaa665b330fdf21a94822942e059a3b0cdcd23a5e830afcc99dffe04550a0000000000fdffffff03943c042a01000000225120d9d7bd8407281b19f2fedbfa88fd9789b1bbcf0ffca6bf07bad691a8ee6d0cd7a086010000000000225120999e3e3b623af3db15d958cf5cedb601808b6728e8d0b4dac57ac90e7a10a2a81027000000000000225120a52bbf0002b4e5e110d0dce690686302c9cb9e903216c0f234ee991f686a297e01405efada67287b988764a7152b4e99a1ad56a87cb6eb141f88857c66482ebe3695f55c32e5d9a10aa35264903b3b7344fb7075019adc5c208c625fe9626a303f6729000000",
+      "txid": "1ccbe35660b9345f02512093042bd8cb961e7406ebfffb9ad5b3680887ba80ac"
     },
     {
       "actor": "claimant",
@@ -203,7 +212,7 @@
     {
       "actor": "claimant",
       "allowed": true,
-      "blockhash": "6816a47079fb07caad2b1c561e65875a5ddac8de523b98adcf39ac014fb0a1e0",
+      "blockhash": "31d7fed061649227383685e25c4c4c829624ef97fea738816283c12c385d61ce",
       "broadcast": true,
       "confirmed": true,
       "height": 102,
@@ -216,30 +225,30 @@
           "base": "0.00003000",
           "effective-feerate": "0.00014423",
           "effective-includes": [
-            "66413e47a12a21c159ecd135088f14825706db5b6adfbe131e4b966654f8b7ef"
+            "5866477e1bb95ba7aced3b343107668bee72772a5526e1d859fff483a02f0fe2"
           ]
         },
-        "txid": "97f95e6c9ca33442a2ae1da13fb1c1c5a3239b43335789d3fc49d0798ff8be93",
+        "txid": "52c60f5115d7b16bf0337f7e482ee245e041feec4b88c6faebeb0912f451f03f",
         "vsize": 208,
-        "wtxid": "66413e47a12a21c159ecd135088f14825706db5b6adfbe131e4b966654f8b7ef"
+        "wtxid": "5866477e1bb95ba7aced3b343107668bee72772a5526e1d859fff483a02f0fe2"
       },
       "note": null,
       "prevouts": [
         {
           "amount": 100000,
           "script_pubkey": "5120999e3e3b623af3db15d958cf5cedb601808b6728e8d0b4dac57ac90e7a10a2a8",
-          "txid": "3f055785617f35a99a3c672f1dc2da458e0e535555177b3da015ae76064570cd",
-          "vout": 2
+          "txid": "1ccbe35660b9345f02512093042bd8cb961e7406ebfffb9ad5b3680887ba80ac",
+          "vout": 1
         }
       ],
       "proof": [
         40000,
         9400
       ],
-      "raw_transaction": "02000000000101cd70450676ae15a03d7b175555530e8e45dac21d2f673c9aa9357f618557053f0200000000ffffffff02e87a0100000000002251209e005d8f4c511a5f24d61fb957a10a10a3de8f0fc8c60aff03db27bea749b5010000000000000000266a24494f42339e363c0cbf18c5b30b25f1b4a6e54a5e6f133dbff7f673fe979b25998d2bb27b044054be6604d4e388033e628d723c273cfc99b4ea94a70ec4048e45cd47977138d862b8118dfc544fbb69bc0226822bf86a5f3b13768a81b83214557d20316198d040b4ac02d48c0d7b86d15954271be82bb0e3e3f705ca21ac76c54945afd3bde8dc8dc552ab8c36d8632ac45d9d0e8aff9a98d6f0dd6926d8d70839e06c57c49d544420aeb1f37bd68b70ae51d98f5f5da9981c723ede1a1a6cf4d5a90edb80faf9634aad20fd9190d59557817f29c4c02374351652902785f704a1737f62b39d25d71d898cac41c150929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0a8ecb0e45303149c6a867228e2c7dee89eef353bb8d67011dbf87d80937646fe00000000",
+      "raw_transaction": "02000000000101ac80ba870868b3d59afbffeb06741e96cbd82b04932051025f34b96056e3cb1c0100000000ffffffff02e87a0100000000002251209e005d8f4c511a5f24d61fb957a10a10a3de8f0fc8c60aff03db27bea749b5010000000000000000266a24494f42339e363c0cbf18c5b30b25f1b4a6e54a5e6f133dbff7f673fe979b25998d2bb27b044089fa2565d408fb3e9d3b95d7834ae7fc8bdd037c6f3e2e9b8012392cecc2f87fbd5984dd9ced74552aa415715929b0e61088bfb9f717e853aea1d8757a44c91a40a845a62ded69c4c4e6acce3667f4d83389a8de33f721ee3b57990a541af7c42c40cd37df3049862c3e0e053606d70a5a01188968a1a13fc79eaf5a8c83ba0edb4420aeb1f37bd68b70ae51d98f5f5da9981c723ede1a1a6cf4d5a90edb80faf9634aad20fd9190d59557817f29c4c02374351652902785f704a1737f62b39d25d71d898cac41c150929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0a8ecb0e45303149c6a867228e2c7dee89eef353bb8d67011dbf87d80937646fe00000000",
       "reject_reason": null,
       "role": "claim",
-      "txid": "97f95e6c9ca33442a2ae1da13fb1c1c5a3239b43335789d3fc49d0798ff8be93"
+      "txid": "52c60f5115d7b16bf0337f7e482ee245e041feec4b88c6faebeb0912f451f03f"
     },
     {
       "actor": "claimant",
@@ -357,10 +366,10 @@
         "allowed": false,
         "reject-details": "min relay fee not met, 0 < 17",
         "reject-reason": "min relay fee not met",
-        "txid": "f9b43ecce5733860f0bc32fbd30a5b38e081f758ba0edb1cf66bdcc9d73a1bd0",
-        "wtxid": "a547370e42a78dea95be22ed15c62d65c98177ce6afd707140c36b5b07a16d00"
+        "txid": "7245805af0b2479c1fa199c9296b8f4fe6be624d662b75cef4569945422fb75e",
+        "wtxid": "827e026a0a15bbf0bfded6457eb75a6db73c09859c757a916c80ef1e9b6bf3b7"
       },
-      "blockhash": "20f82560093ae45d24df9f7c2b792d624bf0980ff492e5db92a292fdb3f1df31",
+      "blockhash": "2ba2e175d03aac102a899bf41b4c2bd78d97a7422747bd605928a8d50e6e57bc",
       "broadcast": true,
       "confirmed": true,
       "height": 104,
@@ -372,11 +381,11 @@
           "base": "0.00000000",
           "effective-feerate": "0.00009493",
           "effective-includes": [
-            "a547370e42a78dea95be22ed15c62d65c98177ce6afd707140c36b5b07a16d00",
-            "f8912b1e24d5c5658370f8953bc0cdfaa04ffd061531c3e8889e9f94aa045a3d"
+            "827e026a0a15bbf0bfded6457eb75a6db73c09859c757a916c80ef1e9b6bf3b7",
+            "9acf71474059a8adbcba88b7b4eb5908cae4b8750f5b7e2a61b35d05aa6ea865"
           ]
         },
-        "txid": "f9b43ecce5733860f0bc32fbd30a5b38e081f758ba0edb1cf66bdcc9d73a1bd0",
+        "txid": "7245805af0b2479c1fa199c9296b8f4fe6be624d662b75cef4569945422fb75e",
         "vsize": 163
       },
       "note": "the watcher pays the fee through the P2A anchor",
@@ -385,13 +394,13 @@
         {
           "amount": 97000,
           "script_pubkey": "51209e005d8f4c511a5f24d61fb957a10a10a3de8f0fc8c60aff03db27bea749b501",
-          "txid": "97f95e6c9ca33442a2ae1da13fb1c1c5a3239b43335789d3fc49d0798ff8be93",
+          "txid": "52c60f5115d7b16bf0337f7e482ee245e041feec4b88c6faebeb0912f451f03f",
           "vout": 0
         }
       ],
-      "raw_transaction": "0300000000010193bef88f79d049fcd3895733439b23a3c5c1b13fa11daea24234a39c6c5ef9970000000000fdffffff02e87a010000000000225120725e7f9afc4ca0e3184ddc3535c0d7085f2e2536676405405f6f8dc42263818600000000000000000451024e7304402ca62d4b39c120489c3663a3468ae603538bc8029e65b0b283b885dacc42a8dc64e564d6c8e5ab416d9f6b94a40aa94b8fd2a8571591849d040645b186fe7df010e62c7ac4dd9e59ae7082834c96cbaf2b45a820bc9b32b52dcad92b5f010e9b6a4f4e8aa1018279292f71da07d5670b9ab376d88820aeb1f37bd68b70ae51d98f5f5da9981c723ede1a1a6cf4d5a90edb80faf9634aac41c050929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac08474729f594c403c5856496e22b694ae0b3e1dd331dfa6b15fae352432f3b0dd00000000",
+      "raw_transaction": "030000000001013ff051f41209ebebfac6884becfe41e045e22e487e7f33f06bb1d715510fc6520000000000fdffffff02e87a010000000000225120725e7f9afc4ca0e3184ddc3535c0d7085f2e2536676405405f6f8dc42263818600000000000000000451024e730440ad939ba171f2c5fddaffa611c009531011cd8357147152e489a22d0b15a594718569a61c76028a7a6414e120113eb8ac5e90e39372035de87588b2fd695392b510e62c7ac4dd9e59ae7082834c96cbaf2b45a820bc9b32b52dcad92b5f010e9b6a4f4e8aa1018279292f71da07d5670b9ab376d88820aeb1f37bd68b70ae51d98f5f5da9981c723ede1a1a6cf4d5a90edb80faf9634aac41c050929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac08474729f594c403c5856496e22b694ae0b3e1dd331dfa6b15fae352432f3b0dd00000000",
       "reject_reason": null,
-      "txid": "f9b43ecce5733860f0bc32fbd30a5b38e081f758ba0edb1cf66bdcc9d73a1bd0"
+      "txid": "7245805af0b2479c1fa199c9296b8f4fe6be624d662b75cef4569945422fb75e"
     },
     {
       "actor": "watch",
@@ -399,10 +408,10 @@
       "alone_result": {
         "allowed": false,
         "reject-reason": "missing-inputs",
-        "txid": "c9a537f777dbd5cd67f582224f03f78ffb1852cbe3d66508ba03b8a1e2bd564b",
-        "wtxid": "f8912b1e24d5c5658370f8953bc0cdfaa04ffd061531c3e8889e9f94aa045a3d"
+        "txid": "62bd6c8786b7a52fa0c4373c9a1723fccbc010baf35cfee6b6146ac26e89dfad",
+        "wtxid": "9acf71474059a8adbcba88b7b4eb5908cae4b8750f5b7e2a61b35d05aa6ea865"
       },
-      "blockhash": "20f82560093ae45d24df9f7c2b792d624bf0980ff492e5db92a292fdb3f1df31",
+      "blockhash": "2ba2e175d03aac102a899bf41b4c2bd78d97a7422747bd605928a8d50e6e57bc",
       "broadcast": true,
       "confirmed": true,
       "height": 104,
@@ -414,11 +423,11 @@
           "base": "0.00003000",
           "effective-feerate": "0.00009493",
           "effective-includes": [
-            "a547370e42a78dea95be22ed15c62d65c98177ce6afd707140c36b5b07a16d00",
-            "f8912b1e24d5c5658370f8953bc0cdfaa04ffd061531c3e8889e9f94aa045a3d"
+            "827e026a0a15bbf0bfded6457eb75a6db73c09859c757a916c80ef1e9b6bf3b7",
+            "9acf71474059a8adbcba88b7b4eb5908cae4b8750f5b7e2a61b35d05aa6ea865"
           ]
         },
-        "txid": "c9a537f777dbd5cd67f582224f03f78ffb1852cbe3d66508ba03b8a1e2bd564b",
+        "txid": "62bd6c8786b7a52fa0c4373c9a1723fccbc010baf35cfee6b6146ac26e89dfad",
         "vsize": 153
       },
       "note": "the watcher pays the fee through the P2A anchor",
@@ -427,19 +436,19 @@
         {
           "amount": 0,
           "script_pubkey": "51024e73",
-          "txid": "f9b43ecce5733860f0bc32fbd30a5b38e081f758ba0edb1cf66bdcc9d73a1bd0",
+          "txid": "7245805af0b2479c1fa199c9296b8f4fe6be624d662b75cef4569945422fb75e",
           "vout": 1
         },
         {
           "amount": 10000,
           "script_pubkey": "5120a52bbf0002b4e5e110d0dce690686302c9cb9e903216c0f234ee991f686a297e",
-          "txid": "3f055785617f35a99a3c672f1dc2da458e0e535555177b3da015ae76064570cd",
-          "vout": 0
+          "txid": "1ccbe35660b9345f02512093042bd8cb961e7406ebfffb9ad5b3680887ba80ac",
+          "vout": 2
         }
       ],
-      "raw_transaction": "03000000000102d01b3ad7c9dc6bf61cdb0eba58f781e0385b0ad3fb32bcf0603873e5cc3eb4f90100000000fdffffffcd70450676ae15a03d7b175555530e8e45dac21d2f673c9aa9357f618557053f0000000000fdffffff01581b000000000000225120a52bbf0002b4e5e110d0dce690686302c9cb9e903216c0f234ee991f686a297e000140360ea921d7e81a05f29c1ff75ab492c7f38564b6f38d25ad828a750c91126e62c2f7fd32655e058261d3aafede74391f85fd6cea6d516cfbc62be501d8f1cafe00000000",
+      "raw_transaction": "030000000001025eb72f42459956f4ce752b664d62bee64f8f6b29c999a11f9c47b2f05a8045720100000000fdffffffac80ba870868b3d59afbffeb06741e96cbd82b04932051025f34b96056e3cb1c0200000000fdffffff01581b000000000000225120a52bbf0002b4e5e110d0dce690686302c9cb9e903216c0f234ee991f686a297e0001400ba20016ae67e74b5ed8a71b0880cb643e92ff1cadb0671e78ee779a169634d4530095aa4b5fb259f8216cf36041391461203a6605d9c50a6bafc3e94d39c6df00000000",
       "reject_reason": null,
-      "txid": "c9a537f777dbd5cd67f582224f03f78ffb1852cbe3d66508ba03b8a1e2bd564b"
+      "txid": "62bd6c8786b7a52fa0c4373c9a1723fccbc010baf35cfee6b6146ac26e89dfad"
     },
     {
       "actor": "environment",
@@ -553,21 +562,21 @@
       "mempool_result": {
         "allowed": false,
         "reject-reason": "missing-inputs",
-        "txid": "6a7b6f68743c2432a0200560655d45c8ce50724bcfb1011d1599510a4bbcbd7a",
-        "wtxid": "aeba11c9cf274d8aeb21bdc5183d5893010e8116cd7a56be83cf416a130399cf"
+        "txid": "166eb58ed534061bc6a2ef4330ce65addad6480cbf67d73e270689d1db10c669",
+        "wtxid": "1e65c85d50ad8d8b430e44a0ea325c935fde336563627483bddfbe9b9b7771c2"
       },
       "note": null,
       "prevouts": [
         {
           "amount": 97000,
           "script_pubkey": "51209e005d8f4c511a5f24d61fb957a10a10a3de8f0fc8c60aff03db27bea749b501",
-          "txid": "97f95e6c9ca33442a2ae1da13fb1c1c5a3239b43335789d3fc49d0798ff8be93",
+          "txid": "52c60f5115d7b16bf0337f7e482ee245e041feec4b88c6faebeb0912f451f03f",
           "vout": 0
         }
       ],
-      "raw_transaction": "0200000000010193bef88f79d049fcd3895733439b23a3c5c1b13fa11daea24234a39c6c5ef99700000000000c00000001306f0100000000002251201f445e10bbf30bfe3c8cc482364185201c40d5c169c748b49c77e9c407e8b1690340ddb2456fc98bf0ffda48ec5dcf03c466b45fac18f39fab71640cd90314e7d31e2394920c1c3519aaa5e9a792605ee6f2cde937510d02fd2ab09c90735f7d9b62255cb27520aeb1f37bd68b70ae51d98f5f5da9981c723ede1a1a6cf4d5a90edb80faf9634aac41c050929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac03c210a1ad93f656b5ddd4faa79d083187ed036dce93adda47911494975b3e76500000000",
+      "raw_transaction": "020000000001013ff051f41209ebebfac6884becfe41e045e22e487e7f33f06bb1d715510fc65200000000000c00000001306f0100000000002251201f445e10bbf30bfe3c8cc482364185201c40d5c169c748b49c77e9c407e8b169034047dad214a32488f3aff7a3f724bebedb311148c539984c2afd5a6e9e3a67bca53ab2c6436bab7c6b200694ba816b94c5704290a572450fcf7c14902b72e17882255cb27520aeb1f37bd68b70ae51d98f5f5da9981c723ede1a1a6cf4d5a90edb80faf9634aac41c050929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac03c210a1ad93f656b5ddd4faa79d083187ed036dce93adda47911494975b3e76500000000",
       "reject_reason": "missing-inputs",
-      "txid": "6a7b6f68743c2432a0200560655d45c8ce50724bcfb1011d1599510a4bbcbd7a"
+      "txid": "166eb58ed534061bc6a2ef4330ce65addad6480cbf67d73e270689d1db10c669"
     }
   ],
   "tag": "1"

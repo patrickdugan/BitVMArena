@@ -67,7 +67,7 @@ jobs:
       - run: python -m bitvm_corpus validate
       - name: Audit the saved Core 31.1 evidence offline
         run: |
-          for track in primitive bitvm3 bitvm2; do
+          for track in primitive bitvm3 bitvm2 bitvm3-m14; do
             python -m bitvm_corpus native audit "examples/native/$track-core31.1.json"
           done
       - name: Audit the saved episode reports offline
@@ -100,12 +100,13 @@ jobs:
           echo "BITVM_ARENA_BITCOIND=$RUNNER_TEMP/bitcoin-$CORE_VERSION/bin/bitcoind" >> "$GITHUB_ENV"
       - run: python -m unittest discover -s tests -p 'test_native.py' -v
       - run: python -m unittest discover -s tests -p 'test_episode.py' -v
+      - run: python -m unittest discover -s tests -p 'test_m14.py' -v
       - name: Rerun every example episode and audit it
         run: python tools/rebuild_episode_reports.py --bitcoind "$BITVM_ARENA_BITCOIND"
       - name: Run every native track on regtest and audit the reports
         run: |
           mkdir -p reports
-          for track in primitive bitvm3 bitvm2; do
+          for track in primitive bitvm3 bitvm2 bitvm3-m14; do
             python -m bitvm_corpus native run --track "$track" --output "reports/$track-core$CORE_VERSION-linux.json"
             python -m bitvm_corpus native audit "reports/$track-core$CORE_VERSION-linux.json"
           done
