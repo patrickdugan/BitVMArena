@@ -1,0 +1,59 @@
+name: CPA bounded candidate search
+
+on:
+  push:
+    branches: ['research/cpa-gate-enumeration']
+  pull_request:
+    paths:
+      - 'research/canonical-proof-authority/**'
+      - '.github/workflows/cpa-candidate-search.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cpa-candidate-search-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  candidate-search:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        sdk: [false, true]
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          path: arena
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          repository: patrickdugan/bitcoin-rs
+          ref: 24a5593350f42efc8a96047aa9e7e114fa22cb08
+          path: bitcoin-rs
+          persist-credentials: false
+      - name: Install reviewed SDK pins
+        if: matrix.sdk
+        run: python -m pip install -r arena/research/canonical-proof-authority/fixtures/sdk-requirements.txt
+      - name: Reproduce bounded search and tests
+        env:
+          SDK: ${{ matrix.sdk }}
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/cpa-search-evidence
+          git -C arena rev-parse HEAD > /tmp/cpa-search-evidence/commit.txt
+          git -C arena archive --format=tar HEAD research/canonical-proof-authority .github/workflows/cpa-candidate-search.yml | gzip -n > /tmp/cpa-search-evidence/source.tar.gz
+          args=()
+          if [ "$SDK" = "true" ]; then args+=(--sdk); fi
+          python -I -B arena/research/canonical-proof-authority/scripts/run_search.py --bitcoin-rs bitcoin-rs --out /tmp/cpa-search-evidence/run "${args[@]}" | tee /tmp/cpa-search-evidence/runner.log
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        if: always()
+        with:
+          name: cpa-candidate-search-sdk-${{ matrix.sdk }}-${{ github.run_id }}
+          path: /tmp/cpa-search-evidence/
+          if-no-files-found: error

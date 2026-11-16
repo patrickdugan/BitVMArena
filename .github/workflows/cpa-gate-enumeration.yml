@@ -1,0 +1,77 @@
+name: CPA gate-enumeration research
+
+on:
+  push:
+    branches: ['research/cpa-gate-enumeration']
+  pull_request:
+    paths:
+      - 'research/canonical-proof-authority/**'
+      - '.github/workflows/cpa-gate-enumeration.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cpa-gate-enumeration-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  offline-study:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          path: arena
+          persist-credentials: false
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          repository: patrickdugan/bitcoin-rs
+          ref: 24a5593350f42efc8a96047aa9e7e114fa22cb08
+          path: bitcoin-rs
+          persist-credentials: false
+      - name: Runner integrity and scenario tests
+        run: |
+          set -o pipefail
+          mkdir -p /tmp/arena-cpa-evidence
+          git -C arena rev-parse HEAD > /tmp/arena-cpa-evidence/arena-commit.txt
+          python3 -I -S -B -m unittest discover -s arena/research/canonical-proof-authority/tests -v 2>&1 | tee /tmp/arena-cpa-evidence/runner-tests.log
+      - name: Reproduce studies and fixed-target campaign
+        run: python3 -I -S -B arena/research/canonical-proof-authority/scripts/run.py --bitcoin-rs bitcoin-rs --out /tmp/arena-cpa-evidence/run --campaign --interactive --timeout 240
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        if: always()
+        with:
+          name: bitvm-arena-cpa-${{ github.run_id }}-${{ github.run_attempt }}
+          path: /tmp/arena-cpa-evidence/
+          if-no-files-found: error
+
+  cpa-sdk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          path: arena
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          repository: patrickdugan/bitcoin-rs
+          ref: 24a5593350f42efc8a96047aa9e7e114fa22cb08
+          path: bitcoin-rs
+          persist-credentials: false
+      - name: Install reviewed SDK versions
+        run: python -m pip install -r arena/research/canonical-proof-authority/fixtures/sdk-requirements.txt
+      - name: Execute CPA tools through actual ControlArena and Inspect
+        run: |
+          mkdir -p /tmp/arena-cpa-sdk
+          git -C arena rev-parse HEAD > /tmp/arena-cpa-sdk/arena-commit.txt
+          python -I -B arena/research/canonical-proof-authority/scripts/run.py --bitcoin-rs bitcoin-rs --out /tmp/arena-cpa-sdk/run --interactive --sdk --timeout 240
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        if: always()
+        with:
+          name: bitvm-arena-cpa-sdk-${{ github.run_id }}-${{ github.run_attempt }}
+          path: /tmp/arena-cpa-sdk/
+          if-no-files-found: error

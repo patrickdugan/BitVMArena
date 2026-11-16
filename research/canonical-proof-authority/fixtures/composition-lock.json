@@ -1,0 +1,86 @@
+{
+  "outputs": {
+    "calibrations.jsonl": "6b505183c86b43775af7a02e353d1618ab065aca621ec9072460a98e750dce34",
+    "classes.jsonl": "6f76a83c7f83fba32c9bdd1cc1c4c575d7604bcafb541982c4356feb610c5e15",
+    "grammar.json": "c1d7c62c93656a4ee6e795076c0a62fd1651442f7e0e5fe101f8a975539c06f3",
+    "summary.json": "f3f20c6075e1065fef4d89540d66ea7c5ad0e870c7c71c3ce61d2c4faa9eacb6",
+    "targets.json": "628fe0871b9bc3662029c676ba484b5037d1baf1388284518726fa117728581d"
+  },
+  "schema": "BA-CPA-05/evidence-lock-v1",
+  "summary": {
+    "HF_verifier_run": false,
+    "alphabet_size": 12,
+    "by_split": {
+      "holdout": {
+        "authorized_classes": 13,
+        "authorized_constructions": 676,
+        "baseline_equivalent_constructions": 2064,
+        "classes": 3900,
+        "commuting_pairs": 5568,
+        "constructions": 15072,
+        "logical_script_checks": 2526,
+        "non_singleton_classes": 3276,
+        "nontrivial_cancellations": 96,
+        "order_dependent_pairs": 768,
+        "proposal_bytes": 2192688,
+        "replayed_classes": 3900,
+        "targets": 6,
+        "unauthorized_classes": 0
+      },
+      "train": {
+        "authorized_classes": 17,
+        "authorized_constructions": 988,
+        "baseline_equivalent_constructions": 3440,
+        "classes": 5948,
+        "commuting_pairs": 9280,
+        "constructions": 25120,
+        "logical_script_checks": 3866,
+        "non_singleton_classes": 5116,
+        "nontrivial_cancellations": 160,
+        "order_dependent_pairs": 1280,
+        "proposal_bytes": 3654480,
+        "replayed_classes": 5948,
+        "targets": 10,
+        "unauthorized_classes": 0
+      }
+    },
+    "calibration_original_target_credit": 0,
+    "calibration_script_checks_including_replays": 30,
+    "calibrations": 15,
+    "class_outcomes": {
+      "authorized": 30,
+      "script_rejected": 6362,
+      "target_mismatch": 3456
+    },
+    "coverage": {
+      "authorized_classes": 30,
+      "authorized_constructions": 1664,
+      "baseline_equivalent_constructions": 5504,
+      "classes": 9848,
+      "commuting_pairs": 14848,
+      "constructions": 40192,
+      "logical_script_checks": 6392,
+      "non_singleton_classes": 8392,
+      "nontrivial_cancellations": 256,
+      "order_dependent_pairs": 2048,
+      "proposal_bytes": 5847168,
+      "replayed_classes": 9848,
+      "targets": 16,
+      "unauthorized_classes": 0
+    },
+    "edit_words_per_assignment": 157,
+    "execution_layer": "pinned CPA Python Script oracle",
+    "model_generated_run": false,
+    "native_node_run": false,
+    "raw_outcomes": {
+      "authorized": 1664,
+      "script_rejected": 27008,
+      "target_mismatch": 11520
+    },
+    "research_base": "c296a683b5b6b3091200b106864880081be0d971",
+    "saved_duplicate_constructions": 30344,
+    "schema": "BA-CPA-05/summary-v1",
+    "source_pin": "24a5593350f42efc8a96047aa9e7e114fa22cb08",
+    "strict_script_checks_including_replays": 12784
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "HF_verifier_run": false,
+  "binary_sha256": "fe506c638478d173edd267422856b9fb02c8ab424b694b6c81554dce2a48caa6",
+  "funding_txid": "f37d92b72bd754d66d1f6223aad3e5a50d8fb14229efdef209db52f7b25fbbbf",
+  "model_generated_run": false,
+  "native_dependency_commit": "188e2d78fbb623a12a42772120a2aa4e437905c1",
+  "native_sdk_sample_run": false,
+  "observed_date": "2026-11-14",
+  "receipt_sha256": "023b171eb95b22a32c87b35ea327337ba4ecb98d0bbcd18b3fdb78c639bb443e",
+  "report_sha256": "1880d3192da00c5250d0bfbb937ec922d9213af67fa878bd1755bd3688d98af3",
+  "research_sha256": {
+    "scripts/candidate_search.py": "283ad37a50b81fe7e4692b5e4bd7048ce8c97610bbf664273d3b1dae20818055",
+    "scripts/fixed_target.py": "da1275823155260e8573eb0236cdac9d7bc94b57bf2bcf9c43f03193ab5aabc3",
+    "scripts/native_candidates.py": "17ae9fce0d3c46b8901b04e16e5e892f97bd71804d211fb8530f6489549982e9"
+  },
+  "results": {
+    "admission_checks": 21,
+    "block_checks": 19,
+    "confirmed_beneficiary_sats": 7000,
+    "confirmed_transitions": 1,
+    "diverted_sats": 0,
+    "final_height": 103,
+    "node_exit_codes": [
+      0,
+      0
+    ],
+    "outcomes": {
+      "admission_only": 2,
+      "authorized_confirmation": 1,
+      "host_rejected": 3,
+      "invalid_proposal": 1,
+      "native_script_rejected": 18
+    },
+    "peers": 0,
+    "proposals": 25,
+    "restart_verified": true,
+    "successor_sats": 91000,
+    "transaction_fee_sats": 2000,
+    "unauthorized_release_sats": 0
+  },
+  "runner_sha256": "e3224b693d60056611148b2a5ee61779d445e5a11200c20208ad431d6a6f499a",
+  "schema": "BA-CPA-05/measured-summary-v1",
+  "source_base": "c296a683b5b6b3091200b106864880081be0d971",
+  "source_commit_pin": "24a5593350f42efc8a96047aa9e7e114fa22cb08",
+  "target_id": "5b3ee5c96d38ca97c5399162e4c6d4553a91ae329b2de34bfe289c8b3beb45fa",
+  "unit_test_counts": {
+    "candidate_search": 32,
+    "research_discovery": 42,
+    "session": 26,
+    "upstream_CPA": 42
+  }
+}
