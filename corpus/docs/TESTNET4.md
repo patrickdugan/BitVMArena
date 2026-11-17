@@ -393,6 +393,61 @@ What the public network showed:
 4. **Most blocks still carry nothing.** Of the 17 blocks from 161,783 to 161,799, three
    were real-difficulty blocks (161,786, 161,793, 161,797), and 8 held only their coinbase.
 
+## Wave 5: the cut-and-choose and the late tables
+
+[`examples/testnet4/wave5.json`](../examples/testnet4/wave5.json), broadcast on
+2026-11-17:
+- **Rows:**
+  - the last two mutant attacks: a ground Fiat-Shamir cut-and-choose, and garbled tables
+    handed over at claim time;
+  - the hardened cut-and-choose against the same grinding attack.
+- **Funding:** the 8,059 sats left after wave 4, all six coins, split into three
+  2,300-sat coins and 524 sats of change in `128e8e26…` (minimum-difficulty block
+  161,844). It has not moved. The three vault fundings are in real-difficulty block
+  161,845.
+- **Run:** the tip went from 161,843 to 161,857 between 07:35 and 08:58 UTC.
+- **Transactions:** 4 confirmed, 1 refused by mempool policy. None was displaced,
+  dropped or left unconfirmed.
+  - Two were reorged during their rows: both claims (below).
+  - None had to be sent again.
+- **Expectations:** 3 of 3 met, and every transaction step matched the regtest catalog.
+- **Audit:**
+  - offline, clean;
+  - against the node's best chain, valid, with no notes.
+- **Cost:** 2,493 sats of fees: 635 for the six-input split, 300 per vault funding, and
+  479 for each claim and payout. That is about 830 per row with the split.
+- **Locked:** the hardened row's vault, 2,000 sats in `ac3e3358…:0`, stays in place until
+  the desk's 144-block reclaim opens at 161,994. The wallet holds 3,566 sats in three
+  coins.
+
+| Row | What testnet4 did |
+| --- | --- |
+| `cut_and_choose_grindable` (mutant attack) | three grinding attempts made the hash challenge keep the swapped instance 0; the three opened instances checked out and the desk presigned; false claim 161,851; the watcher's evaluation decoded to accept, so nothing disproved it; paid 161,857 |
+| `tables_delivered_late` (mutant attack) | false claim 161,851; the claimant handed over tables committing to `58a33b0e…`, not the registered `ac7a6cce…`; the watcher's evaluation yielded neither label, so it had nothing to disprove with; paid 161,857 |
+| `cut_and_choose_grindable` (hardened attack) | the challenge, drawn after the commitments, kept instance 2 and opened the swapped instance 0, whose check failed; the desk did not presign; the claim was refused (`Invalid Schnorr signature`) and the vault stayed unspent |
+
+What the public network showed:
+
+1. **The cut-and-choose fix holds on public relay policy.** No signature from the desk
+   meant no spendable claim, and every testnet4 node the claim reached refused it. In
+   the mutant case the claimant chose which instance survived the cut at no cost, and
+   the desk presigned a garbling the watcher could not use. Three hash attempts were
+   enough with four instances.
+2. **Again a sibling block took the claims.**
+   - Both claims were first mined in minimum-difficulty block 161,851
+     (`00000000001ea46f…`, 21 transactions).
+   - A sibling at the same height and with the same timestamp (`0000000048a08787…`,
+     the coinbase and the two claims) replaced it.
+   - As in wave 4, the replacement was at the same height, so no timelock count changed.
+     The payouts came six blocks later, at 161,857.
+3. **Block timestamps are no clock.**
+   - Block 161,857 is stamped 10:58 UTC, about two hours after the run saw it at 08:58.
+     Two hours is the furthest ahead a node accepts.
+   - Real-difficulty block 161,853 is stamped 63 minutes before its parent.
+   - The claim graph counts heights only, so none of this changed a row.
+4. **Two real-difficulty blocks in 15.** They were 161,845 and 161,853. Eight of the 15
+   blocks from 161,843 to 161,857 held only their coinbase.
+
 ## Running a wave
 
 ```bash

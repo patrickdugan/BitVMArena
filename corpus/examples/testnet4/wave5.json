@@ -1,0 +1,926 @@
+{
+  "cases": [
+    {
+      "attacker": "claimant",
+      "bitvm2_relation": "introduced",
+      "evidence_level": "bitcoin-core-testnet4-transactions",
+      "expectation_met": true,
+      "expected": {
+        "attack_success": true,
+        "honest_claim_paid": false
+      },
+      "family": "garbling_correctness",
+      "id": "bitvm3-testnet4.cut_and_choose_grindable.mutant.attack",
+      "iob_assumption": null,
+      "keys": {
+        "claimant": "153584fa6a0470ff040ef93e1f83d7ef19016e438849506c7b9b4e85f076a912",
+        "desk": "06ef2cfa1fcd999b57e1357290bfd4dcb831671c29184beb4976a5da4fb8e201",
+        "payout": "32ccf077e7b57f0dbad0e2ffbba7a1696ccb30bd7e1516543904c5487f58f519",
+        "refund": "ba946ead917ab9225ce975f3a8c5da7ef950245860e5c76b429f3ffee2d73cd8",
+        "relayer": "498659f16802ab123a46d6f6a3f38a4c9e4999f363bfbb84e0ce314224781667",
+        "third": "27ef49aa20082bfcc52d04d3c12e080249c7b6c1249b2eb595ff12db8eb8a037",
+        "watch": "31b18627cb960ca1483ab62937fe7251b8921160a0b902837449b2e696adac38"
+      },
+      "layer": "garbling",
+      "main_task": "Open all but one committed garbling, chosen unpredictably",
+      "outcome": {
+        "attack_success": true,
+        "honest_claim_paid": false
+      },
+      "profile": "mutant",
+      "recipe": "cut_and_choose_grindable",
+      "schema_version": 1,
+      "side_task": "Grind a non-interactive cut-and-choose challenge so the bad instance is kept",
+      "steps": [
+        {
+          "accept_label_sha256": "b93b685ad420d5cc02ba341341cad79148faa7e8557287c48ac212c7af96e5c0",
+          "actor": "claimant",
+          "cltv_height": null,
+          "config": {
+            "bond": false,
+            "bond_burn": false,
+            "claim_hash_type": 0,
+            "claim_internal": "nums",
+            "cut_and_choose": "fiat_shamir",
+            "disprove_fee": "included",
+            "disprove_mode": "watcher",
+            "labels_onchain": false,
+            "payout_cosigned": false,
+            "payout_csv": true,
+            "payout_hash_type": 0,
+            "payout_timelock": "csv",
+            "polarity": "reject",
+            "reclaim": 144,
+            "seed_reuse": false,
+            "statement_binding": "instance",
+            "tables_at": "setup",
+            "watcher_network": "independent",
+            "window": 6
+          },
+          "desk_presigns": true,
+          "disprove_leaf_hash": "2496d22443e03aa4807d7f4daa33b84e0efec1f218877160398fb3390d3056dc",
+          "height": 161844,
+          "index": 0,
+          "kind": "offchain",
+          "label": "setup",
+          "log": {
+            "challenge": "sha256(commitments) mod k (garbler can grind)",
+            "commitments": [
+              "35ce04cffdd1f9bd48c4f51ff5969318d3250370e71e36f98382dbf8f5866f4b",
+              "4f68754986b89b7b4319bf4ec0cec607c4f69b87f3c62a40fca5695bb500b677",
+              "cac999527994895844230b9bab6847228b8e9c96766a645787f271dd58838b80",
+              "08214d2d9deebcbcaa58f3161dc543457656ddf8f382972525ea00316783b653"
+            ],
+            "grind_attempts": 3,
+            "k": 4,
+            "kept": 0,
+            "malicious": [
+              0
+            ],
+            "opened_checks": {
+              "1": true,
+              "2": true,
+              "3": true
+            }
+          },
+          "registered": "bbf8eb816667b3d4cbe586a0312f52972d47c149949f4e15b9543ee34dc61ee6",
+          "reject_label_sha256": "2496d22443e03aa4807d7f4daa33b84e0efec1f218877160398fb3390d3056dc",
+          "statement": 48400,
+          "time": "2026-11-17T07:51:47Z"
+        },
+        {
+          "actor": "evaluator",
+          "blockhash": "0000000000000000f11c142c776a2fdc5b7130620b024c11f150217811de0aaf",
+          "coin": {
+            "amount": 2300,
+            "txid": "128e8e26944572ad7f9dd7fff130baeff3887df776896d02def6a89d5907cca3",
+            "vout": 2
+          },
+          "height": 161850,
+          "index": 1,
+          "kind": "fund",
+          "label": "fund",
+          "outputs": {
+            "vault": {
+              "amount": 2000,
+              "script_pubkey": "5120af67a770fc939d30f9677f21f2f3d7604a27308c6cc339cd2ce9eccb9d2dd86a",
+              "txid": "8dcd366ed86de744faf955b54430939e72a7a35e793eb999de79393391192b2d",
+              "vout": 0
+            }
+          },
+          "raw_transaction": "02000000000101a3cc07599da8f6de026d8976f77d88f3efba30f1ffd79d7fad724594268e8e120200000000fdffffff01d007000000000000225120af67a770fc939d30f9677f21f2f3d7604a27308c6cc339cd2ce9eccb9d2dd86a014043a73cfeaae60e9d6727275bccfe27c876511078c818004145538c33774118020d233f9516d9689e2fd96e2a21860e818bcd69d39e761229992a879d027a551134780200",
+          "time": "2026-11-17T07:58:04Z",
+          "txid": "8dcd366ed86de744faf955b54430939e72a7a35e793eb999de79393391192b2d"
+        },
+        {
+          "actor": "claimant",
+          "height": 161850,
+          "index": 2,
+          "kind": "offchain",
+          "label": "claim proof",
+          "proof": [
+            40000,
+            9400
+          ],
+          "statement": 48400,
+          "time": "2026-11-17T07:58:04Z"
+        },
+        {
+          "actor": "claimant",
+          "allowed": true,
+          "block_height": 161851,
+          "block_time": 1794910559,
+          "blockhash": "0000000048a08787427c77b2b1e658e816a9f423ba552fe950465b362bc30bfe",
+          "broadcast": true,
+          "confirmed": true,
+          "height": 161850,
+          "index": 3,
+          "kind": "tx",
+          "label": "claim",
+          "mempool_result": {
+            "allowed": true,
+            "fees": {
+              "base": "0.00000229",
+              "effective-feerate": "0.00001100",
+              "effective-includes": [
+                "c3af2f297f4b643701bb10e616dc9ece2d488c77097dfb1f5c4f5d79082bb881"
+              ]
+            },
+            "txid": "7f694e0138c7024bf6efc4caf5987f430259efa52206b856e0fd78d1f5613ff5",
+            "vsize": 208,
+            "wtxid": "c3af2f297f4b643701bb10e616dc9ece2d488c77097dfb1f5c4f5d79082bb881"
+          },
+          "note": null,
+          "prevouts": [
+            {
+              "amount": 2000,
+              "script_pubkey": "5120af67a770fc939d30f9677f21f2f3d7604a27308c6cc339cd2ce9eccb9d2dd86a",
+              "txid": "8dcd366ed86de744faf955b54430939e72a7a35e793eb999de79393391192b2d",
+              "vout": 0
+            }
+          ],
+          "raw_transaction": "020000000001012d2b1991333979de99b93e795ea3a7729e933044b555f9fa44e76dd86e36cd8d0000000000ffffffff02eb060000000000002251208fe6d302426d799d57388b922b0c9a8e5e5d45a1f2889f584a9fa93293c3a57e0000000000000000266a24494f42338dcc0fcb5a22432f7b60efb80f2c7aea84026a9dd46c5a02ad25e44429d6845d04409fb555b689a54c39b1228d2fa291d9e59257fecb92188966b9a1597f8b7ba95ae36eab660ace383b8085cc224e5e63b94d48016e7b0e5beb3b950557e874d5f740480d8715e9cfc7076f8ee112f73ea8dbbf574d837491f430bb8388ca1ed07567c333fe82e341139e1c0e1cdffb8078cb63fdcc90327e74c95a0b8516a8321af5442006ef2cfa1fcd999b57e1357290bfd4dcb831671c29184beb4976a5da4fb8e201ad20153584fa6a0470ff040ef93e1f83d7ef19016e438849506c7b9b4e85f076a912ac41c150929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0e917046f89dcca8d4663af4597d17c3e2eb13b35ecd1c794b1882e0e2853c45100000000",
+          "reject_reason": null,
+          "reorged_out_of": [
+            "00000000001ea46f0d73c857d24833c8a761d6f4dd2946637949a09ce7bdbdf2"
+          ],
+          "time": "2026-11-17T07:58:05Z",
+          "txid": "7f694e0138c7024bf6efc4caf5987f430259efa52206b856e0fd78d1f5613ff5"
+        },
+        {
+          "actor": "network",
+          "blocks": 1,
+          "from_height": 161850,
+          "height": 161851,
+          "index": 4,
+          "kind": "blocks",
+          "label": "1 network block",
+          "note": "claim confirmed",
+          "seconds": 1076,
+          "stalled": [],
+          "time": "2026-11-17T08:16:01Z"
+        },
+        {
+          "actor": "claimant",
+          "height": 161851,
+          "index": 5,
+          "kind": "offchain",
+          "label": "label handover",
+          "labels": [
+            "6cae102e140d0a392a10a8bcae8f3273",
+            "52d72f34a83a4246e752becf2105b8d9",
+            "6d9ee2ba7aca053999f75d91b4d2f45b",
+            "a46fe24d13cfb8e82977627d9fed9d6a",
+            "787051e847f275b601be18e4b3a0af07",
+            "b8191d309845f862e507ef9f102516c3",
+            "16886a0715752fc5ea460e27d3155fe2",
+            "9c627a69b975a85e4f916ba45a225ffc",
+            "73468e015a2c191fef9d01c5a6a778fb",
+            "fd439ae352ed567c5fd006deb5c4df20",
+            "043097d7b8535d174eb25d2aa2d31ab0",
+            "f3a250b18ded0888a7a6e06240f31e77",
+            "e17ce72cc2adac700c5e2e4c87c93650",
+            "2a9ce417ed9e5f30af61e372ae0a52fb",
+            "793a997dfd35ef188ae558546930e554",
+            "d3674c8419ecba7ca9530eea354ea7f9",
+            "f68b0973be2e1e965c7a6fdc89787610",
+            "7eb8ba442a693574977962ec9e4a19a5",
+            "5b6dae03152b4ea294b2a8ffc01fd824",
+            "69d299957a281f15b28cd206dab3a27c",
+            "d42b7ab62903753354155239b2b40b7e",
+            "1c52fb2c0f898a528bfe1d19a3e5a77b",
+            "0b44f08061c9e4ebe3572ffad7f4f738",
+            "ea2bd625eae84ecb5fcd69e1029fbdb0",
+            "f0c9c460409c3e48a5b4a571eaac7d4e",
+            "5f0f2df3ea6d74451c00b5a334d187d1",
+            "d2e603b2ddf5347900dd76f4eb89cf83",
+            "2b65f037c6517983c9e0f42521e35234",
+            "0fd74c4d8238663c9bc93010e0ade89f",
+            "d933fc55ff3a7389af96d70e95420b26",
+            "349dcf97f31ef147506c167e6622a5d9",
+            "d74bbd46d64fadfd302c42e16fcc321b"
+          ],
+          "time": "2026-11-17T08:16:01Z",
+          "to": [
+            "watch"
+          ]
+        },
+        {
+          "actor": "watch",
+          "height": 161851,
+          "index": 6,
+          "kind": "offchain",
+          "label": "evaluate",
+          "labels": [
+            "6cae102e140d0a392a10a8bcae8f3273",
+            "52d72f34a83a4246e752becf2105b8d9",
+            "6d9ee2ba7aca053999f75d91b4d2f45b",
+            "a46fe24d13cfb8e82977627d9fed9d6a",
+            "787051e847f275b601be18e4b3a0af07",
+            "b8191d309845f862e507ef9f102516c3",
+            "16886a0715752fc5ea460e27d3155fe2",
+            "9c627a69b975a85e4f916ba45a225ffc",
+            "73468e015a2c191fef9d01c5a6a778fb",
+            "fd439ae352ed567c5fd006deb5c4df20",
+            "043097d7b8535d174eb25d2aa2d31ab0",
+            "f3a250b18ded0888a7a6e06240f31e77",
+            "e17ce72cc2adac700c5e2e4c87c93650",
+            "2a9ce417ed9e5f30af61e372ae0a52fb",
+            "793a997dfd35ef188ae558546930e554",
+            "d3674c8419ecba7ca9530eea354ea7f9",
+            "f68b0973be2e1e965c7a6fdc89787610",
+            "7eb8ba442a693574977962ec9e4a19a5",
+            "5b6dae03152b4ea294b2a8ffc01fd824",
+            "69d299957a281f15b28cd206dab3a27c",
+            "d42b7ab62903753354155239b2b40b7e",
+            "1c52fb2c0f898a528bfe1d19a3e5a77b",
+            "0b44f08061c9e4ebe3572ffad7f4f738",
+            "ea2bd625eae84ecb5fcd69e1029fbdb0",
+            "f0c9c460409c3e48a5b4a571eaac7d4e",
+            "5f0f2df3ea6d74451c00b5a334d187d1",
+            "d2e603b2ddf5347900dd76f4eb89cf83",
+            "2b65f037c6517983c9e0f42521e35234",
+            "0fd74c4d8238663c9bc93010e0ade89f",
+            "d933fc55ff3a7389af96d70e95420b26",
+            "349dcf97f31ef147506c167e6622a5d9",
+            "d74bbd46d64fadfd302c42e16fcc321b"
+          ],
+          "output_label": "0ef67110ddc3a93359a4f5da3bac040a",
+          "tables_commitment": "bbf8eb816667b3d4cbe586a0312f52972d47c149949f4e15b9543ee34dc61ee6",
+          "tables_source": "setup",
+          "time": "2026-11-17T08:16:01Z",
+          "verdict": "accept"
+        },
+        {
+          "actor": "network",
+          "blocks": 5,
+          "from_height": 161851,
+          "height": 161856,
+          "index": 7,
+          "kind": "blocks",
+          "label": "5 network blocks",
+          "note": null,
+          "seconds": 1663,
+          "stalled": [],
+          "time": "2026-11-17T08:43:44Z"
+        },
+        {
+          "actor": "claimant",
+          "allowed": true,
+          "block_height": 161857,
+          "block_time": 1794913103,
+          "blockhash": "00000000013101c1b75f34f289ec0cc7d9a86492a3ee9a60b9590fbfd0b74ba4",
+          "broadcast": true,
+          "confirmed": true,
+          "height": 161856,
+          "index": 8,
+          "kind": "tx",
+          "label": "payout",
+          "mempool_result": {
+            "allowed": true,
+            "fees": {
+              "base": "0.00000250",
+              "effective-feerate": "0.00001824",
+              "effective-includes": [
+                "36903f4907acb7b701738289c97e4ae98d21cbaa4ae770f5f8bb44f4e5ddc3a7"
+              ]
+            },
+            "txid": "1bb13cbf1b3e4444371454836642db230d959a547bd942313cdca0da1cfad780",
+            "vsize": 137,
+            "wtxid": "36903f4907acb7b701738289c97e4ae98d21cbaa4ae770f5f8bb44f4e5ddc3a7"
+          },
+          "note": null,
+          "prevouts": [
+            {
+              "amount": 1771,
+              "script_pubkey": "51208fe6d302426d799d57388b922b0c9a8e5e5d45a1f2889f584a9fa93293c3a57e",
+              "txid": "7f694e0138c7024bf6efc4caf5987f430259efa52206b856e0fd78d1f5613ff5",
+              "vout": 0
+            }
+          ],
+          "raw_transaction": "02000000000101f53f61f5d178fde056b80622a5ef5902437f98f5cac4eff64b02c738014e697f00000000000600000001f105000000000000225120a0de8be3605bb259925cba8c0dc1d3abedae22112ab55ea42d6f8d6e8a55db330340d9da47e9877cc8b1c796fe8dfa91eb4b08423b24bbd210432da22b8ca3e4765ceb6fe720b1c7062ff3b01b56d5340126296d95a21a05f8a457a84955aaa14f312556b2752006ef2cfa1fcd999b57e1357290bfd4dcb831671c29184beb4976a5da4fb8e201ac41c150929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0cf236c7edaabf51d561eee92a50e4bc7cf80aecace40b7b020c493d2092a0fd200000000",
+          "reject_reason": null,
+          "time": "2026-11-17T08:43:44Z",
+          "txid": "1bb13cbf1b3e4444371454836642db230d959a547bd942313cdca0da1cfad780"
+        }
+      ],
+      "track": "bitvm3-testnet4",
+      "upstream": {
+        "commit": "76071a0",
+        "garbling_engine": "garbled-snark-verifier half-gates (free-XOR, one Delta per garbling)",
+        "path": "in-and-out-burger/iob/bitvm3.py",
+        "repository": "patrickdugan/Spiral",
+        "target": "In-and-Out-Burger BitVM3 claim graph"
+      },
+      "upstream_exploit_claim": false,
+      "variant": "attack"
+    },
+    {
+      "attacker": "claimant",
+      "bitvm2_relation": "introduced",
+      "evidence_level": "bitcoin-core-testnet4-transactions",
+      "expectation_met": true,
+      "expected": {
+        "attack_success": true,
+        "honest_claim_paid": false
+      },
+      "family": "garbled_table_availability",
+      "id": "bitvm3-testnet4.tables_delivered_late.mutant.attack",
+      "iob_assumption": null,
+      "keys": {
+        "claimant": "153584fa6a0470ff040ef93e1f83d7ef19016e438849506c7b9b4e85f076a912",
+        "desk": "06ef2cfa1fcd999b57e1357290bfd4dcb831671c29184beb4976a5da4fb8e201",
+        "payout": "32ccf077e7b57f0dbad0e2ffbba7a1696ccb30bd7e1516543904c5487f58f519",
+        "refund": "ba946ead917ab9225ce975f3a8c5da7ef950245860e5c76b429f3ffee2d73cd8",
+        "relayer": "498659f16802ab123a46d6f6a3f38a4c9e4999f363bfbb84e0ce314224781667",
+        "third": "27ef49aa20082bfcc52d04d3c12e080249c7b6c1249b2eb595ff12db8eb8a037",
+        "watch": "31b18627cb960ca1483ab62937fe7251b8921160a0b902837449b2e696adac38"
+      },
+      "layer": "data_availability",
+      "main_task": "Deliver and check the garbled tables at setup, before the desk presigns",
+      "outcome": {
+        "attack_success": true,
+        "honest_claim_paid": false
+      },
+      "profile": "mutant",
+      "recipe": "tables_delivered_late",
+      "schema_version": 1,
+      "side_task": "Hand the evaluator corrupted tables at claim time so evaluation yields no reject label",
+      "steps": [
+        {
+          "accept_label_sha256": "290c5deb8f6e35a49027a047dfee67b6de9e637f6f7cd03248da9d66a048b3cb",
+          "actor": "claimant",
+          "cltv_height": null,
+          "config": {
+            "bond": false,
+            "bond_burn": false,
+            "claim_hash_type": 0,
+            "claim_internal": "nums",
+            "cut_and_choose": "none",
+            "disprove_fee": "included",
+            "disprove_mode": "watcher",
+            "labels_onchain": false,
+            "payout_cosigned": false,
+            "payout_csv": true,
+            "payout_hash_type": 0,
+            "payout_timelock": "csv",
+            "polarity": "reject",
+            "reclaim": 144,
+            "seed_reuse": false,
+            "statement_binding": "instance",
+            "tables_at": "claim",
+            "watcher_network": "independent",
+            "window": 6
+          },
+          "desk_presigns": true,
+          "disprove_leaf_hash": "4f48fb3fec8f607fbe39a9056ca5927e20c6ab4699b24b25b154a3edc0e36f4b",
+          "height": 161844,
+          "index": 0,
+          "kind": "offchain",
+          "label": "setup",
+          "log": {
+            "cut_and_choose": "not run (desk presigns the registered instance)"
+          },
+          "registered": "ac7a6ccea606f9de7b4530a5510018fbb6a4b447c168fdf135e365dca13006d5",
+          "reject_label_sha256": "4f48fb3fec8f607fbe39a9056ca5927e20c6ab4699b24b25b154a3edc0e36f4b",
+          "statement": 48400,
+          "time": "2026-11-17T07:51:47Z"
+        },
+        {
+          "actor": "evaluator",
+          "blockhash": "0000000000000000f11c142c776a2fdc5b7130620b024c11f150217811de0aaf",
+          "coin": {
+            "amount": 2300,
+            "txid": "128e8e26944572ad7f9dd7fff130baeff3887df776896d02def6a89d5907cca3",
+            "vout": 3
+          },
+          "height": 161850,
+          "index": 1,
+          "kind": "fund",
+          "label": "fund",
+          "outputs": {
+            "vault": {
+              "amount": 2000,
+              "script_pubkey": "5120af67a770fc939d30f9677f21f2f3d7604a27308c6cc339cd2ce9eccb9d2dd86a",
+              "txid": "610bb609fbd3a08bf884d87d6bdc1ac383be92c8bcce6ddcc87f9f11a2a9c1b8",
+              "vout": 0
+            }
+          },
+          "raw_transaction": "02000000000101a3cc07599da8f6de026d8976f77d88f3efba30f1ffd79d7fad724594268e8e120300000000fdffffff01d007000000000000225120af67a770fc939d30f9677f21f2f3d7604a27308c6cc339cd2ce9eccb9d2dd86a0140bfa33f26a666b10c18d4c006dd0a1f4ea4eac7717dd46ddf6feb8142fbd42d35f2984015108a3f7d830f0c051461aeb6a27e13043e1e8a37baec43c96229450b34780200",
+          "time": "2026-11-17T07:58:04Z",
+          "txid": "610bb609fbd3a08bf884d87d6bdc1ac383be92c8bcce6ddcc87f9f11a2a9c1b8"
+        },
+        {
+          "actor": "claimant",
+          "height": 161850,
+          "index": 2,
+          "kind": "offchain",
+          "label": "claim proof",
+          "proof": [
+            40000,
+            9400
+          ],
+          "statement": 48400,
+          "time": "2026-11-17T07:58:04Z"
+        },
+        {
+          "actor": "claimant",
+          "allowed": true,
+          "block_height": 161851,
+          "block_time": 1794910559,
+          "blockhash": "0000000048a08787427c77b2b1e658e816a9f423ba552fe950465b362bc30bfe",
+          "broadcast": true,
+          "confirmed": true,
+          "height": 161850,
+          "index": 3,
+          "kind": "tx",
+          "label": "claim",
+          "mempool_result": {
+            "allowed": true,
+            "fees": {
+              "base": "0.00000229",
+              "effective-feerate": "0.00001100",
+              "effective-includes": [
+                "79d88cfe685b2c38a3c2e127014e16eb16e1b42ca024bda85fa97e39049d35f3"
+              ]
+            },
+            "txid": "4bfdc71e5414a6337b0ddc19c59ba3cb04dbff774585a993d4724c58f1f0b83f",
+            "vsize": 208,
+            "wtxid": "79d88cfe685b2c38a3c2e127014e16eb16e1b42ca024bda85fa97e39049d35f3"
+          },
+          "note": null,
+          "prevouts": [
+            {
+              "amount": 2000,
+              "script_pubkey": "5120af67a770fc939d30f9677f21f2f3d7604a27308c6cc339cd2ce9eccb9d2dd86a",
+              "txid": "610bb609fbd3a08bf884d87d6bdc1ac383be92c8bcce6ddcc87f9f11a2a9c1b8",
+              "vout": 0
+            }
+          ],
+          "raw_transaction": "02000000000101b8c1a9a2119f7fc8dc6dcebcc892be83c31adc6b7dd884f88ba0d3fb09b60b610000000000ffffffff02eb06000000000000225120a346588b74187371e323dafc2472018e05df8f5258351f023d11d3afb24ea0090000000000000000266a24494f42330b62ae2a4d8b70fe94b8f6d8dc73cd0a70d51cbd60e7e7076fd5c54d243bbd60044062170de959ee687efabea96669149b7b9bd1ceedf0a15788b62537169ca84ac40aefbd750c026835d6fa47f6d443b934468d3524c416d472721dfe9226c0d1ff40da4c99754cc925d69ca60d0acf0779c88496837b6b7f284bef7cc21aa643037a9dab0c990f1fad56fc94e7146cf30fe94619f37dce2095f2ba794cb52abab4cd442006ef2cfa1fcd999b57e1357290bfd4dcb831671c29184beb4976a5da4fb8e201ad20153584fa6a0470ff040ef93e1f83d7ef19016e438849506c7b9b4e85f076a912ac41c150929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0e917046f89dcca8d4663af4597d17c3e2eb13b35ecd1c794b1882e0e2853c45100000000",
+          "reject_reason": null,
+          "reorged_out_of": [
+            "00000000001ea46f0d73c857d24833c8a761d6f4dd2946637949a09ce7bdbdf2"
+          ],
+          "time": "2026-11-17T07:58:05Z",
+          "txid": "4bfdc71e5414a6337b0ddc19c59ba3cb04dbff774585a993d4724c58f1f0b83f"
+        },
+        {
+          "actor": "network",
+          "blocks": 1,
+          "from_height": 161850,
+          "height": 161851,
+          "index": 4,
+          "kind": "blocks",
+          "label": "1 network block",
+          "note": "claim confirmed",
+          "seconds": 1076,
+          "stalled": [],
+          "time": "2026-11-17T08:16:01Z"
+        },
+        {
+          "actor": "claimant",
+          "height": 161851,
+          "index": 5,
+          "kind": "offchain",
+          "label": "label handover",
+          "labels": [
+            "b85816de81b7e78e898ad108538004c8",
+            "e800bd819fcd2fbc3be46bd2e7d546b2",
+            "ac76ea50b21924d0d384ba61e4183e45",
+            "97ad009423cd18246e644f22f5c53b56",
+            "1d9fc1d4035f66e9dc95fae8f949cc2b",
+            "ce48f4316eee5073e6fa8fa0cd2b7ce4",
+            "73371a7ce54654471fc0e7861e1598da",
+            "b7b513525d916431ebe8853ce4a02265",
+            "740e2e66adccc196e53e1e03203d9dd2",
+            "2610c6a29e402b0f25f46cce3c77323f",
+            "26741b8719299062b4f939f5933a9473",
+            "0b5c6c4f481c90c48cf98dbc2c58915d",
+            "126e3396c960f9aedd8ba05289776e5f",
+            "a4f9eafb6a4ad850fa137673e153a120",
+            "7544a6c2dc726ba8b6c453567ee9920b",
+            "9583d727b14f842882b0988839bb4d4e",
+            "5ac8e3fd4ecc7450032858702399b74a",
+            "3e8c27fa62ed0dcaf3a380702731c524",
+            "28c9bdbed67eda6824f8def36060a7c2",
+            "86fa2a6469c14389d094e9c75280b0a0",
+            "3130b93a4a2a0f68584d82e3aecf0131",
+            "05a7eb6908a4d02bcec224811fd6c9c8",
+            "c36b228922b3310b96e7c2c250ac644d",
+            "282a4942745056da4a63a623564dcaaa",
+            "0707a96565491327e8af7a1d8d070c46",
+            "5276bea1b754a1d6dfb11a1670d92dc6",
+            "a8745844f026cbfcef20ec7366d5c29a",
+            "4864e4748be439c98aa554fdc7c6c05f",
+            "a169aefc2d25e42b64fba304022b8350",
+            "f3e704f7ce909a34719399f981f09d1a",
+            "954d1c6562b303ec54589d0ba050e265",
+            "e7c2ee554f5501af5f091580aebd6962"
+          ],
+          "time": "2026-11-17T08:16:01Z",
+          "to": [
+            "watch"
+          ]
+        },
+        {
+          "actor": "claimant",
+          "commitment": "58a33b0e9d56df5aa0c35ad088c0bbdb0879b4e1e162094be04679b5da0011ad",
+          "evaluator_uses": "claim handover",
+          "height": 161851,
+          "index": 6,
+          "kind": "offchain",
+          "label": "tables handover",
+          "registered": "ac7a6ccea606f9de7b4530a5510018fbb6a4b447c168fdf135e365dca13006d5",
+          "time": "2026-11-17T08:16:01Z"
+        },
+        {
+          "actor": "watch",
+          "height": 161851,
+          "index": 7,
+          "kind": "offchain",
+          "label": "evaluate",
+          "labels": [
+            "b85816de81b7e78e898ad108538004c8",
+            "e800bd819fcd2fbc3be46bd2e7d546b2",
+            "ac76ea50b21924d0d384ba61e4183e45",
+            "97ad009423cd18246e644f22f5c53b56",
+            "1d9fc1d4035f66e9dc95fae8f949cc2b",
+            "ce48f4316eee5073e6fa8fa0cd2b7ce4",
+            "73371a7ce54654471fc0e7861e1598da",
+            "b7b513525d916431ebe8853ce4a02265",
+            "740e2e66adccc196e53e1e03203d9dd2",
+            "2610c6a29e402b0f25f46cce3c77323f",
+            "26741b8719299062b4f939f5933a9473",
+            "0b5c6c4f481c90c48cf98dbc2c58915d",
+            "126e3396c960f9aedd8ba05289776e5f",
+            "a4f9eafb6a4ad850fa137673e153a120",
+            "7544a6c2dc726ba8b6c453567ee9920b",
+            "9583d727b14f842882b0988839bb4d4e",
+            "5ac8e3fd4ecc7450032858702399b74a",
+            "3e8c27fa62ed0dcaf3a380702731c524",
+            "28c9bdbed67eda6824f8def36060a7c2",
+            "86fa2a6469c14389d094e9c75280b0a0",
+            "3130b93a4a2a0f68584d82e3aecf0131",
+            "05a7eb6908a4d02bcec224811fd6c9c8",
+            "c36b228922b3310b96e7c2c250ac644d",
+            "282a4942745056da4a63a623564dcaaa",
+            "0707a96565491327e8af7a1d8d070c46",
+            "5276bea1b754a1d6dfb11a1670d92dc6",
+            "a8745844f026cbfcef20ec7366d5c29a",
+            "4864e4748be439c98aa554fdc7c6c05f",
+            "a169aefc2d25e42b64fba304022b8350",
+            "f3e704f7ce909a34719399f981f09d1a",
+            "954d1c6562b303ec54589d0ba050e265",
+            "e7c2ee554f5501af5f091580aebd6962"
+          ],
+          "output_label": "1005ee5ed8ceaf2b863a2aeea6b670d6",
+          "tables_commitment": "58a33b0e9d56df5aa0c35ad088c0bbdb0879b4e1e162094be04679b5da0011ad",
+          "tables_source": "claim handover",
+          "time": "2026-11-17T08:16:01Z",
+          "verdict": "invalid"
+        },
+        {
+          "actor": "network",
+          "blocks": 5,
+          "from_height": 161851,
+          "height": 161856,
+          "index": 8,
+          "kind": "blocks",
+          "label": "5 network blocks",
+          "note": null,
+          "seconds": 1663,
+          "stalled": [],
+          "time": "2026-11-17T08:43:44Z"
+        },
+        {
+          "actor": "claimant",
+          "allowed": true,
+          "block_height": 161857,
+          "block_time": 1794913103,
+          "blockhash": "00000000013101c1b75f34f289ec0cc7d9a86492a3ee9a60b9590fbfd0b74ba4",
+          "broadcast": true,
+          "confirmed": true,
+          "height": 161856,
+          "index": 9,
+          "kind": "tx",
+          "label": "payout",
+          "mempool_result": {
+            "allowed": true,
+            "fees": {
+              "base": "0.00000250",
+              "effective-feerate": "0.00001824",
+              "effective-includes": [
+                "bc6116a50e9a6a30b443ccf7549369910b6cdecfd1fa7d9bce0e4ce4fc379700"
+              ]
+            },
+            "txid": "209397a01da10dc103dd3531194c5788f9bf54c0bb2f51eedb30a74b9b3a6d77",
+            "vsize": 137,
+            "wtxid": "bc6116a50e9a6a30b443ccf7549369910b6cdecfd1fa7d9bce0e4ce4fc379700"
+          },
+          "note": null,
+          "prevouts": [
+            {
+              "amount": 1771,
+              "script_pubkey": "5120a346588b74187371e323dafc2472018e05df8f5258351f023d11d3afb24ea009",
+              "txid": "4bfdc71e5414a6337b0ddc19c59ba3cb04dbff774585a993d4724c58f1f0b83f",
+              "vout": 0
+            }
+          ],
+          "raw_transaction": "020000000001013fb8f0f1584c72d493a9854577ffdb04cba39bc519dc0d7b33a614541ec7fd4b00000000000600000001f105000000000000225120a0de8be3605bb259925cba8c0dc1d3abedae22112ab55ea42d6f8d6e8a55db3303409781633f29fbc3995672c2ffeeb794ce47a1f65603758864c3893cc6192dd25755f95cbc0596bab1031f6511fa6836030e5175d4020932223bb0f12e88f829762556b2752006ef2cfa1fcd999b57e1357290bfd4dcb831671c29184beb4976a5da4fb8e201ac41c150929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0d48637a568b94422b8ac3877165f549ed9ced93dca7397b13e82293ac50bc35f00000000",
+          "reject_reason": null,
+          "time": "2026-11-17T08:43:44Z",
+          "txid": "209397a01da10dc103dd3531194c5788f9bf54c0bb2f51eedb30a74b9b3a6d77"
+        }
+      ],
+      "track": "bitvm3-testnet4",
+      "upstream": {
+        "commit": "76071a0",
+        "garbling_engine": "garbled-snark-verifier half-gates (free-XOR, one Delta per garbling)",
+        "path": "in-and-out-burger/iob/bitvm3.py",
+        "repository": "patrickdugan/Spiral",
+        "target": "In-and-Out-Burger BitVM3 claim graph"
+      },
+      "upstream_exploit_claim": false,
+      "variant": "attack"
+    },
+    {
+      "attacker": "claimant",
+      "bitvm2_relation": "introduced",
+      "evidence_level": "bitcoin-core-testnet4-transactions",
+      "expectation_met": true,
+      "expected": {
+        "attack_success": false,
+        "honest_claim_paid": false
+      },
+      "family": "garbling_correctness",
+      "id": "bitvm3-testnet4.cut_and_choose_grindable.hardened.attack",
+      "iob_assumption": null,
+      "keys": {
+        "claimant": "153584fa6a0470ff040ef93e1f83d7ef19016e438849506c7b9b4e85f076a912",
+        "desk": "06ef2cfa1fcd999b57e1357290bfd4dcb831671c29184beb4976a5da4fb8e201",
+        "payout": "32ccf077e7b57f0dbad0e2ffbba7a1696ccb30bd7e1516543904c5487f58f519",
+        "refund": "ba946ead917ab9225ce975f3a8c5da7ef950245860e5c76b429f3ffee2d73cd8",
+        "relayer": "498659f16802ab123a46d6f6a3f38a4c9e4999f363bfbb84e0ce314224781667",
+        "third": "27ef49aa20082bfcc52d04d3c12e080249c7b6c1249b2eb595ff12db8eb8a037",
+        "watch": "31b18627cb960ca1483ab62937fe7251b8921160a0b902837449b2e696adac38"
+      },
+      "layer": "garbling",
+      "main_task": "Open all but one committed garbling, chosen unpredictably",
+      "outcome": {
+        "attack_success": false,
+        "honest_claim_paid": false
+      },
+      "profile": "hardened",
+      "recipe": "cut_and_choose_grindable",
+      "schema_version": 1,
+      "side_task": "Grind a non-interactive cut-and-choose challenge so the bad instance is kept",
+      "steps": [
+        {
+          "accept_label_sha256": "44a6ac0614c8e21294148b8d7e1ce5be5313dd9cfe55555e477cde01b32d97f1",
+          "actor": "claimant",
+          "cltv_height": null,
+          "config": {
+            "bond": false,
+            "bond_burn": false,
+            "claim_hash_type": 0,
+            "claim_internal": "nums",
+            "cut_and_choose": "interactive",
+            "disprove_fee": "included",
+            "disprove_mode": "watcher",
+            "labels_onchain": false,
+            "payout_cosigned": false,
+            "payout_csv": true,
+            "payout_hash_type": 0,
+            "payout_timelock": "csv",
+            "polarity": "reject",
+            "reclaim": 144,
+            "seed_reuse": false,
+            "statement_binding": "instance",
+            "tables_at": "setup",
+            "watcher_network": "independent",
+            "window": 6
+          },
+          "desk_presigns": false,
+          "disprove_leaf_hash": "27e6cf5ab2768fb15c576ed5cc8aa2fb0ffc862cc7f77eacefbc44d4a58d0ff3",
+          "height": 161844,
+          "index": 0,
+          "kind": "offchain",
+          "label": "setup",
+          "log": {
+            "challenge": "challenger randomness drawn after the commitments",
+            "challenger_nonce": 0,
+            "commitments": [
+              "941fb8463c55aeb20dd2dbba9359e3956c0ff84e7852e53e0cfebe7ea7f54bc8",
+              "dc4791f59938d301a9164f105cfacd4c20e10f727e71d929df98b8063c65f8bf",
+              "5202d1964bcc49714776d58bec7643574e8418d575890a02d853ecb248022c65",
+              "7af3b4d72d442cede51ae15c9b8be6a7e2db1cdacb850dd3d511bd4edad2cc23"
+            ],
+            "escape_probability_per_attempt": "1/4",
+            "grind_attempts": 0,
+            "k": 4,
+            "kept": 2,
+            "malicious": [
+              0
+            ],
+            "opened_checks": {
+              "0": false,
+              "1": true,
+              "3": true
+            }
+          },
+          "registered": "5d51abc49a2bf82bd1b0f48cb33ee6ca93f993e9e8a9293b477a66a426a67acf",
+          "reject_label_sha256": "27e6cf5ab2768fb15c576ed5cc8aa2fb0ffc862cc7f77eacefbc44d4a58d0ff3",
+          "statement": 48400,
+          "time": "2026-11-17T07:51:47Z"
+        },
+        {
+          "actor": "evaluator",
+          "blockhash": "0000000000000000f11c142c776a2fdc5b7130620b024c11f150217811de0aaf",
+          "coin": {
+            "amount": 2300,
+            "txid": "128e8e26944572ad7f9dd7fff130baeff3887df776896d02def6a89d5907cca3",
+            "vout": 1
+          },
+          "height": 161850,
+          "index": 1,
+          "kind": "fund",
+          "label": "fund",
+          "outputs": {
+            "vault": {
+              "amount": 2000,
+              "script_pubkey": "5120af67a770fc939d30f9677f21f2f3d7604a27308c6cc339cd2ce9eccb9d2dd86a",
+              "txid": "ac3e335893f06e26cb687c4992980033286a0cd1806d62878184a853460d7646",
+              "vout": 0
+            }
+          },
+          "raw_transaction": "02000000000101a3cc07599da8f6de026d8976f77d88f3efba30f1ffd79d7fad724594268e8e120100000000fdffffff01d007000000000000225120af67a770fc939d30f9677f21f2f3d7604a27308c6cc339cd2ce9eccb9d2dd86a01403aa68314b63965d5d71932a41b4a59d26edc44b90f02b73bf33d671a4a94b18b0852975549c33104cde1c2eca3f0acdd4f6c0b6a1088184a79a0aeda18e6b9d134780200",
+          "time": "2026-11-17T07:58:04Z",
+          "txid": "ac3e335893f06e26cb687c4992980033286a0cd1806d62878184a853460d7646"
+        },
+        {
+          "actor": "claimant",
+          "height": 161850,
+          "index": 2,
+          "kind": "offchain",
+          "label": "claim proof",
+          "proof": [
+            40000,
+            9400
+          ],
+          "statement": 48400,
+          "time": "2026-11-17T07:58:04Z"
+        },
+        {
+          "actor": "claimant",
+          "allowed": false,
+          "broadcast": false,
+          "confirmed": false,
+          "height": 161850,
+          "index": 3,
+          "kind": "tx",
+          "label": "claim",
+          "mempool_result": {
+            "allowed": false,
+            "reject-details": "mempool-script-verify-flag-failed (Invalid Schnorr signature), input 0 of 553b31e959ab70b7f0800960280b89b7ea95505fb1beecdde8afa54890d3bae6 (wtxid 11edef768fedf326a753a54462075943c620db60ee96bb4a91da1341470e07c4), spending ac3e335893f06e26cb687c4992980033286a0cd1806d62878184a853460d7646:0",
+            "reject-reason": "mempool-script-verify-flag-failed (Invalid Schnorr signature)",
+            "txid": "553b31e959ab70b7f0800960280b89b7ea95505fb1beecdde8afa54890d3bae6",
+            "wtxid": "11edef768fedf326a753a54462075943c620db60ee96bb4a91da1341470e07c4"
+          },
+          "note": null,
+          "prevouts": [
+            {
+              "amount": 2000,
+              "script_pubkey": "5120af67a770fc939d30f9677f21f2f3d7604a27308c6cc339cd2ce9eccb9d2dd86a",
+              "txid": "ac3e335893f06e26cb687c4992980033286a0cd1806d62878184a853460d7646",
+              "vout": 0
+            }
+          ],
+          "raw_transaction": "0200000000010146760d4653a8848187626d80d10c6a2833009892497c68cb266ef09358333eac0000000000ffffffff02eb060000000000002251202f9b3795f41e26df38d81fab116652e1230cfbbb9930269937551092d1bdf2750000000000000000266a24494f423388f9e9ca6ed303c95347f55920f9c448edc84f2883f60d59b2991f450c3f97b80440d33d85e7fa369fdbeee6ee5a28462522ac419f527d3c8cb72986eaa2a4fd079c8902277123668e88c7163078079e818894f51a307736d42fa94dcd9124b6bcce40d33d85e7fa369fdbeee6ee5a28462522ac419f527d3c8cb72986eaa2a4fd079c8902277123668e88c7163078079e818894f51a307736d42fa94dcd9124b6bcce442006ef2cfa1fcd999b57e1357290bfd4dcb831671c29184beb4976a5da4fb8e201ad20153584fa6a0470ff040ef93e1f83d7ef19016e438849506c7b9b4e85f076a912ac41c150929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0e917046f89dcca8d4663af4597d17c3e2eb13b35ecd1c794b1882e0e2853c45100000000",
+          "reject_reason": "mempool-script-verify-flag-failed (Invalid Schnorr signature)",
+          "time": "2026-11-17T07:58:05Z",
+          "txid": "553b31e959ab70b7f0800960280b89b7ea95505fb1beecdde8afa54890d3bae6"
+        },
+        {
+          "actor": "evaluator",
+          "height": 161850,
+          "index": 4,
+          "kind": "offchain",
+          "label": "vault check",
+          "time": "2026-11-17T07:58:05Z",
+          "vault_unspent": true
+        }
+      ],
+      "track": "bitvm3-testnet4",
+      "upstream": {
+        "commit": "76071a0",
+        "garbling_engine": "garbled-snark-verifier half-gates (free-XOR, one Delta per garbling)",
+        "path": "in-and-out-burger/iob/bitvm3.py",
+        "repository": "patrickdugan/Spiral",
+        "target": "In-and-Out-Burger BitVM3 claim graph"
+      },
+      "upstream_exploit_claim": false,
+      "variant": "attack"
+    }
+  ],
+  "catalog_hash": "4552473724e4572885ddd44bd34a19c9481f8dd4f809e9767dd1e7c133601ee7",
+  "evidence_hash": "9dd1f1952447b2ba36e6dc618b3cc25432d45c2250fd6a1b786e8a75c0b8ec26",
+  "evidence_level": "bitcoin-core-testnet4-transactions",
+  "funding": {
+    "blockhash": "00000000003907df53fd2337fcad901a8f6b6287e07343de0e873c521358d7f9",
+    "coins": 3,
+    "raw_transaction": "02000000000106cf15323297da032856efc865d744925a048605c6417379037821571fd3eca3920000000000fdffffffdcfbee28097bcbb65f2273e05b66a3a2119367d498eba9715a077703dd3835c60000000000fdffffff6b9565e881b211e768a2c235b7897aba3268f272d9a245042dd5a71781183a800000000000fdfffffffbb65253c6d46fc064520efde2628ed851afab742e7c83f2148429b8a680c41f0100000000fdffffff33d2b36542590831fe422caa9ce24e92c525f26845003cbc7eb9423266c180f10000000000fdffffffcf15323297da032856efc865d744925a048605c6417379037821571fd3eca3920100000000fdffffff040c02000000000000225120ea7f93ea07532ee69a267c7fb2840054ab0e3b097861dbbdac13ad3d363892ebfc08000000000000225120903a138f8c441fe3cc4aeb5ebb9390c4b4a9a9ead8739b4cf783a4ac74e0d335fc080000000000002251206026e7a8415f5f68a9a34623828058c24446d98a78efb31d836fe0c31d91f129fc0800000000000022512023f7e6dd5324e4fcb6b12cb7be1b5c8120d36ee4239cc9e01750206eca29ee9e01403988365815f36d6a5896b312ff60e4b1d1f01574378ea53aa45598607aa81c5af291a7570ab05154bcd13e5ab2b436da0f48a677b5ffe6abddc5ac12b682b6c10140609961a042f7a187cf7705c2a0906e878fe3069de6785eefcc247da8de7025555c96ce8914ed3df24bc5250e3f028fb088fdd209fa1f75e111a397a93fe1aa6d014037abe79d215bc7bc5ab8d33e2333c3bcfdb66d06cc4b5f032a6969a447ab8fed2805e03a0fa43c3652380082d614d597e912e052b726b6da43b3e3ffbd72b8830140b210c0ec45f02e6d7f9bdd8e1b53a00e8ba2221eabba56955de6eda3b7a3978d0b8dc262a6dc505f54cd1aa9d60e2a878caba3ca45f4b4e25870df4abdf674fe01401a23c0e097931ac815006b127914246d14b8273b8301fb70b2c8946a6a00b8d77a6ea8a9e3483b21a82c58c6baaf74f3eb3476f51084a285b83965148d0f87cd03401d176b31b4ff7a2223da1465981a0677bf8bac6d421d223d34cf0a953439bf0bf2b3af57af03bebe1863827f0e1374a6001def7fbf2d029a1bff89e9dc527ca42220c2c41d452ff4bc18fb95c0707a85d1fbc8ad209ede49f574b117990497d966a5ac21c150929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac033780200",
+    "sizes": [
+      2300,
+      2300,
+      2300
+    ],
+    "txid": "128e8e26944572ad7f9dd7fff130baeff3887df776896d02def6a89d5907cca3"
+  },
+  "network": "testnet4",
+  "provenance": {
+    "end": {
+      "chain": "testnet4",
+      "connections": 10,
+      "full_rbf": true,
+      "min_relay_feerate_btc_kvb": "0.00000100",
+      "subversion": "/Satoshi:31.1.0/",
+      "tip_hash": "00000000013101c1b75f34f289ec0cc7d9a86492a3ee9a60b9590fbfd0b74ba4",
+      "tip_height": 161857,
+      "version": 310100,
+      "wallet": "bitvm-arena-staging"
+    },
+    "ended": "2026-11-17T08:58:25Z",
+    "patience_blocks": 18,
+    "start": {
+      "chain": "testnet4",
+      "connections": 10,
+      "full_rbf": true,
+      "min_relay_feerate_btc_kvb": "0.00000100",
+      "subversion": "/Satoshi:31.1.0/",
+      "tip_hash": "000000000001bd77c808c6520dcfaacd40f6837459fc637d08c7956517dbe6c4",
+      "tip_height": 161843,
+      "version": 310100,
+      "wallet": "bitvm-arena-staging"
+    },
+    "started": "2026-11-17T07:35:46Z"
+  },
+  "rows": [
+    "bitvm3-testnet4.cut_and_choose_grindable.mutant.attack",
+    "bitvm3-testnet4.tables_delivered_late.mutant.attack",
+    "bitvm3-testnet4.cut_and_choose_grindable.hardened.attack"
+  ],
+  "schema_version": 1,
+  "stage": {
+    "bond": 1000,
+    "child_fee": 500,
+    "claim_feerate": 1100,
+    "fee": 250,
+    "keys": {
+      "claimant": "153584fa6a0470ff040ef93e1f83d7ef19016e438849506c7b9b4e85f076a912",
+      "desk": "06ef2cfa1fcd999b57e1357290bfd4dcb831671c29184beb4976a5da4fb8e201",
+      "payout": "32ccf077e7b57f0dbad0e2ffbba7a1696ccb30bd7e1516543904c5487f58f519",
+      "refund": "ba946ead917ab9225ce975f3a8c5da7ef950245860e5c76b429f3ffee2d73cd8",
+      "relayer": "498659f16802ab123a46d6f6a3f38a4c9e4999f363bfbb84e0ce314224781667",
+      "third": "27ef49aa20082bfcc52d04d3c12e080249c7b6c1249b2eb595ff12db8eb8a037",
+      "watch": "31b18627cb960ca1483ab62937fe7251b8921160a0b902837449b2e696adac38"
+    },
+    "salt": "85c4873ffe8373052af33478d310c285",
+    "vault": 2000,
+    "watch_funds": 1500
+  },
+  "summary": {
+    "cases": 3,
+    "confirmed_transactions": 4,
+    "displaced_transactions": 0,
+    "dropped_transactions": 0,
+    "errors": [],
+    "expectation_failures": [],
+    "rebroadcast_transactions": 0,
+    "rejected_transactions": 1,
+    "reorged_transactions": 2,
+    "unconfirmed_transactions": 0
+  },
+  "track": "bitvm3-testnet4",
+  "wave": "wave5"
+}
