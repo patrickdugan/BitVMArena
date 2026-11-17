@@ -331,6 +331,79 @@ class ChainCheckTests(unittest.TestCase):
         self.assertEqual(problems, ["row: fund fund is not in the best chain"])
 
 
+class RecoverTests(unittest.TestCase):
+    """Wave 1 left a claim output unpaid and burned a bond; wave 5 left a vault unclaimed."""
+
+    class Node:
+        def __init__(self, tip, txs, unspent, mine=()):
+            self.tip, self.txs, self.unspent, self.mine, self.sent = tip, txs, unspent, set(mine), []
+
+        def rpc(self, method, *args, wallet=False):
+            if method == "getblockcount":
+                return self.tip
+            if method == "getrawtransaction":
+                return {"vout": self.txs[args[0]]}
+            if method == "gettxout":
+                confirmations = self.unspent.get(f"{args[0]}:{args[1]}")
+                return None if confirmations is None else {"confirmations": confirmations}
+            if method == "getaddressinfo":
+                return {"ismine": args[0] in self.mine}
+            if method == "testmempoolaccept":
+                return [{"allowed": True}]
+            if method == "sendrawtransaction":
+                self.sent.append(args[0])
+                return Transaction.parse(bytes.fromhex(args[0])).txid
+            raise AssertionError(method)
+
+    @staticmethod
+    def out(n, sats, spk, address=None):
+        script = {"hex": spk.hex() if isinstance(spk, bytes) else spk}
+        if address:
+            script["address"] = address
+        return {"n": n, "value": Decimal(sats) / Decimal(100_000_000), "scriptPubKey": script}
+
+    def setUp(self):
+        self.stage = testnet4.new_stage()
+        self.row = testnet4.select(["cut_and_choose_grindable.hardened.attack"])[0]
+        self.graph = testnet4._graphs(self.row, self.stage, {})[0]
+
+    def report(self, steps):
+        return {"wave": "w", "stage": testnet4.stage_record(self.stage),
+                "cases": [{"id": self.row["id"], "steps": steps}]}
+
+    def test_reclaims_pays_out_and_leaves_burned_and_owned_outputs(self):
+        g, stage = self.graph, self.stage
+        steps = [
+            {"kind": "fund", "label": "fund", "txid": "aa" * 32},
+            {"kind": "tx", "label": "claim", "txid": "bb" * 32, "confirmed": True},
+            {"kind": "tx", "label": "disprove", "txid": "cc" * 32, "confirmed": True},
+        ]
+        node = self.Node(1_000, {
+            "aa" * 32: [self.out(0, stage.vault, g.V.script_pubkey)],
+            "bb" * 32: [self.out(0, g.k_value, g.K.script_pubkey), self.out(1, 0, "6a")],
+            "cc" * 32: [self.out(0, 1_438, stage.spk("refund"), "refund-address"),
+                        self.out(1, stage.bond, bitvm3.BURN_SPK), self.out(2, 700, "51200000")],
+        }, {f"{'aa' * 32}:0": 10, f"{'bb' * 32}:0": 30, f"{'cc' * 32}:0": 5, f"{'cc' * 32}:1": 5,
+            f"{'cc' * 32}:2": 5}, mine={"refund-address"})
+        found = testnet4.recover(self.report(steps), stage, node, send=True)["outputs"]
+        by_kind = {f["kind"]: f for f in found}
+        self.assertEqual(sorted(by_kind), ["burned", "payout", "reclaim", "unknown"])
+        reclaim = by_kind["reclaim"]   # funded at 991: the 144-block reclaim opens at 1,135
+        self.assertEqual((reclaim["opens_at_height"], reclaim["returns"]), (991 + g.cfg.reclaim, stage.vault - stage.fee))
+        self.assertNotIn("sent", reclaim)
+        payout = by_kind["payout"]
+        self.assertEqual(payout["opens_at_height"], 971 + g.cfg.window)
+        self.assertTrue(payout["allowed"] and payout["sent"])
+        self.assertEqual(payout["txid"], g.payout_tx(testnet4._Spent("bb" * 32)).txid)
+        self.assertEqual(len(node.sent), 1)
+
+    def test_refuses_another_waves_keys(self):
+        other = self.report([])
+        other["stage"] = testnet4.stage_record(testnet4.new_stage())
+        with self.assertRaises(testnet4.ValidationError):
+            testnet4.recover(other, self.stage, self.Node(1, {}, {}))
+
+
 @unittest.skipUnless(reports(), "no committed testnet4 report")
 class EvidenceTests(unittest.TestCase):
     def test_committed_reports_audit_clean_and_detect_tampering(self):

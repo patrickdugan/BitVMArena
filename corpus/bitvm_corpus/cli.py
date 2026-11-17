@@ -175,6 +175,15 @@ def testnet4_command(args):
         emit({"track": report.get("track"), "wave": report.get("wave"), "cases": len(report.get("cases", [])),
               "summary": report.get("summary"), "problems": problems, "chain_notes": notes, "valid": not problems})
         return 0 if not problems else 1
+    if args.action == "recover":
+        if args.report is None or args.state is None or args.rpc_port is None or args.cookie is None \
+                or not args.wallet:
+            raise ValidationError("recover needs a report, --state, --rpc-port, --cookie and --wallet")
+        report = load_json(args.report)
+        stage = testnet4.stage_from_record(load_json(args.state / "stage.json"))
+        node = testnet4.StagingNode(args.rpc_port, args.cookie, args.wallet, chain=report.get("network")).check()
+        emit(testnet4.recover(report, stage, node, send=args.broadcast), args.output)
+        return 0
     if args.action == "list":
         waves = {i: w for w, ids in testnet4.WAVES.items() for i in ids}
         rows = testnet4.select(args.row, args.wave) if (args.row or args.wave) else testnet4.catalog()
@@ -266,8 +275,8 @@ def main(argv=None):
     p.add_argument("--miner", action="store_true", help="episode: grant the attacker the miner capability")
     p.add_argument("--actions", type=Path, help="episode: JSONL actions file (default: stdin)")
     p = sub.add_parser("testnet4", help="stage bitvm3 trajectories on testnet4 (rehearse on regtest first)")
-    p.add_argument("action", choices=("list", "rehearse", "run", "audit"))
-    p.add_argument("report", nargs="?", type=Path, help="report file for audit")
+    p.add_argument("action", choices=("list", "rehearse", "run", "audit", "recover"))
+    p.add_argument("report", nargs="?", type=Path, help="report file for audit and recover")
     from .testnet4 import WAVES
     p.add_argument("--wave", choices=tuple(WAVES), help="a predefined set of rows (testnet4.WAVES)")
     p.add_argument("--row", action="append", default=[], help="a row id, or text a row id contains (repeatable)")
@@ -275,11 +284,11 @@ def main(argv=None):
     p.add_argument("--interval", type=float, default=1.5, help="rehearse: seconds between the network's blocks")
     p.add_argument("--reorg-every", type=int, default=0,
                    help="rehearse: every Nth block is a reorg (tip invalidated, two empty blocks replace it)")
-    p.add_argument("--rpc-port", type=int, help="run/audit: RPC port of an existing testnet4 node")
-    p.add_argument("--cookie", type=Path, help="run/audit: that node's RPC cookie file")
-    p.add_argument("--wallet", help="run: the node wallet that funds the wave")
-    p.add_argument("--state", type=Path, help="run: new directory outside the repository for keys and the journal")
-    p.add_argument("--broadcast", action="store_true", help="run: confirm that real testnet4 transactions are sent")
+    p.add_argument("--rpc-port", type=int, help="run/audit/recover: RPC port of an existing testnet4 node")
+    p.add_argument("--cookie", type=Path, help="run/audit/recover: that node's RPC cookie file")
+    p.add_argument("--wallet", help="run/recover: the node wallet that funds the wave")
+    p.add_argument("--state", type=Path, help="run: new directory outside the repository for keys and the journal; recover: that wave's directory")
+    p.add_argument("--broadcast", action="store_true", help="run/recover: confirm that real testnet4 transactions are sent")
     p.add_argument("--output", type=Path)
     args = parser.parse_args(argv)
     try:

@@ -55,15 +55,16 @@ Next:
      - the 39 benign rows.
    - The cost is fees, about 780–990 sats per row (funding, claim, disprove, payout), plus
      a split per wave.
-     - Wave 1 spent 17,740 of its 49,000 sats and left 2,771 in contract outputs (a claim
-       output never paid out, and a bond) until their 144-block reclaim.
+     - Wave 1 spent 17,740 of its 49,000 sats. It burned the hardened `bond_self_slash`
+       bond (1,000 sats to the NUMS key), as that profile intends. It also left the
+       reorg-lost row's claim output (1,771 sats) unpaid; `testnet4 recover` has since paid
+       it out and returned 1,521.
      - Wave 2 spent 9,677, wave 3 6,478, wave 4 4,275 and wave 5 2,493.
-     - Wave 5's hardened row left its 2,000-sat vault unspent, as a refused claim does,
-       until the desk's reclaim opens at 161,994.
-     - The staging wallet holds 3,566 sats after wave 5, about one more row. The 44 rows
-       left need about 44k more (about 1,000 per row).
-   - Recovering the locked outputs needs a sweep that signs the desk's reclaims and the
-     bond paths with each wave's keys. It is not written yet.
+     - Wave 5's hardened row left its 2,000-sat vault unspent, as a refused claim does.
+       The desk's reclaim can be mined from block 161,989 and returns 1,750.
+     - The staging wallet holds 3,566 sats after wave 5, plus the 1,521 recovered from
+       wave 1: about two more rows. The 44 rows left need about 44k more (about 1,000 per
+       row).
    - Running all 84 rows at once would need about 163k sats of coins in flight. Waves sized
      to the wallet recycle the same coins.
    - The recipes that need a miner or a topology (`disprove_censored_by_miner`,

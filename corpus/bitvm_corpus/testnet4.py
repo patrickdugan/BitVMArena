@@ -127,6 +127,14 @@ WAVES = {
         f"{TRACK}.tables_delivered_late.mutant.attack",
         f"{TRACK}.cut_and_choose_grindable.hardened.attack",
     ],
+    # The sixth wave: the hardened halves of two pairs whose mutant attacks landed in waves 4
+    # and 5 (reused garbling seeds, tables delivered at claim time). Both end in a payout or a
+    # refund, so their coins come back. Sized to the 5,087 sats (four coins) left after wave 5
+    # and the wave 1 recovery: two 2,300-sat coins plus the split.
+    "wave6": [f"{TRACK}.{recipe}.hardened.attack" for recipe in (
+        "seed_reuse_across_claims",
+        "tables_delivered_late",
+    )],
 }
 
 
@@ -866,3 +874,82 @@ def verify_chain(report, node):
         elif confirmed:
             notes.append(f"{owner}: {label} confirmed after its case ended")
     return problems, notes
+
+
+# --- recovery ----------------------------------------------------------------------------
+
+class _Spent:
+    """A transaction known only by its txid: all `Graph.payout_tx` needs of the claim."""
+
+    def __init__(self, txid):
+        self.txid = txid
+
+
+def _graphs(row, stage, setup):
+    """Every graph a case may have built: its vault, and the second vault of a replayed proof."""
+    cltv = setup.get("cltv_height")
+    return [bitvm3.Graph(bitvm3.prepare(row, index=i, stage=stage), cltv_height=cltv) for i in (0, 1)]
+
+
+def _spend_for(graphs, utxo, confirmations, tip):
+    """(kind, transaction, first block height that can include it) for a contract output, or None."""
+    funded_at = tip - confirmations + 1
+    for g in graphs:
+        if utxo["script_pubkey"] == g.V.script_pubkey.hex() and utxo["amount"] == g.stage.vault:
+            return "reclaim", g.reclaim_tx(utxo), funded_at + g.cfg.reclaim
+        if utxo["script_pubkey"] == g.K.script_pubkey.hex() and utxo["amount"] == g.k_value and utxo["vout"] == 0:
+            if g.cltv_height is not None:
+                opens = g.cltv_height + 1
+            else:
+                opens = funded_at + (g.cfg.window if g.cfg.payout_csv else 0)
+            return "payout", g.payout_tx(_Spent(utxo["txid"])), opens
+    return None
+
+
+def recover(report, stage, node, *, send=False):
+    """The outputs a wave left in contract scripts, each with the spend that returns it to the
+    wallet: the desk's reclaim of a vault no claim spent, or the presigned payout of a claim
+    output nobody paid out. A bond paid to the NUMS key is burned and stays so. Every spend
+    whose timelock has passed is checked with testmempoolaccept and, with `send`, broadcast."""
+    if stage.public_keys() != report["stage"]["keys"]:
+        raise ValidationError("this stage's keys are not the report's")
+    by_id = {r["id"]: r for r in catalog()}
+    tip = node.rpc("getblockcount")
+    found = []
+    for case in report["cases"]:
+        steps, graphs = case["steps"], None
+        setup = next((s for s in steps if s["kind"] == "offchain" and s["label"] == "setup"), {})
+        for s in steps:
+            if not (s["kind"] == "fund" or (s["kind"] == "tx" and s.get("confirmed"))):
+                continue
+            for out in node.rpc("getrawtransaction", s["txid"], True)["vout"]:
+                left = node.rpc("gettxout", s["txid"], out["n"], True)
+                if left is None:
+                    continue
+                address = out["scriptPubKey"].get("address")
+                if address and node.rpc("getaddressinfo", address, wallet=True).get("ismine"):
+                    continue
+                utxo = {"txid": s["txid"], "vout": out["n"], "amount": int(Decimal(out["value"]) * SATS),
+                        "script_pubkey": out["scriptPubKey"]["hex"]}
+                entry = {"case": case["id"], "step": s["label"], "outpoint": f"{s['txid']}:{out['n']}",
+                         "amount": utxo["amount"], "confirmations": left["confirmations"]}
+                if utxo["script_pubkey"] == bitvm3.BURN_SPK.hex():
+                    found.append({**entry, "kind": "burned"})
+                    continue
+                graphs = graphs or _graphs(by_id[case["id"]], stage, setup)
+                plan = _spend_for(graphs, utxo, left["confirmations"], tip)
+                if plan is None:
+                    found.append({**entry, "kind": "unknown"})
+                    continue
+                kind, tx, opens = plan
+                entry.update(kind=kind, txid=tx.txid, returns=tx.outputs[0][0], opens_at_height=opens)
+                if tip + 1 >= opens:
+                    raw = tx.serialize().hex()
+                    result = node.rpc("testmempoolaccept", [raw])[0]
+                    entry.update(allowed=bool(result["allowed"]), reject_reason=result.get("reject-reason"))
+                    if result["allowed"] and send:
+                        if node.rpc("sendrawtransaction", raw) != tx.txid:
+                            raise CoreError("Core txid disagrees with local serialization")
+                        entry["sent"] = True
+                found.append(entry)
+    return {"wave": report.get("wave"), "tip": tip, "outputs": found}

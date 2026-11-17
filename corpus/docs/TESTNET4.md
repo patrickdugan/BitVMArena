@@ -416,9 +416,10 @@ What the public network showed:
   - against the node's best chain, valid, with no notes.
 - **Cost:** 2,493 sats of fees: 635 for the six-input split, 300 per vault funding, and
   479 for each claim and payout. That is about 830 per row with the split.
-- **Locked:** the hardened row's vault, 2,000 sats in `ac3e3358…:0`, stays in place until
-  the desk's 144-block reclaim opens at 161,994. The wallet holds 3,566 sats in three
-  coins.
+- **Locked:** the hardened row's vault, 2,000 sats in `ac3e3358…:0`, stays where it is
+  until the desk's 144-block reclaim. That reclaim can first be mined in block 161,989,
+  144 blocks after the funding block, and `testnet4 recover` sends it (below). The wallet
+  holds 3,566 sats in three coins.
 
 | Row | What testnet4 did |
 | --- | --- |
@@ -448,6 +449,33 @@ What the public network showed:
 4. **Two real-difficulty blocks in 15.** They were 161,845 and 161,853. Eight of the 15
    blocks from 161,843 to 161,857 held only their coinbase.
 
+## Recovering what a wave leaves
+
+A row can end with coins still in a contract output:
+- a vault that no claim spent, as when the desk refused to presign a claim;
+- a claim output that nobody paid out, as with wave 1's reorg-lost row.
+
+`testnet4 recover` lists every such output of a report.
+- **How it builds the spends:** it rebuilds each case's graphs from the wave's
+  `stage.json` and pairs each output with the spend that returns it to the wallet:
+  - a vault goes back through the desk's 144-block reclaim;
+  - a claim output goes out through the presigned payout, once its window has passed.
+- **Burned bonds:** a bond paid to the NUMS key is listed as burned. Nobody can spend it,
+  and the hardened `bond_self_slash` profile intends that.
+- **Checks:** every spend whose timelock has passed is checked with `testmempoolaccept`.
+- **Broadcast:** only with `--broadcast`.
+
+Recovered so far:
+
+| Wave | Output | Spend | Result |
+| --- | --- | --- | --- |
+| 1 | `reclaim_preempts_claim` claim output `4bfcefd1…:0`, 1,771 sats | presigned payout `b81cec35…` | 1,521 back to the wallet, block 161,859 |
+| 1 | `bond_self_slash` bond `6560a185…:1`, 1,000 sats | none | burned to the NUMS key |
+| 5 | `cut_and_choose_grindable` hardened vault `ac3e3358…:0`, 2,000 sats | desk reclaim `cdee3580…` | can be mined from block 161,989 |
+
+The wave 1 payout has the same txid as the payout testnet4 refused as `non-BIP68-final`
+during wave 1. The rebuilt graph is byte for byte the one the row signed.
+
 ## Running a wave
 
 ```bash
@@ -455,6 +483,8 @@ python -m bitvm_corpus testnet4 rehearse --wave wave1 --reorg-every 3 --output r
 python -m bitvm_corpus testnet4 run --wave wave1 --rpc-port 48332 --cookie <datadir>/testnet4/.cookie \
     --wallet bitvm-arena-staging --state <outside the repo>/wave1 --broadcast --output examples/testnet4/wave1.json
 python -m bitvm_corpus testnet4 audit examples/testnet4/wave1.json [--rpc-port 48332 --cookie ...]
+python -m bitvm_corpus testnet4 recover examples/testnet4/wave1.json --state <outside the repo>/wave1 \
+    --rpc-port 48332 --cookie <datadir>/testnet4/.cookie --wallet bitvm-arena-staging [--broadcast]
 ```
 
 With `--rpc-port`, `audit` also re-checks the split, every vault funding and every
