@@ -510,6 +510,49 @@ What the public network showed:
 4. **Two real-difficulty blocks in 15.** They were 161,860 and 161,868. Seven of the 15
    blocks from 161,859 to 161,873 held only their coinbase.
 
+## Wave 7: the hardened payout
+
+[`examples/testnet4/wave7.json`](../examples/testnet4/wave7.json), broadcast on
+2026-11-17:
+- **Row:** the hardened payout, presigned with its outputs committed, against the relayer
+  that redirects the presigned payout. Its mutant half landed in wave 3.
+- **Funding:** the 3,042 sats in the wallet, both coins, split into one 2,300-sat coin and
+  487 sats of change in `39fd067d…`. The split was first mined in minimum-difficulty
+  block 161,881 and is now in real-difficulty block 161,882 (below).
+- **Run:** the tip went from 161,880 to 161,895 between 11:14 and 12:56 UTC.
+- **Transactions:** 2 confirmed, 1 refused by mempool policy. None was displaced, dropped,
+  reorged during its row or left unconfirmed, and none had to be sent again.
+- **Expectations:** 1 of 1 met, and every transaction step matched the regtest catalog.
+- **Audit:**
+  - offline, clean;
+  - against the node's best chain, valid, with one note: the split moved to another block
+    after it was recorded.
+- **Cost:** 1,034 sats of fees: 255 for the split, 300 for the vault funding, 229 for the
+  claim and 250 for the payout.
+- **Locked:** nothing. The payout returned 1,521 sats, and the wallet holds 2,008 sats in
+  two coins.
+
+| Row | What testnet4 did |
+| --- | --- |
+| `payout_sighash_none` (hardened attack) | honest claim 161,885; the relayer's payout redirected to its own key was refused (`Invalid Schnorr signature`), because the presignature commits to the claimant's output; the claimant's payout 161,895 |
+
+What the public network showed:
+
+1. **The fix holds on testnet4.** A presignature over the outputs leaves a relayer nothing
+   to rewrite. In wave 3 the mutant's `SIGHASH_NONE` payout went to the relayer.
+2. **The split's own block was replaced.**
+   - The split was mined in minimum-difficulty block 161,881 (`0000000001d5e3ea…`, 15
+     transactions). The run then sent the vault funding, which spends it.
+   - A coinbase-only sibling (`00000000caba2d71…`) replaced 161,881. That put the split
+     and the funding back in the mempool together.
+   - Real-difficulty block 161,882 mined both. Nothing was sent again, and the funding
+     reached its depth before the claim went out.
+   - The report's funding record still names the first block. The audit's chain re-check
+     is what shows the move.
+3. **Three real-difficulty blocks in 16.** They were 161,882, 161,886 and 161,891. Nine of
+   the 16 blocks from 161,880 to 161,895 held only their coinbase. At 161,895 the node
+   knew thirteen other chain tips from height 161,880 up.
+
 ## Recovering what a wave leaves
 
 A row can end with coins still in a contract output:

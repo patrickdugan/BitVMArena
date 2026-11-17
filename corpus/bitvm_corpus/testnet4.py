@@ -135,6 +135,10 @@ WAVES = {
         "seed_reuse_across_claims",
         "tables_delivered_late",
     )],
+    # The seventh wave: the hardened payout presigned with its output committed, against the
+    # relayer that would redirect it. The honest claim is paid, so the coin comes back. Sized
+    # to the 3,042 sats (two coins) left after wave 6: one 2,300-sat coin plus the split.
+    "wave7": [f"{TRACK}.payout_sighash_none.hardened.attack"],
 }
 
 
