@@ -42,6 +42,10 @@ Done:
     tables handed over at claim time) and the hardened cut-and-choose; 3 of 3 met. Every
     mutant attack in the catalog has now landed on testnet4, and the hardened
     cut-and-choose claim was refused by public relay policy.
+  - **Wave 6:** the hardened seed-reuse and late-tables attacks; 2 of 2 met. The griefing
+    disprove failed its hashlock, and the watcher disproved the false claim from the tables
+    checked at setup. Three consecutive blocks holding wave transactions were replaced, and
+    nothing needed a resend.
 
 Next:
 
@@ -49,9 +53,9 @@ Next:
    `m14-claim` does not export; the window and censorship recipes need the evaluation
    time measured on the watcher hardware a deployment expects.
 2. **The rest of the testnet4 catalog.**
-   - Left after wave 5:
-     - five hardened attacks (`garbling_unchecked`, `seed_reuse_across_claims`,
-       `payout_sighash_none`, `tables_delivered_late`, `claim_sighash_none`);
+   - Left after wave 6:
+     - three hardened attacks (`garbling_unchecked`, `payout_sighash_none`,
+       `claim_sighash_none`);
      - the 39 benign rows.
    - The cost is fees, about 780–990 sats per row (funding, claim, disprove, payout), plus
      a split per wave.
@@ -59,12 +63,11 @@ Next:
        bond (1,000 sats to the NUMS key), as that profile intends. It also left the
        reorg-lost row's claim output (1,771 sats) unpaid; `testnet4 recover` has since paid
        it out and returned 1,521.
-     - Wave 2 spent 9,677, wave 3 6,478, wave 4 4,275 and wave 5 2,493.
+     - Wave 2 spent 9,677, wave 3 6,478, wave 4 4,275, wave 5 2,493 and wave 6 2,045.
      - Wave 5's hardened row left its 2,000-sat vault unspent, as a refused claim does.
        The desk's reclaim can be mined from block 161,989 and returns 1,750.
-     - The staging wallet holds 3,566 sats after wave 5, plus the 1,521 recovered from
-       wave 1: about two more rows. The 44 rows left need about 44k more (about 1,000 per
-       row).
+     - The staging wallet holds 3,042 sats after wave 6: one more 2,300-sat coin. The 42
+       rows left need about 42k more (about 1,000 per row).
    - Running all 84 rows at once would need about 163k sats of coins in flight. Waves sized
      to the wallet recycle the same coins.
    - The recipes that need a miner or a topology (`disprove_censored_by_miner`,

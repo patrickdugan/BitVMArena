@@ -449,6 +449,67 @@ What the public network showed:
 4. **Two real-difficulty blocks in 15.** They were 161,845 and 161,853. Eight of the 15
    blocks from 161,843 to 161,857 held only their coinbase.
 
+## Wave 6: the hardened seeds and tables
+
+[`examples/testnet4/wave6.json`](../examples/testnet4/wave6.json), broadcast on
+2026-11-17:
+- **Rows:** the hardened halves of two pairs whose mutant attacks landed in waves 4 and 5:
+  - a fresh garbling seed per claim, against the watcher that derives Delta from two
+    claims' labels;
+  - garbled tables delivered and checked at setup, against the claimant that hands over
+    other tables at claim time.
+- **Funding:** the 5,087 sats in the wallet, all four coins (wave 5's three and the 1,521
+  recovered from wave 1), split into two 2,300-sat coins in `561a28e6…` (real-difficulty
+  block 161,860). The leftover was below the dust limit, so the wallet added it to the fee
+  and made no change output. The split has not moved.
+- **Run:** the tip went from 161,859 to 161,873 between 09:39 and 11:04 UTC.
+- **Transactions:** 4 confirmed, 2 refused by mempool policy. None was displaced, dropped
+  or left unconfirmed.
+  - Three were reorged during their rows: both claims and the disprove (below).
+  - None had to be sent again.
+- **Expectations:** 2 of 2 met, and every transaction step matched the regtest catalog.
+- **Audit:**
+  - offline, clean;
+  - against the node's best chain, valid, with one note per row: both vault fundings
+    moved to another block at height 161,865 after they were recorded.
+- **Cost:** 2,045 sats of fees: 487 for the four-input split, 300 per vault funding, 229
+  per claim, and 250 for the payout and for the disprove. That is about 1,020 per row
+  with the split.
+- **Locked:** nothing. Both rows returned 1,521 sats to the wallet, which holds 3,042 sats
+  in two coins.
+
+| Row | What testnet4 did |
+| --- | --- |
+| `seed_reuse_across_claims` (hardened attack) | honest claim 161,866; the watcher took the labels of an earlier claim garbled from an independent seed and tried 32 candidates for the reject label; none matched, so the griefing disprove failed its hashlock (`OP_EQUALVERIFY`) and was refused; paid 161,873 |
+| `tables_delivered_late` (hardened attack) | false claim 161,866; the claimant handed over tables committing to `8f884c5b…`, not the registered `f832397f…`; the watcher evaluated the tables checked at setup, got the reject label and disproved, 161,868; the claimant's payout was refused (`missing-inputs`) |
+
+What the public network showed:
+
+1. **Both fixes hold on testnet4.**
+   - With one seed per claim, an earlier claim's labels say nothing about this claim's
+     Delta. The griefing disprove that took the honest claim in wave 4 now fails its
+     script.
+   - With the tables fixed at setup, tables handed over late do not matter: the watcher
+     never evaluates them.
+2. **Three blocks in a row with wave transactions were replaced.**
+   - The vault fundings were first mined in minimum-difficulty block 161,865
+     (`00000000004968…`, 37 transactions). A sibling at the same height
+     (`0000000001672991…`, 38 transactions) replaced it. The audit's chain re-check is
+     what noticed: the report records the block a funding was in when its case started.
+   - On the new 161,865, both claims went into 161,866 (`000000000065a2b8…`, 61
+     transactions) and the disprove into 161,867 (`000000005b8fbfcc…`, 5 transactions).
+   - A three-block branch with more work replaced those two: 161,866 (`0000000044b2b693…`,
+     the coinbase and the two claims), a coinbase-only 161,867, and real-difficulty
+     161,868, which holds the disprove.
+   - The claims stayed at height 161,866, so the payout window counted the same blocks.
+     Every transaction came back in the new blocks without a resend.
+   - At 161,873 the node knew nine other chain tips from height 161,859 up.
+3. **Real-difficulty block 161,868 is stamped 79 minutes before its parent.** The
+   minimum-difficulty blocks around it are stamped 20 minutes apart and up to two hours
+   ahead.
+4. **Two real-difficulty blocks in 15.** They were 161,860 and 161,868. Seven of the 15
+   blocks from 161,859 to 161,873 held only their coinbase.
+
 ## Recovering what a wave leaves
 
 A row can end with coins still in a contract output:
