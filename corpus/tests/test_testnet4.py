@@ -5,6 +5,7 @@ import os
 import unittest
 import uuid
 from contextlib import redirect_stderr, redirect_stdout
+from decimal import Decimal
 from pathlib import Path
 
 from bitvm_corpus import bitvm3, gc, testnet4
@@ -238,6 +239,96 @@ class ReorgTests(unittest.TestCase):
         self.assertEqual(session._confirmations("claim"), 1)
         self.assertEqual(network.rpc("getblockcount"), 102)
         self.assertEqual(session.finish()[0]["rebroadcasts"], 1)
+
+
+class SplitTests(unittest.TestCase):
+    class Node:
+        def __init__(self):
+            self.mempool, self.confirmed, self.sent, self.addresses = set(), False, 0, 0
+
+        def rpc_named(self, method, wallet=False, **_):
+            self.mempool.add("split")
+            return {"txid": "split"}
+
+        def rpc(self, method, *args, wallet=False):
+            if method == "getnewaddress":
+                self.addresses += 1
+                return f"addr{self.addresses}"
+            if method == "gettransaction":
+                return {"hex": "raw"}
+            if method == "getmempoolentry":
+                if args[0] not in self.mempool:
+                    raise testnet4.CoreError("Transaction not in mempool")
+                return {}
+            if method == "sendrawtransaction":
+                self.sent += 1
+                self.mempool.add("split")
+                return "split"
+            if method == "getrawtransaction":
+                if not self.confirmed:
+                    raise testnet4.CoreError("No such mempool or blockchain transaction")
+                vout = [{"n": n, "value": Decimal("0.00002300"), "scriptPubKey": {"address": f"addr{n + 1}"}}
+                        for n in range(self.addresses)]
+                return {"confirmations": 1, "hex": "raw", "blockhash": "B", "vout": vout}
+            raise AssertionError(method)
+
+    class Chain:
+        def __init__(self, node):
+            self.node = node
+
+        def wait_until(self, predicate, timeout):
+            self.node.mempool.clear()            # the reorg right after the split evicts it
+            if predicate():
+                return True
+            if "split" in self.node.mempool:     # the next block mines whatever is in the mempool
+                self.node.mempool.clear()
+                self.node.confirmed = True
+            return predicate()
+
+    class Journal:
+        def __init__(self):
+            self.entries = []
+
+        def write(self, **entry):
+            self.entries.append(entry)
+
+    def test_an_evicted_split_is_sent_again(self):
+        # Wave 5's rehearsal: a reorg two seconds after the split lowered the tip, the split
+        # (nLockTime = the old tip) left the mempool, and the wave waited six hours for it.
+        node, journal = self.Node(), self.Journal()
+        pool, record = testnet4.CoinPool.split(node, self.Chain(node), [2300, 2300], journal)
+        self.assertEqual(node.sent, 1)
+        self.assertIn("coin split resent", [e["kind"] for e in journal.entries])
+        self.assertEqual(record["sizes"], [2300, 2300])
+        self.assertEqual(len(pool.coins), 2)
+
+
+class ChainCheckTests(unittest.TestCase):
+    class Chain:
+        def __init__(self, txs):
+            self.txs = txs
+
+        def rpc(self, method, txid, verbose):
+            if txid not in self.txs:
+                raise testnet4.CoreError("No such mempool or blockchain transaction")
+            return self.txs[txid]
+
+    def test_the_split_and_vault_fundings_are_rechecked(self):
+        # Waves 3 and 4: the split was recorded in a block a reorg replaced. The re-check
+        # covered only the steps, so the move went unnoted.
+        report = {
+            "funding": {"txid": "split", "blockhash": "A", "raw_transaction": "00"},
+            "cases": [{"id": "row", "steps": [
+                {"kind": "fund", "label": "fund", "txid": "fund", "blockhash": "A", "raw_transaction": "11"},
+                {"kind": "tx", "label": "claim", "txid": "claim", "blockhash": "C", "raw_transaction": "22",
+                 "broadcast": True, "confirmed": True},
+            ]}],
+        }
+        chain = self.Chain({"split": {"confirmations": 9, "hex": "00", "blockhash": "B"},
+                            "claim": {"confirmations": 3, "hex": "22", "blockhash": "C"}})
+        problems, notes = testnet4.verify_chain(report, chain)
+        self.assertEqual(notes, ["funding: split was reorganized into block B"])
+        self.assertEqual(problems, ["row: fund fund is not in the best chain"])
 
 
 @unittest.skipUnless(reports(), "no committed testnet4 report")

@@ -131,7 +131,9 @@ class Regtest:
     def initialize_wallet(self):
         self.rpc("createwallet", "arena")
         self.miner = self.rpc("getnewaddress", "", "bech32m", wallet=True)
-        self.rpc("generatetoaddress", 101, self.miner)
+        # Ten blocks per call: on a loaded machine one call for all 101 outlasts the RPC timeout.
+        for start in range(0, 101, 10):
+            self.rpc("generatetoaddress", min(10, 101 - start), self.miner)
 
     def mine(self, count=1):
         return self.rpc("generatetoaddress", count, self.miner)

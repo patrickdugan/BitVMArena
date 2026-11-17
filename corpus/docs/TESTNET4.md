@@ -60,6 +60,22 @@ The rehearsal found three harness bugs a single-threaded regtest run cannot show
 - A block arriving between reading the tip for an absolute payout height and recording the
   setup step broke the CLTV audit. The public-network audit allows 2 blocks of slack.
 
+Wave 5's rehearsals found two more:
+- **An evicted coin split was never sent again.**
+  - The wallet sets the split's nLockTime to the tip. A reorg that lowers the tip makes the
+    split non-final, and in a rehearsal the split can also spend a coinbase that is
+    immature again.
+  - A reorg two seconds after the split did both. Core dropped it from the mempool, and the
+    rehearsal waited six hours for a transaction that was gone.
+  - The split is now sent again on every block until it is back, as the case transactions
+    already were.
+  - Testnet4 can lower the tip the same way, when a real-difficulty block replaces two
+    minimum-difficulty blocks.
+- **The bootstrap outlasted the RPC timeout.** On a machine at 100% CPU, the regtest node
+  took about 0.8 s per block, and one `generatetoaddress 101` call outlasted the 30-second
+  RPC timeout. It now mines ten blocks per call, and the rehearsal node uses the 60-second
+  cap.
+
 ## Wave 1: 18 hardened rows on testnet4
 
 [`examples/testnet4/wave1.json`](../examples/testnet4/wave1.json), broadcast on
@@ -75,7 +91,11 @@ The rehearsal found three harness bugs a single-threaded regtest run cannot show
   - offline, clean;
   - the re-check against the node's best chain finds every confirmed transaction still
     in the chain, with the same bytes;
-  - two payouts the report records in block 161,710 now sit in 161,712.
+  - two payouts the report records in block 161,710 now sit in 161,712;
+  - the second vault funding of `proof_replay_across_vaults`, recorded in 161,704
+    (`00000000d7df…`), now sits in a sibling block at the same height
+    (`000000000043948b…`). The re-check has covered vault fundings and the split since
+    wave 4.
 
 | Row (hardened) | Outcome | What testnet4 did |
 | --- | --- | --- |
@@ -280,7 +300,13 @@ What the public network showed:
 - **Audit:**
   - offline, clean;
   - against the node's best chain, valid;
-  - three notes: payouts recorded in 161,776 now sit in 161,778 (below).
+  - six notes:
+    - the split, recorded in 161,765, now sits in a sibling block at the same height
+      (`00000000ae78151d…`);
+    - three payouts recorded in 161,776 now sit in 161,778 (below);
+    - the two `proof_replay_across_vaults` payouts, recorded in 161,783
+      (`0000000026eb5d1e…`), now sit in a sibling block at the same height
+      (`00000000006e060e…`). That block replaced the recorded one after the wave ended.
 - **Cost:** 6,478 sats of fees, of which 1,274 were for the split, so about 870 per row.
   Wave 2 came to about 780 per row after its 1,866-sat split. Nothing was left in contract
   outputs.
@@ -291,7 +317,7 @@ What the public network showed:
 | `window_below_latency` | claim 161,767; payout 161,776 (now 161,778) before the evaluation finished; disprove refused `missing-inputs` |
 | `claim_sighash_none` | the claimant's rewrite of the presigned claim, paying the vault straight to itself, 161,767 |
 | `payout_sighash_none` | claim 161,767; redirected payout 161,776 (now 161,778); honest payout refused `missing-inputs` |
-| `proof_replay_across_vaults` | one payment proof claimed both vaults, 161,772; both paid 161,783 |
+| `proof_replay_across_vaults` | one payment proof claimed both vaults, 161,772; both paid 161,783 (since moved to a sibling block) |
 | `single_watcher_disprove` | claim 161,767; a disprove by a reject-label holder other than the one authorized watcher refused `Invalid Schnorr signature`; false claim paid 161,776 (now 161,778) |
 
 What the public network showed:
@@ -308,6 +334,65 @@ What the public network showed:
    - The audit's chain re-check notes each move. No outcome changed: on every branch,
      the payout was the transaction that spent the claim output.
 
+## Wave 4: seeds, polarity, the bond and the garbling
+
+[`examples/testnet4/wave4.json`](../examples/testnet4/wave4.json), broadcast on
+2026-11-16 and 17:
+- **Rows:** four mutant attacks:
+  - a griefing disprove built from reused garbling seeds;
+  - a disprove that the swapped output polarity refuses;
+  - the bond self-slash replacement under full RBF;
+  - a claim on a garbling nobody checked.
+- **Funding:** the 12,334 sats left after wave 3, all eight coins, split into four coins
+  (2,300 sats, and 3,300 for the bond row) in `1fc480a6…`. It was recorded in 161,784 and
+  now sits in 161,786 (below).
+- **Run:** the tip went from 161,783 to 161,799 between 23:35 UTC on the 16th and 01:05
+  UTC on the 17th.
+- **Transactions:** 8 confirmed, 3 refused by mempool policy, and 1 displaced. None was
+  dropped or left unconfirmed.
+  - The displaced one is the watcher's disprove in `bond_self_slash`. The claimant's
+    self-slash disprove replaced it, as the recipe intends.
+  - Four were reorged during their rows: all four claims (below).
+  - None had to be sent again.
+- **Expectations:** 4 of 4 met. Every attack landed, and every transaction step matched
+  the regtest catalog.
+- **Audit:**
+  - offline, clean;
+  - against the node's best chain, valid;
+  - one note: the split.
+- **Cost:** 4,275 sats of fees, of which 826 were for the eight-input split, so about 860
+  per row. Nothing was left in contract outputs. The wallet holds 8,059 sats in six coins.
+
+| Row (mutant attack) | What testnet4 did |
+| --- | --- |
+| `seed_reuse_across_claims` | honest claim 161,790; griefing disprove, carrying the reject label that the leaked Delta yields, 161,791; honest payout refused `missing-inputs` |
+| `output_polarity_swapped` | false claim 161,790; the watcher's disprove refused (`OP_EQUALVERIFY` failed); false claim paid 161,797 |
+| `bond_self_slash` | false claim 161,790; the watcher's disprove accepted, then replaced in the mempool by the claimant's self-slash disprove, mined 161,791; payout refused `missing-inputs` |
+| `garbling_unchecked` | false claim 161,790; nothing could disprove it; paid 161,797 |
+
+What the public network showed:
+
+1. **Full-RBF replacement of a disprove reaches testnet4 miners.** The watcher's disprove
+   of `bond_self_slash` was in the mempool first. The claimant's self-slash disprove
+   spent the same claim output at a higher fee, replaced it, and was mined in 161,791.
+   The bond went back to the claimant. A mutant bond that whoever disproves can take
+   deters nothing: the garbler knows the reject label and can always outbid the watcher.
+2. **A sibling block took all four claims.**
+   - The claims were first mined in minimum-difficulty block 161,790
+     (`0000000061f22a97…`).
+   - A sibling minimum-difficulty block at the same height (`0000000000213be0…`), on the
+     branch the next blocks built on, replaced it and mined all four claims again.
+   - The replacement was at the same height, so no timelock count changed. The two
+     payouts came at 161,797, seven blocks after their claims.
+3. **The split moved, and the re-check now sees it.**
+   - The split was recorded in minimum-difficulty block 161,784 (`00000000000f4602…`).
+     Real-difficulty block 161,786 replaced the branch and mined it again.
+   - Until wave 4 the audit's chain re-check covered only the steps of each case. Run
+     against waves 1–3 after the change, it found two more moves the reports did not
+     note: the wave 3 split, and a wave 1 vault funding (above).
+4. **Most blocks still carry nothing.** Of the 17 blocks from 161,783 to 161,799, three
+   were real-difficulty blocks (161,786, 161,793, 161,797), and 8 held only their coinbase.
+
 ## Running a wave
 
 ```bash
@@ -317,8 +402,9 @@ python -m bitvm_corpus testnet4 run --wave wave1 --rpc-port 48332 --cookie <data
 python -m bitvm_corpus testnet4 audit examples/testnet4/wave1.json [--rpc-port 48332 --cookie ...]
 ```
 
-With `--rpc-port`, `audit` also re-checks every confirmed transaction against a testnet4
-node's current best chain: it must still be in the chain, with the same bytes. A reorg into
+With `--rpc-port`, `audit` also re-checks the split, every vault funding and every
+confirmed transaction against a testnet4 node's current best chain: each must still be in
+the chain, with the same bytes. A reorg into
 another block is noted, not failed. A report records the block each transaction was in
 when its case ended. On testnet4 that block can still be replaced, which is why the
 re-check exists.

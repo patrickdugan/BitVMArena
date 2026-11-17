@@ -118,6 +118,15 @@ WAVES = {
         "bond_self_slash",
         "garbling_unchecked",
     )],
+    # The fifth wave: the last two mutant attacks (a grindable Fiat-Shamir cut-and-choose and
+    # garbled tables delivered after the claim), and the hardened cut-and-choose against the
+    # same grinding. Sized to the 8,059 sats (six coins) left after wave 4: three 2,300-sat
+    # coins plus the split.
+    "wave5": [
+        f"{TRACK}.cut_and_choose_grindable.mutant.attack",
+        f"{TRACK}.tables_delivered_late.mutant.attack",
+        f"{TRACK}.cut_and_choose_grindable.hardened.attack",
+    ],
 }
 
 
@@ -384,7 +393,23 @@ class CoinPool:
                                 fee_rate=feerate)
         txid = result["txid"]
         journal.write(kind="coin split", txid=txid, sizes=list(sizes))
-        if not chain.wait_until(lambda: confirmations(node, txid) >= 1, timeout):
+        raw = node.rpc("gettransaction", txid, wallet=True)["hex"]
+
+        def settled():
+            if confirmations(node, txid) >= 1:
+                return True
+            if not in_mempool(node, txid):
+                # A reorg that lowers the tip evicts the split: the wallet set its nLockTime to
+                # the tip, and in a rehearsal it can spend a coinbase that is immature again.
+                # Send it again on every block until it is back, as its owner's wallet would.
+                try:
+                    node.rpc("sendrawtransaction", raw)
+                    journal.write(kind="coin split resent", txid=txid)
+                except CoreError:
+                    pass
+            return False
+
+        if not chain.wait_until(settled, timeout):
             raise CoreError(f"coin split {txid} did not confirm")
         info = node.rpc("getrawtransaction", txid, True)
         coins = []
@@ -753,7 +778,7 @@ def rehearse(binary, directory, rows, *, wave="rehearsal", interval=1.5, reorg_e
     with `reorg_every` also reorganizes it the way testnet4 does."""
     NetworkMiner.check_reorg_every(reorg_every)
     directory = Path(directory)
-    with Regtest(binary, directory / "node") as owned:
+    with Regtest(binary, directory / "node", timeout=60) as owned:
         owned.initialize_wallet()
         node = StagingNode(owned.port, owned.cookie, "arena", chain="regtest").check()
         with NetworkMiner(node, owned.miner, interval, reorg_every) as miner:
@@ -808,25 +833,36 @@ def audit(report):
     return problems
 
 
-def verify_chain(report, node):
-    """Re-check every confirmed transaction against a testnet4 node's current best chain."""
-    problems, notes = [], []
+def _chain_records(report):
+    """The transactions a report puts on chain, as (owner, label, record, recorded as confirmed):
+    the split, each vault funding and each broadcast step."""
+    if report.get("funding"):
+        yield "funding", "split", report["funding"], True
     for case in report.get("cases", []):
         for s in case["steps"]:
-            if s["kind"] != "tx" or not s.get("broadcast"):
-                continue
-            try:
-                info = node.rpc("getrawtransaction", s["txid"], True)
-            except CoreError:
-                info = None
-            confirmed = bool(info and info.get("confirmations", 0) >= 1)
-            if s.get("confirmed"):
-                if not confirmed:
-                    problems.append(f"{case['id']}: {s['label']} {s['txid']} is not in the best chain")
-                elif info["hex"] != s["raw_transaction"]:
-                    problems.append(f"{case['id']}: {s['label']} differs from the chain's transaction")
-                elif info["blockhash"] != s["blockhash"]:
-                    notes.append(f"{case['id']}: {s['label']} was reorganized into block {info['blockhash']}")
-            elif confirmed:
-                notes.append(f"{case['id']}: {s['label']} confirmed after its case ended")
+            if s["kind"] == "fund":
+                yield case["id"], s["label"], s, True
+            elif s["kind"] == "tx" and s.get("broadcast"):
+                yield case["id"], s["label"], s, bool(s.get("confirmed"))
+
+
+def verify_chain(report, node):
+    """Re-check the split, every vault funding and every confirmed transaction against a
+    testnet4 node's current best chain."""
+    problems, notes = [], []
+    for owner, label, s, recorded in _chain_records(report):
+        try:
+            info = node.rpc("getrawtransaction", s["txid"], True)
+        except CoreError:
+            info = None
+        confirmed = bool(info and info.get("confirmations", 0) >= 1)
+        if recorded:
+            if not confirmed:
+                problems.append(f"{owner}: {label} {s['txid']} is not in the best chain")
+            elif info["hex"] != s["raw_transaction"]:
+                problems.append(f"{owner}: {label} differs from the chain's transaction")
+            elif info["blockhash"] != s["blockhash"]:
+                notes.append(f"{owner}: {label} was reorganized into block {info['blockhash']}")
+        elif confirmed:
+            notes.append(f"{owner}: {label} confirmed after its case ended")
     return problems, notes

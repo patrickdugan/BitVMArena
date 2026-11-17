@@ -35,6 +35,9 @@ Done:
     public network, and 13 transactions came through a reorg without a resend.
   - **Wave 3:** six mutant attacks on timing and on presigned transactions; 6 of 6 met.
     The absolute-timelock payout landed in its claim's block.
+  - **Wave 4:** four mutant attacks on seeds, polarity, the bond and the garbling; 4 of 4
+    met. The claimant's self-slash disprove replaced the watcher's under full RBF. The
+    audit's chain re-check now covers the split and the vault fundings.
 
 Next:
 
@@ -42,19 +45,19 @@ Next:
    `m14-claim` does not export; the window and censorship recipes need the evaluation
    time measured on the watcher hardware a deployment expects.
 2. **The rest of the testnet4 catalog.**
-   - Wave 4 runs four more mutant attacks: seed reuse, swapped polarity, bond self-slash
-     and unchecked garbling.
-   - Left after wave 4:
-     - two mutant attacks (`cut_and_choose_grindable`, `tables_delivered_late`);
-     - the six hardened attacks wave 1 left out;
+   - Wave 5 runs the last two mutant attacks (`cut_and_choose_grindable`,
+     `tables_delivered_late`) and the hardened `cut_and_choose_grindable` attack.
+   - Left after wave 5:
+     - five hardened attacks (`garbling_unchecked`, `seed_reuse_across_claims`,
+       `payout_sighash_none`, `tables_delivered_late`, `claim_sighash_none`);
      - the 39 benign rows.
-   - The cost is fees, about 970–990 sats per row (funding, claim, disprove, payout).
+   - The cost is fees, about 860–990 sats per row (funding, claim, disprove, payout), plus
+     a split per wave.
      - Wave 1 spent 17,740 of its 49,000 sats and left 2,771 in contract outputs (a claim
        output never paid out, and a bond) until their 144-block reclaim.
-     - Wave 2 spent 9,677 and wave 3 spent 6,478. Neither left anything locked.
-     - The staging wallet had 12,334 sats before wave 4. At about 900 sats per row plus
-       the split, wave 4 leaves about 8k. That covers the last two mutant attacks (4,600 in
-       coins plus a split). The 45 rows after that need about 45k more.
+     - Wave 2 spent 9,677, wave 3 6,478 and wave 4 4,275. None left anything locked.
+     - The staging wallet had 8,059 sats before wave 5, enough for three 2,300-sat coins
+       and the split. The 44 rows after wave 5 need about 44k more (about 1,000 per row).
    - Running all 84 rows at once would need about 163k sats of coins in flight. Waves sized
      to the wallet recycle the same coins.
    - The recipes that need a miner or a topology (`disprove_censored_by_miner`,
