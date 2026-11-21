@@ -85,6 +85,74 @@
       ]
     },
     {
+      "id": "BVA-CORRELATED-SETUP",
+      "title": "Correlated compromise of BitVM ceremony participants",
+      "target": {
+        "kind": "local",
+        "path": "src/bitvm_arena/setup_compromise.py",
+        "paired_native_sources": [
+          {
+            "repository": "patrickdugan/BitVMArena",
+            "commit": "933d8329c0a9b2c2d4662bdc5cef0aadd2c0bf80",
+            "path": "corpus/bitvm_corpus/bitvm3.py"
+          },
+          {
+            "repository": "patrickdugan/bitcoin-rs",
+            "commit": "256c4af320f501050bfaac7d4f7cfe97d87a03b4",
+            "path": "docs/research/keyless-checksig.md"
+          }
+        ]
+      },
+      "arena_execution_status": "local_model_ready",
+      "evidence_level": "synthetic-model",
+      "scenario_families": [
+        "independent subthreshold setup compromise",
+        "correlated three-host quorum compromise",
+        "covert versus visible attacker coordination capability",
+        "poisoned presignatures",
+        "honest-challenger outage",
+        "TXCOMMIT preactivation or missing digest verification",
+        "proof-fragment availability and old-state binding"
+      ],
+      "invariants": [
+        "Attacks in each arm preserve the evaluator-owned funded outpoint and policy.",
+        "The same logical payout policy is compared across arm-specific funding outputs.",
+        "A rejected attack receives no value-theft credit, while unavailable proof data receives a separate liveness mark.",
+        "A synthetic assumption result cannot be promoted to native consensus evidence."
+      ],
+      "upstream_commands": [],
+      "local_scenario_ids": [
+        "honest",
+        "subthreshold-covert",
+        "quorum-covert",
+        "quorum-visible",
+        "poisoned-presigns",
+        "watcher-outage",
+        "wrong-actual-tx",
+        "proof-withheld",
+        "wrong-old-state"
+      ],
+      "next_acceptance_gates": [
+        "Pin concrete test-only 3-of-5 and n-of-n signing graphs and repeat authority retention against identical logical obligations.",
+        "Execute both signed and keyless program paths on isolated regtest validators using exact source and binary hashes.",
+        "Require actual transaction bytes, mempool admission, block validation and final UTXO ownership receipts.",
+        "Include monitor-visibility tests if a concrete covert-channel detector is developed."
+      ],
+      "limits": [
+        "All nine cases on three arms are a deterministic capability model, not simulated agent infiltrations or real transactions.",
+        "The keyless side assumes P2MR script-only authority, activated TXCOMMIT and a sound application validity verifier.",
+        "The 3-of-5 threshold is a fixture parameter, not a claim about every BitVM deployment.",
+        "The deliberately disabled-TXCOMMIT arm is a planted consensus-activation fault.",
+        "Native BitVM3 desk-key retention and Keyless F17 transitions have different source-level scope."
+      ],
+      "completed_checks": [],
+      "sources": [
+        "docs/setup_compromise.md",
+        "https://github.com/patrickdugan/Spiral/blob/main/BIPSpace/Keyless-CHECKSIG/bip-keyless-checksig.md",
+        "https://github.com/patrickdugan/bitcoin-rs/pull/2"
+      ]
+    },
+    {
       "id": "BVA-AUTHORITY",
       "title": "Canonical gate authority and funded-target tests",
       "target": {
