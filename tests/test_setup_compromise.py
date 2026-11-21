@@ -121,10 +121,6 @@ class CorrelatedSetupTests(unittest.TestCase):
                            expected_case="quorum-covert")
             self.assertTrue((out / "summary.json").is_file())
             from bitvm_arena.setup_compromise import main
-            with self.assertRaisesRegex(ValueError, "overwrite"):
-                # The library benchmark intentionally writes again; CLI alone refuses overwrite.
-                if out.exists():
-                    raise ValueError("refusing to overwrite existing evidence directory")
             with self.assertRaises(SystemExit) as error:
                 main(["benchmark", "--output", str(out)])
             self.assertEqual(error.exception.code, 2)
