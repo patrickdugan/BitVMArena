@@ -185,12 +185,14 @@ def run_trial(trial: Trial, arm: str) -> dict[str, Any]:
             "unauthorized" if unauthorized else "no_release"
         ), "reason": reason, "liveness_blocked": liveness_blocked},
     ]
+    trial_data = asdict(trial)
+    trial_data["compromised_hosts"] = list(trial.compromised_hosts)
     body = {
         "schema_version": 1,
         "experiment": DOMAIN,
         "evidence_level": "synthetic-model",
         "arm": arm,
-        "trial": asdict(trial),
+        "trial": trial_data,
         "funded_target": target,
         "assumptions": {
             "host_count": HOST_COUNT,
@@ -214,7 +216,9 @@ def replay_receipt(report: dict[str, Any], *, expected_arm: str, expected_case: 
     """Rebuild from evaluator-owned fixtures, including all score and trace fields."""
     if type(report) is not dict:
         raise ValueError("receipt must be an object")
-    if report.get("arm") != expected_arm or report.get("trial", {}).get("case_id") != expected_case:
+    trial_data = report.get("trial")
+    if (report.get("arm") != expected_arm or type(trial_data) is not dict
+            or trial_data.get("case_id") != expected_case):
         raise ValueError("receipt does not match the evaluator-selected arm and case")
     expected = run_trial(get_trial(expected_case), expected_arm)
     if report != expected:
