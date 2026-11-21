@@ -95,6 +95,38 @@ python -m bitvm_arena.setup_compromise replay \
 The benchmark refuses to overwrite an existing evidence directory. Use a fresh
 output path per campaign.
 
+## Causal synthetic compromise input from CryptoSwarmArena
+
+The separate [CryptoSwarmArena five-host campaign](https://github.com/patrickdugan/CryptoSwarmArena/pull/10)
+now invokes this module's run_trial with the actual host set reached by
+the existing SwarmCompromiseEnv simulation. H0–H4 correspond to five
+NPC host nodes; social, recruitment and proximity vectors resolve against
+seeded host psychology and defender postures. Leakage-only contacts confer
+no signing authority. Each host must also submit an explicit malicious
+approval to count toward the 3-of-5 threshold. Observed telemetry reaches
+a separate Sentinel, which can quarantine or halt the modeled settlement.
+
+CryptoSwarmArena uses this BitVMArena evaluator pinned at commit
+c499498ad499b000c5afd8ae09b09498253cb8bb and verifies the setup_compromise
+source Git blob 967a646c733a27c10cb6536e5f918bea046dbcc9.
+Replay reconstructs both the upstream social simulation and all three
+local synthetic settlement outcomes from the recorded bounded decisions.
+
+The [four-seed paired CI sweep](https://github.com/patrickdugan/CryptoSwarmArena/actions/runs/44934269418)
+illustrates the synthetic model's behavior: baseline_open/passive reached
+four of four compromised quorums and four unauthorized modeled presigned
+payouts. A monitor quarantining hosts with flagged observed signals
+reduced modeled unauthorized payouts to two of four. The full_hardening
+posture reached zero quorums in the same four-seed trial. These counts
+are consequences of the simulation's parameterization and scripted policies,
+with no measured real-world AI compromise rate or deployed BitVM security claim.
+
+The **source of compromise** and the **authorized settlement** are separate
+evidence layers: physical-host compromise is a synthetic world-state
+transition; an accepted transaction under real consensus still requires
+a native regtest receipt. No reported social episode can be promoted to
+on-chain evidence solely by changing its declared evidence label.
+
 ## Native test progression
 
 The existing
