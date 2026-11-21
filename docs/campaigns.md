@@ -12,6 +12,7 @@ evidence that can support a score.
 | Lane | Arena evidence | Next execution gate |
 | --- | --- | --- |
 | Dispute model | Deterministic synthetic state transitions and planted-fault calibration | Replay and ControlArena sample isolation |
+| Correlated setup compromise | Three-arm synthetic comparison of threshold setup, sound keyless validity, and a disabled TXCOMMIT calibration | Native A/B on isolated regtest with exact signing manifests and final UTXO ownership receipts |
 | Authority enumeration | Imported catalogue and reference-interpreter study | Pin CPA dependencies and replay measured cases |
 | OP_MULADDMOD | Upstream source and native regtest receipts described by its owner | Arena receipt adapter and bounded scheduling actions |
 | Keyless CHECKSIG | Upstream payout and state-lifecycle fixtures | Host-owned state oracle across competing paths |

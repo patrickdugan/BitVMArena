@@ -30,7 +30,8 @@ Benchmark outputs contain deterministic event traces and a JSON summary.
 | Authority enumeration | 1,851 canonical NAND programs, 32 compiled authorities, 256 Python Script-oracle executions | Reproduced pinned CPA research |
 | Historical recovery | Nine reconstructed files from the original local Arena | Archived source captures with per-file provenance |
 | [Corruption corpus](corpus/README.md) | 168 model trajectories; Core-judged native tracks: BitVM3 claim graph (96, seven layers from garbling to miners, plus the graph decided by the real M14 garbled verifier), BitVM2 bridge graph (32), Script and settlement primitives (56); interactive BitVM3 red-team episodes against application presets | Bitcoin Core 31.1 regtest receipts, audited offline; CI reruns the tracks on Linux Core |
-| Campaign map | Eight lanes covering the simulator, CPA, Keyless-CHECKSIG, MULADDMOD, UTXORef, BitVM2 and BitVM3 | Source-pinned plan; each lane declares its adapter status |
+| Correlated setup campaign | 9 scenarios × 3 synthetic arms, with setup-host coalitions and explicit TXCOMMIT activation control | Deterministic assumption model; native comparison pending |
+| Campaign map | Nine lanes covering simulator, setup threat model, CPA, Keyless-CHECKSIG, MULADDMOD, UTXORef, BitVM2 and BitVM3 | Source-pinned plan; each lane declares its adapter status |
 
 The active engine executes a bounded optimistic dispute model. Its arithmetic
 witnesses are public fixtures. All balances and block heights are simulated;
@@ -63,6 +64,22 @@ python -m bitvm_corpus native audit examples/native/bitvm3-core31.1.json
 python -m bitvm_corpus native assess --app iob-payout-desk
 python -m bitvm_corpus native episode --app bridge-pegout --bitcoind /path/to/bitcoind   --actions examples/episodes/false-claim-withheld.jsonl --output work/episode.json
 python -m unittest discover -s tests -v
+```
+
+## Correlated AI-era setup compromise (synthetic)
+
+The [correlated setup campaign](docs/setup_compromise.md) compares a modelled
+BitVM threshold-signing ceremony against a sound, activated Keyless-CHECKSIG
+reserve and a deliberately disabled TXCOMMIT check. It tests compromised
+host coalitions, poisoned presignatures, covert coordination as a declared
+capability, honest-challenger outages and proof availability. These are
+assumption controls and independently replayed synthetic receipts; the
+existing [native BitVM3 corpus](corpus/docs/BITVM3.md) remains the Core-judged
+source for individual signing and claim-graph failures.
+
+```sh
+python -m bitvm_arena.setup_compromise benchmark --output runs/correlated-setup-01
+python -m unittest discover -s tests -p test_setup_compromise.py -v
 ```
 
 ## Protocol games
