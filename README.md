@@ -65,6 +65,22 @@ python -m bitvm_corpus native episode --app bridge-pegout --bitcoind /path/to/bi
 python -m unittest discover -s tests -v
 ```
 
+## Correlated AI-era setup compromise (synthetic)
+
+The [correlated setup campaign](docs/setup_compromise.md) compares a modelled
+BitVM threshold-signing ceremony against a sound, activated Keyless-CHECKSIG
+reserve and a deliberately disabled TXCOMMIT check. It tests compromised
+host coalitions, poisoned presignatures, covert coordination as a declared
+capability, honest-challenger outages and proof availability. These are
+assumption controls and independently replayed synthetic receipts; the
+existing [native BitVM3 corpus](corpus/docs/BITVM3.md) remains the Core-judged
+source for individual signing and claim-graph failures.
+
+```sh
+python -m bitvm_arena.setup_compromise benchmark --output runs/correlated-setup-01
+python -m unittest discover -s tests -p test_setup_compromise.py -v
+```
+
 ## Protocol games
 
 Each episode starts with one immutable funded target: its outpoint, authority,
