@@ -30,7 +30,8 @@ Benchmark outputs contain deterministic event traces and a JSON summary.
 | Authority enumeration | 1,851 canonical NAND programs, 32 compiled authorities, 256 Python Script-oracle executions | Reproduced pinned CPA research |
 | Historical recovery | Nine reconstructed files from the original local Arena | Archived source captures with per-file provenance |
 | [Corruption corpus](corpus/README.md) | 168 model trajectories; Core-judged native tracks: BitVM3 claim graph (96, seven layers from garbling to miners, plus the graph decided by the real M14 garbled verifier), BitVM2 bridge graph (32), Script and settlement primitives (56); interactive BitVM3 red-team episodes against application presets | Bitcoin Core 31.1 regtest receipts, audited offline; CI reruns the tracks on Linux Core |
-| Campaign map | Eight lanes covering the simulator, CPA, Keyless-CHECKSIG, MULADDMOD, UTXORef, BitVM2 and BitVM3 | Source-pinned plan; each lane declares its adapter status |
+| Correlated setup campaign | 9 scenarios × 3 synthetic arms, with setup-host coalitions and explicit TXCOMMIT activation control | Deterministic assumption model; native comparison pending |
+| Campaign map | Nine lanes covering simulator, setup threat model, CPA, Keyless-CHECKSIG, MULADDMOD, UTXORef, BitVM2 and BitVM3 | Source-pinned plan; each lane declares its adapter status |
 
 The active engine executes a bounded optimistic dispute model. Its arithmetic
 witnesses are public fixtures. All balances and block heights are simulated;
