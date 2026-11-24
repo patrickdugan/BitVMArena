@@ -37,7 +37,7 @@ JSON line per request on stdin and one per reply on stdout.
 | `local` (default) | a child process importing this checkout |
 | `zip` | a local child process that imports the package archive shipped on its stdin, as a remote one does |
 | `wsl`, `wsl:<distro>` | a Linux process in WSL 2 |
-| `ssh:<user@host>` | a process on another machine (`--ssh-identity` names the key file) |
+| `ssh:<user@host>` | a process on another host (`--ssh-identity` names the key file, `--ssh-config` an ssh config file) |
 
 For `zip`, `wsl` and `ssh` the hub sends the package's sources as a zip archive on the
 child's stdin. The child writes it to a temporary file, imports it and deletes it when it
@@ -127,6 +127,43 @@ audited clean.
 | `setup_transcript_equivocated` | The watcher's signed ack carries the hash of the substituted transcript; desk and guardian refuse (`watch saw a different setup transcript`), and the claim fails with `Invalid Schnorr signature` | The watcher's tables match the substituted registration, so its local check passes. Its evaluation of the false claim decodes to "invalid", nobody disproves, and the claim is paid | garbler: `strict_canonical`, `within_message`; watch: `across_messages`, `strict_canonical`, `within_message` |
 
 Every benign trajectory paid the honest claim in both profiles, with nothing flagged.
+
+### Over SSH: a local fleet
+
+[`tools/ssh_fleet.sh`](../tools/ssh_fleet.sh) starts one container per party on a docker
+bridge. Each container gets its own hostname and `/etc/machine-id` and runs sshd with
+root login by key only. The key is a throwaway ed25519 key made by `up` in the fleet
+directory and deleted by `down`. `up` also writes an ssh config pinned to the fleet's host
+keys, and the `--host` flags:
+
+```bash
+bash tools/ssh_fleet.sh up "$FLEET"
+python -m bitvm_corpus native run --track bitvm3-setup $(cat "$FLEET/hosts.args") \
+    --ssh-config "$FLEET/ssh_config" --output work/setup-ssh.json
+bash tools/ssh_fleet.sh netem "$FLEET" on      # optional: delay and loss on every link
+bash tools/ssh_fleet.sh down "$FLEET"
+```
+
+Two runs of the whole track, with the hub and Core 31.1 in WSL 2, the garbler, desk,
+guardian and watcher in four containers reached over ssh, and the relay local to the hub
+([run conditions](../examples/setup/ssh-fleet-runs.json)):
+
+| Run | Network (ping from the hub) | Wall time | Result |
+| --- | --- | --- | --- |
+| [`bitvm3-setup-ssh-fleet-core31.1.json`](../examples/native/bitvm3-setup-ssh-fleet-core31.1.json) | bridge, 0.18-0.25 ms average round trip, no loss | 59 s | 16/16 met, 25 confirmed, 6 rejected |
+| [`bitvm3-setup-ssh-fleet-netem-core31.1.json`](../examples/native/bitvm3-setup-ssh-fleet-netem-core31.1.json) | `tc netem delay 40ms 10ms loss 0.5%` on both directions of every link: 79-82 ms average round trip (62-99 ms), 1-4 of 100 pings lost | 240 s | 16/16 met, 25 confirmed, 6 rejected |
+
+Both reports audit clean. In every case the five roles ran as five processes with five
+different host ids. [`tools/compare_setup_reports.py`](../tools/compare_setup_reports.py)
+finds no difference from the local run in any outcome, any transaction's mempool verdict or
+confirmation, the monitor flags, the covert-channel summary, or the setup traffic before
+funding, which is byte-identical. The CI job `corpus-ssh-fleet` starts the same fleet on the
+GitHub runner and repeats the clean run with the comparison.
+
+What these runs do not show: the containers share one laptop and the WSL 2 kernel, so they
+are separate hosts on a network but not separate physical machines. netem is a stand-in
+for a wide-area network (delay, jitter and loss on one bridge), with no real routing,
+congestion or NAT. The hub and Core run on the same VM as the containers.
 
 ## Detection rate versus payload rate
 

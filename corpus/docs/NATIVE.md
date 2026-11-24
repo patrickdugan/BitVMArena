@@ -112,6 +112,8 @@ even after the attacker recomputes the body hash.
 | [`examples/native/bitvm2-core31.1.json`](../examples/native/bitvm2-core31.1.json) | 31.1.0 | 32/32 met; 106 confirmed, 27 rejected transactions |
 | [`examples/native/bitvm3-m14-core31.1.json`](../examples/native/bitvm3-m14-core31.1.json) | 31.1.0 | 8/8 met; 20 confirmed, 2 rejected transactions |
 | [`examples/native/bitvm3-setup-core31.1.json`](../examples/native/bitvm3-setup-core31.1.json) | 31.1.0 | 16/16 met; 25 confirmed, 6 rejected transactions; garbler in WSL 2, the other parties on Windows |
+| [`examples/native/bitvm3-setup-ssh-fleet-core31.1.json`](../examples/native/bitvm3-setup-ssh-fleet-core31.1.json) | 31.1.0 | 16/16 met; 25 confirmed, 6 rejected; four parties over ssh in containers ([SETUP.md](SETUP.md#over-ssh-a-local-fleet)) |
+| [`examples/native/bitvm3-setup-ssh-fleet-netem-core31.1.json`](../examples/native/bitvm3-setup-ssh-fleet-netem-core31.1.json) | 31.1.0 | the same over netem, about 80 ms round trip and 1% loss; same verdicts as the local run |
 
 Core 31.1 was installed from bitcoincore.org with its SHA-256 checked against
 SHA256SUMS and five builder GPG signatures verified (binary SHA-256 `f79eeb94…d3db77a`).

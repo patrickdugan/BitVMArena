@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "kind": "bitvm3-setup-ssh-fleet-runs",
+  "date": "2026-11-24",
+  "fleet": {
+    "tool": "tools/ssh_fleet.sh",
+    "where": "Docker 29.1.3 in WSL 2 (kernel 6.18.58.1-microsoft-standard-WSL2) on one laptop",
+    "network": "docker bridge bvsetup, 10.231.97.0/24",
+    "containers": {"garbler": "10.231.97.11", "desk": "10.231.97.12", "guardian": "10.231.97.13", "watch": "10.231.97.14"},
+    "image": "python:3.12-slim (sha256:aa943ce4...) + openssh-server; Python 3.12.16 in the containers",
+    "per_container": "own hostname and random /etc/machine-id; sshd with root login by key only",
+    "key": "throwaway ed25519 key made by `up` in the fleet directory and deleted by `down`",
+    "hub": "WSL 2, Python 3.12.3, Bitcoin Core 31.1.0 (/root/opt/bitcoin-31.1/bin/bitcoind); the relay party runs locally on the hub",
+    "command": "python3 -m bitvm_corpus native run --track bitvm3-setup $(cat FLEET/hosts.args) --ssh-config FLEET/ssh_config"
+  },
+  "runs": [
+    {"report": "examples/native/bitvm3-setup-ssh-fleet-core31.1.json", "network": "clean bridge",
+     "ping_rtt_ms_avg": [0.25, 0.254, 0.18, 0.232], "ping_loss": "0/50 per container",
+     "wall_seconds": 59, "cases_met": "16/16", "confirmed": 25, "rejected": 6,
+     "audit": "0 problems", "compare_with_local_run": "same"},
+    {"report": "examples/native/bitvm3-setup-ssh-fleet-netem-core31.1.json",
+     "network": "tc netem `delay 40ms 10ms loss 0.5%` on every container's eth0 and on the bridge (both directions)",
+     "ping_rtt_ms": {"garbler": "62.1/80.8/98.9", "desk": "61.6/79.4/96.1", "guardian": "63.2/82.2/98.4",
+                     "watch": "62.9/80.4/97.7", "format": "min/avg/max over 100 pings"},
+     "ping_loss": {"garbler": "1/100", "desk": "2/100", "guardian": "4/100", "watch": "2/100"},
+     "wall_seconds": 240, "cases_met": "16/16", "confirmed": 25, "rejected": 6,
+     "audit": "0 problems", "compare_with_local_run": "same"}
+  ],
+  "local_run": "examples/native/bitvm3-setup-core31.1.json",
+  "not_shown": [
+    "The containers share the laptop and the WSL 2 kernel: they are separate hosts on a network, not separate physical machines.",
+    "netem stands in for a wide-area network: delay, jitter and loss on one bridge, with no real routing, congestion or NAT.",
+    "The hub and Core run on the same VM as the containers."
+  ]
+}
