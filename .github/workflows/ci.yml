@@ -70,6 +70,13 @@ jobs:
           for track in primitive bitvm3 bitvm2 bitvm3-m14 bitvm3-setup; do
             python -m bitvm_corpus native audit "examples/native/$track-core31.1.json"
           done
+      - name: Audit the saved ssh-fleet reports and compare them with the local run
+        run: |
+          for report in examples/native/bitvm3-setup-ssh-fleet*.json; do
+            [ -e "$report" ] || continue
+            python -m bitvm_corpus native audit "$report"
+            python tools/compare_setup_reports.py examples/native/bitvm3-setup-core31.1.json "$report"
+          done
       - name: Audit the saved episode reports offline
         run: |
           for report in examples/episodes/reports/*.json; do
@@ -127,5 +134,48 @@ jobs:
         if: always()
         with:
           name: corpus-native-reports
+          path: corpus/reports/
+          if-no-files-found: ignore
+
+  corpus-ssh-fleet:
+    # bitvm3-setup with four parties in containers reached over ssh (tools/ssh_fleet.sh),
+    # the relay local: keeps the ssh host path tested.
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: corpus
+    env:
+      CORE_VERSION: '31.1'
+      # From https://bitcoincore.org/bin/bitcoin-core-31.1/SHA256SUMS
+      CORE_SHA256: b80d9c3e04da78fb6f0569685673418cf686fadba9042d926d13fb87ff503f9e
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Fetch checksum-pinned Bitcoin Core
+        run: |
+          archive="bitcoin-$CORE_VERSION-x86_64-linux-gnu.tar.gz"
+          curl -sSfL -o "$RUNNER_TEMP/$archive" "https://bitcoincore.org/bin/bitcoin-core-$CORE_VERSION/$archive"
+          echo "$CORE_SHA256  $RUNNER_TEMP/$archive" | sha256sum -c -
+          tar -xzf "$RUNNER_TEMP/$archive" -C "$RUNNER_TEMP" "bitcoin-$CORE_VERSION/bin/bitcoind"
+          echo "BITVM_ARENA_BITCOIND=$RUNNER_TEMP/bitcoin-$CORE_VERSION/bin/bitcoind" >> "$GITHUB_ENV"
+      - name: Start the ssh fleet (one container per party, throwaway key)
+        run: bash tools/ssh_fleet.sh up "$RUNNER_TEMP/fleet"
+      - name: Run bitvm3-setup over ssh, audit it and compare it with the committed local run
+        run: |
+          mkdir -p reports
+          fleet="$RUNNER_TEMP/fleet"
+          report=reports/bitvm3-setup-ssh-fleet-linux.json
+          python -m bitvm_corpus native run --track bitvm3-setup $(cat "$fleet/hosts.args") --ssh-config "$fleet/ssh_config" --output "$report"
+          python -m bitvm_corpus native audit "$report"
+          python tools/compare_setup_reports.py examples/native/bitvm3-setup-core31.1.json "$report"
+      - name: Stop the fleet
+        if: always()
+        run: bash tools/ssh_fleet.sh down "$RUNNER_TEMP/fleet"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: corpus-ssh-fleet-report
           path: corpus/reports/
           if-no-files-found: ignore

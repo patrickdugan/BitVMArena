@@ -94,7 +94,8 @@ def native_command(args):
     extra = {}
     if args.track == "bitvm3-setup":
         from .ceremony import parse_hosts
-        extra = {"hosts": parse_hosts(args.host), "ssh_identity": args.ssh_identity}
+        extra = {"hosts": parse_hosts(args.host), "ssh_identity": args.ssh_identity,
+                 "ssh_config": args.ssh_config}
     elif args.host:
         raise ValidationError("--host applies to the bitvm3-setup track only")
     report = module.execute(binary, root / "work" / "regtest" / uuid.uuid4().hex, rows, **extra)
@@ -290,6 +291,8 @@ def main(argv=None):
     p.add_argument("--host", action="append", default=[],
                    help="bitvm3-setup: run a party elsewhere, role=local|wsl[:distro]|ssh:user@host (repeatable)")
     p.add_argument("--ssh-identity", type=Path, help="bitvm3-setup: private key file for ssh: hosts")
+    p.add_argument("--ssh-config", type=Path,
+                   help="bitvm3-setup: ssh config file for ssh: hosts (ssh -F; e.g. from tools/ssh_fleet.sh)")
     p.add_argument("--sessions", type=int, default=200, help="stego-study: honest setup sessions to sample")
     p = sub.add_parser("testnet4", help="stage bitvm3 trajectories on testnet4 (rehearse on regtest first)")
     p.add_argument("action", choices=("list", "rehearse", "run", "audit", "recover"))

@@ -48,7 +48,7 @@ from pathlib import Path
 from . import stego
 from .bitcoin import Transaction, public
 from .bitvm3 import SECRETS, STATEMENT, WINDOW
-from .canonical import ValidationError
+from .canonical import ValidationError, digest
 from .core import Regtest
 from .party import ROLES, Party, SetupGraph, h
 from .track import Session, audit_transactions, check_report_envelope, confirmed, finalize_report, step
@@ -182,7 +182,7 @@ def package_zip():
     return buffer.getvalue()
 
 
-def host_command(spec, ssh_identity=None):
+def host_command(spec, ssh_identity=None, ssh_config=None):
     """argv for one party process, and whether the package archive is shipped on stdin.
     `spec`: local | zip (a local process that imports the shipped archive, as a remote host
     does) | wsl | wsl:<distro> | ssh:<user@host>."""
@@ -198,7 +198,8 @@ def host_command(spec, ssh_identity=None):
         target = spec[4:]
         if not target or target.startswith("-") or any(c.isspace() for c in target):
             raise ValidationError("ssh host must be user@host")
-        argv = ["ssh", "-o", "BatchMode=yes", "-o", "ConnectTimeout=15"]
+        argv = ["ssh"] + (["-F", str(ssh_config)] if ssh_config else [])
+        argv += ["-o", "BatchMode=yes", "-o", "ConnectTimeout=15", "-o", "ServerAliveInterval=15"]
         if ssh_identity:
             argv += ["-i", str(ssh_identity)]
         return argv + [target, f'python3 -c "{code}"'], True
@@ -208,8 +209,8 @@ def host_command(spec, ssh_identity=None):
 class PartyProcess:
     """One party as a child process: one JSON request per line, one reply per line."""
 
-    def __init__(self, role, spec="local", ssh_identity=None, log_dir=None):
-        argv, shipped = host_command(spec, ssh_identity)
+    def __init__(self, role, spec="local", ssh_identity=None, log_dir=None, ssh_config=None):
+        argv, shipped = host_command(spec, ssh_identity, ssh_config)
         self.role, self.spec = role, spec
         log = (Path(log_dir) / f"{role}.stderr.log").open("wb") if log_dir else subprocess.DEVNULL
         self.log = log if log_dir else None
@@ -466,14 +467,15 @@ def parse_hosts(items):
     return hosts
 
 
-def spawn(row, hosts=None, ssh_identity=None, log_dir=None, in_process=False):
+def spawn(row, hosts=None, ssh_identity=None, log_dir=None, in_process=False, ssh_config=None):
     parties, identities = {}, {}
     try:
         for role in ROLES:
             if in_process:
                 parties[role] = InProcessParty(role)
             else:
-                parties[role] = PartyProcess(role, (hosts or {}).get(role, "local"), ssh_identity, log_dir)
+                parties[role] = PartyProcess(role, (hosts or {}).get(role, "local"), ssh_identity, log_dir,
+                                             ssh_config)
             reply = parties[role].request(**init_request(row, role))
             if not reply.get("ok"):
                 raise PartyError(f"{role} init: {reply.get('error')}")
@@ -487,7 +489,7 @@ def spawn(row, hosts=None, ssh_identity=None, log_dir=None, in_process=False):
     return parties, identities
 
 
-def execute(binary, directory, rows=None, hosts=None, ssh_identity=None):
+def execute(binary, directory, rows=None, hosts=None, ssh_identity=None, ssh_config=None):
     rows = deepcopy(rows or catalog())
     cases = []
     with Regtest(binary, directory) as node:
@@ -498,7 +500,7 @@ def execute(binary, directory, rows=None, hosts=None, ssh_identity=None):
         for row in rows:
             log_dir = Path(directory) / "parties" / row["id"]
             log_dir.mkdir(parents=True, exist_ok=True)
-            parties, identities = spawn(row, hosts, ssh_identity, log_dir)
+            parties, identities = spawn(row, hosts, ssh_identity, log_dir, ssh_config=ssh_config)
             try:
                 steps = run_case(session, row, parties)
             finally:
@@ -607,6 +609,33 @@ def audit(report):
         row = by_id.get(case.get("id"))
         if row is not None:
             problems += audit_case(case, row)
+    return problems
+
+
+def verdicts(report):
+    """What a run decided, apart from txids, heights and hosts. Per case: the outcome, each
+    transaction's label, actor, mempool verdict and confirmation, the monitor flags, the
+    covert-channel summary, and a digest of the setup traffic before the vault is funded
+    (which is deterministic, so it is byte-identical across runs)."""
+    out = {}
+    for case in report.get("cases", []):
+        steps = case.get("steps", [])
+        fund = next((i for i, s in enumerate(steps) if s["kind"] == "fund"), len(steps))
+        setup = [{k: v for k, v in s.items() if k not in ("index", "height")} for s in steps[:fund]]
+        out[case["id"]] = {
+            "outcome": case.get("outcome"), "monitor": case.get("monitor", {}).get("flagged"),
+            "covert": case.get("covert"), "setup_traffic": digest(setup),
+            "transactions": [[s["label"], s["actor"], s["allowed"], s.get("reject_reason"), bool(s.get("confirmed"))]
+                             for s in steps if s["kind"] == "tx"]}
+    return out
+
+
+def compare(reference, other):
+    """Differences between two runs' verdicts; empty when they decided the same."""
+    a, b = verdicts(reference), verdicts(other)
+    problems = [f"{cid}: only in one report" for cid in sorted(set(a) ^ set(b))]
+    for cid in sorted(set(a) & set(b)):
+        problems += [f"{cid}: {key} differs" for key in a[cid] if a[cid][key] != b[cid][key]]
     return problems
 
 

@@ -284,6 +284,36 @@ class EvidenceTests(unittest.TestCase):
         self.assertTrue(any("share one process" in p for p in problems))
 
 
+FLEET = sorted((ROOT / "examples" / "native").glob("bitvm3-setup-ssh-fleet*.json"))
+
+
+@unittest.skipUnless(FLEET and EVIDENCE.exists(), "no committed ssh fleet report")
+class FleetEvidenceTests(unittest.TestCase):
+    """Runs with four parties reached over ssh (tools/ssh_fleet.sh) decide what the local run did."""
+
+    def test_fleet_runs_audit_clean_and_match_the_local_run(self):
+        local = json.loads(EVIDENCE.read_text(encoding="utf-8"))
+        for path in FLEET:
+            report = json.loads(path.read_text(encoding="utf-8"))
+            self.assertEqual(ceremony.audit(report), [], path.name)
+            self.assertEqual(ceremony.compare(local, report), [], path.name)
+            for case in report["cases"]:
+                processes = case["processes"]
+                self.assertEqual({r for r, p in processes.items() if p["host"] == "ssh"},
+                                 {"garbler", "desk", "guardian", "watch"}, path.name)
+                self.assertEqual(len({p["host_id"] for p in processes.values()}), len(ceremony.ROLES), path.name)
+
+    def test_compare_reports_a_changed_verdict(self):
+        local = json.loads(EVIDENCE.read_text(encoding="utf-8"))
+        changed = copy.deepcopy(local)
+        case = next(c for c in changed["cases"] if c["id"].endswith("setup_watcher_key_leaked.mutant.attack"))
+        next(s for s in case["steps"] if s["label"] == "self-pay disprove")["allowed"] = False
+        self.assertEqual(ceremony.compare(local, changed),
+                         [f"{case['id']}: transactions differs"])
+        self.assertEqual(ceremony.host_command("ssh:root@10.0.0.1", None, "fleet/ssh_config")[0][:3],
+                         ["ssh", "-F", "fleet/ssh_config"])
+
+
 @unittest.skipUnless(STUDY.exists(), "no committed stego study")
 class StudyTests(unittest.TestCase):
     def test_committed_study_shape(self):
