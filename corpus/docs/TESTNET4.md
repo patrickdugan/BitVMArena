@@ -575,7 +575,7 @@ Recovered so far:
 | --- | --- | --- | --- |
 | 1 | `reclaim_preempts_claim` claim output `4bfcefd1…:0`, 1,771 sats | presigned payout `b81cec35…` | 1,521 back to the wallet, block 161,859 |
 | 1 | `bond_self_slash` bond `6560a185…:1`, 1,000 sats | none | burned to the NUMS key |
-| 5 | `cut_and_choose_grindable` hardened vault `ac3e3358…:0`, 2,000 sats | desk reclaim `cdee3580…` | can be mined from block 161,989 |
+| 5 | `cut_and_choose_grindable` hardened vault `ac3e3358…:0`, 2,000 sats | desk reclaim `cdee3580…` | sent 2026-11-24, 1,750 back to the wallet; in the mempool at block 163,099 |
 
 The wave 1 payout has the same txid as the payout testnet4 refused as `non-BIP68-final`
 during wave 1. The rebuilt graph is byte for byte the one the row signed.

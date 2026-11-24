@@ -64,6 +64,9 @@ Next:
        - `claim_sighash_none`: the rewritten claim is refused, and the watcher disproves the
          false claim, which returns the coin;
      - the 39 benign rows.
+   - `testnet4.WAVES["wave8"]` holds all 41. Its rehearsal with `--reorg-every 3` met
+     41 of 41: 80 transactions confirmed, 37 through a reorg, none sent again. On testnet4
+     it needs 100,300 sats of coins plus the split, about 103k in the staging wallet.
    - The cost is fees, about 780–990 sats per row (funding, claim, disprove, payout), plus
      a split per wave.
      - Wave 1 spent 17,740 of its 49,000 sats. It burned the hardened `bond_self_slash`
@@ -73,10 +76,10 @@ Next:
      - Wave 2 spent 9,677, wave 3 6,478, wave 4 4,275, wave 5 2,493, wave 6 2,045 and
        wave 7 1,034.
      - Wave 5's hardened row left its 2,000-sat vault unspent, as a refused claim does.
-       The desk's reclaim can be mined from block 161,989 and returns 1,750.
-     - The staging wallet holds 2,008 sats after wave 7, short of one 2,300-sat coin. With
-       the wave 5 reclaim it holds 3,758: one more row. The 41 rows left need about 41k
-       more (about 1,000 per row).
+       `testnet4 recover` sent the desk's reclaim (`cdee3580…`, 1,750 back) on
+       2026-11-24.
+     - The staging wallet holds 2,008 sats after wave 7, 3,758 with the reclaim. The 41
+       rows left cost about 41k in fees (about 1,000 per row).
    - Running all 84 rows at once would need about 163k sats of coins in flight. Waves sized
      to the wallet recycle the same coins.
    - The recipes that need a miner or a topology (`disprove_censored_by_miner`,

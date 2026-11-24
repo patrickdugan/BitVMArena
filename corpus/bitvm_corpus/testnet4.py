@@ -139,6 +139,26 @@ WAVES = {
     # relayer that would redirect it. The honest claim is paid, so the coin comes back. Sized
     # to the 3,042 sats (two coins) left after wave 6: one 2,300-sat coin plus the split.
     "wave7": [f"{TRACK}.payout_sighash_none.hardened.attack"],
+    # The eighth wave: every row left after wave 7. That is the benign half of all 21 testnet4
+    # recipes under the mutant profile, the 18 hardened benign rows wave 1 did not run, and
+    # the last two hardened attacks. 41 coins of 2,300 sats: 100,300 sats in flight plus the
+    # split, so it needs a top-up of the staging wallet.
+    "wave8": [f"{TRACK}.{recipe}.mutant.benign" for recipe in (
+        "labels_offchain_withheld", "garbling_unchecked", "cut_and_choose_grindable",
+        "seed_reuse_across_claims", "output_polarity_swapped", "single_watcher_disprove",
+        "window_below_latency", "payout_csv_removed", "payout_sighash_none", "claimant_unbonded",
+        "tables_delivered_late", "proof_replay_across_vaults", "claim_internal_key_spendable",
+        "claim_sighash_none", "payout_absolute_timelock", "reclaim_preempts_claim",
+        "disprove_outputs_unbound", "disprove_unbumpable", "bond_self_slash",
+        "disprove_watcher_redirect", "desk_key_retained",
+    )] + [f"{TRACK}.{recipe}.hardened.benign" for recipe in (
+        "garbling_unchecked", "cut_and_choose_grindable", "output_polarity_swapped",
+        "single_watcher_disprove", "payout_csv_removed", "payout_sighash_none", "claimant_unbonded",
+        "tables_delivered_late", "proof_replay_across_vaults", "claim_internal_key_spendable",
+        "claim_sighash_none", "payout_absolute_timelock", "reclaim_preempts_claim",
+        "disprove_outputs_unbound", "disprove_unbumpable", "bond_self_slash",
+        "disprove_watcher_redirect", "desk_key_retained",
+    )] + [f"{TRACK}.{recipe}.hardened.attack" for recipe in ("garbling_unchecked", "claim_sighash_none")],
 }
 
 
