@@ -1,12 +1,14 @@
 #!/bin/bash
 # Record the M14-scale BitVM3 fixtures: one setup and four evaluations of the complete garbled
-# final verifier (785,442,492 gates), with public fixture seeds.
+# final verifier (792,546,673 gates), with public fixture seeds.
 #
 #   M14_CLAIM=.../m14-claim FIXTURES=.../nova-bitvm3/m13/fixtures OUT=/tmp/m14 bash tools/m14_runs.sh
 #
 # m14-claim is nova-bitvm3/m14/e2e (bin m14-claim) of patrickdugan/garbled-snark-verifier at
-# 04b6d3e, built with `cargo build --release`. Each run needs about 10 GB (setup) or more
-# (evaluate: garbler and evaluator stream together). Then: python tools/m14_collect.py OUT.
+# the commit in tools/m14_record.json, built with `cargo build --release`. Each run needs about
+# 10 GB (setup) or more (evaluate: garbler and evaluator stream together). The "Record M14 runs"
+# workflow runs this on a hosted runner; then: python tools/m14_collect.py --ci RUN_ID
+# (or, after a local run, python tools/m14_collect.py OUT).
 set -u
 : "${M14_CLAIM:?path to m14-claim}" "${FIXTURES:?path to nova-bitvm3/m13/fixtures}" "${OUT:?output directory}"
 mkdir -p "$OUT"

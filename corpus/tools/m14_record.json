@@ -1,0 +1,5 @@
+{
+  "repository": "patrickdugan/garbled-snark-verifier",
+  "commit": "25c6c2300c3b932c68790b87ff56b40844902acc",
+  "note": "The verifier revision the bitvm3-m14 track's runs are recorded from. Changing it reruns the 'Record M14 runs' workflow; collect the result with tools/m14_collect.py --ci RUN_ID."
+}

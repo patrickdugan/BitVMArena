@@ -1,0 +1,64 @@
+name: Record M14 runs
+
+# One setup and four evaluations of the complete garbled M14 final verifier with public fixture
+# seeds (corpus/tools/m14_runs.sh), at the garbled-snark-verifier commit pinned in
+# corpus/tools/m14_record.json. Each run's record is published as an annotation, which
+# `python tools/m14_collect.py --ci RUN_ID` reads back into corpus/examples/m14/.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - corpus/tools/m14_record.json
+      - corpus/tools/m14_runs.sh
+      - corpus/tools/m14_collect.py
+      - .github/workflows/m14-record.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: m14-record
+  cancel-in-progress: true
+
+jobs:
+  record:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    env:
+      CARGO_BUILD_JOBS: '2'
+      RUSTFLAGS: '-C debuginfo=0'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Pinned verifier revision
+        id: pin
+        run: |
+          python3 -c "import json; p = json.load(open('corpus/tools/m14_record.json')); print('repository=' + p['repository']); print('commit=' + p['commit'])" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ steps.pin.outputs.repository }}
+          ref: ${{ steps.pin.outputs.commit }}
+          path: .deps/gsv
+      - name: Swap on the runner's temporary disk (garbler and evaluator together exceed 16 GB RAM)
+        run: |
+          sudo fallocate -l 16G /mnt/ci-swap && sudo chmod 600 /mnt/ci-swap && sudo mkswap /mnt/ci-swap && sudo swapon /mnt/ci-swap
+          sudo apt-get update && sudo apt-get install -y time
+          free -g
+      - name: Build m14-claim
+        run: |
+          rustup toolchain install 1.90.0 --profile minimal
+          cargo +1.90.0 build --release --locked --manifest-path .deps/gsv/nova-bitvm3/m14/e2e/Cargo.toml --bin m14-claim
+      - name: One setup and four evaluations
+        run: |
+          export M14_CLAIM="$PWD/.deps/gsv/nova-bitvm3/m14/e2e/target/release/m14-claim"
+          export FIXTURES="$PWD/.deps/gsv/nova-bitvm3/m13/fixtures"
+          export OUT="$RUNNER_TEMP/m14"
+          bash corpus/tools/m14_runs.sh
+          tail -n 3 "$OUT"/*.stdout
+          python3 corpus/tools/m14_collect.py --annotate "$OUT"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: m14-runs-${{ github.sha }}
+          path: ${{ runner.temp }}/m14/
