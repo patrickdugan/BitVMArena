@@ -553,6 +553,82 @@ What the public network showed:
    the 16 blocks from 161,880 to 161,895 held only their coinbase. At 161,895 the node
    knew thirteen other chain tips from height 161,880 up.
 
+## Wave 8: the benign rows and the last two hardened attacks
+
+[`examples/testnet4/wave8.json`](../examples/testnet4/wave8.json), broadcast on
+2026-11-24:
+- **Rows:** the 41 left after wave 7:
+  - the benign row of all 21 recipes under the mutant profile: an honest claim with nobody
+    attacking it, which must be paid;
+  - the 18 hardened benign rows that wave 1 did not run;
+  - the last two hardened attacks, `garbling_unchecked` and `claim_sighash_none`.
+- **Funding:** the wallet held 3,758 sats after wave 7 and wave 5's reclaim, so it received
+  102,000 sats from another testnet4 wallet (`30665f6f…`). The split `5e74e9fe…` spent
+  that and one 1,521-sat coin. It made 41 coins (36 of 2,300 sats, and 3,300 or 3,800 for
+  the five bonded rows) plus 902 sats of change, and it is in minimum-difficulty block
+  163,102.
+- **Run:** the tip went from 163,100 to 163,126 between 06:58 and 10:45 UTC.
+- **Transactions:** 80 confirmed, 3 refused by mempool policy. None was displaced, dropped,
+  reorged during its row or left unconfirmed, and none had to be sent again.
+- **Expectations:** 41 of 41 met, and every transaction step matched the regtest catalog.
+- **Audit:**
+  - offline, clean;
+  - against the node's best chain, valid, with one note per row: all 41 vault fundings
+    moved from block 163,106 to 163,105 after they were recorded (below).
+- **Cost:** 34,029 sats of fees:
+  - 2,319 for the split;
+  - 300 per vault funding (12,300);
+  - 9,410 for the 40 claims (229 to 312 sats each);
+  - 250 per payout (9,750) and 250 for the disprove.
+
+  That is about 830 per row with the split.
+- **Locked:** the `garbling_unchecked` hardened vault (`d47ac670…:0`, 2,000 sats), as a
+  refused claim leaves it. The desk's reclaim opens at block 163,249. The wallet holds
+  69,729 sats in 45 coins.
+
+| Row | What testnet4 did |
+| --- | --- |
+| `garbling_unchecked` (hardened attack) | the claimant registered a garbling whose output decoding is swapped; the desk's cut-and-choose caught it at setup and the desk withheld its presignature, so the claim was refused (`Invalid Schnorr signature`); the vault waits for the desk's reclaim |
+| `claim_sighash_none` (hardened attack) | the claimant reused the desk's presignature with the outputs replaced, paying the vault to itself; refused (`Invalid Schnorr signature`), because the hardened presignature commits to the outputs; the canonical false claim 163,107; the watcher disproved it, 163,114; the claimant's payout was refused (`missing-inputs`) |
+| the 39 benign rows | every claim in real-difficulty block 163,107 and every payout in real-difficulty block 163,122 |
+
+What the public network showed:
+
+1. **The last two fixes hold, and the catalog is complete.**
+   - Every one of the 84 testnet4 rows has now run on the public network and met its
+     expectation. Wave 1's reorg-lost row met it in wave 2.
+   - In wave 4 the mutant `garbling_unchecked` claim was paid. Under the hardened profile
+     the desk never presigns it.
+   - In wave 3 the mutant `claim_sighash_none` rewrite took the vault. The hardened
+     presignature leaves nothing to rewrite.
+   - Every benign row paid its honest claim under both profiles, so none of the fixes stops
+     an honest claimant.
+2. **Two minimum-difficulty branches traded the lead.**
+   - The top-up was first mined in 163,100 (`0000000000457e55…`), the tip when the wave
+     started. A branch from 163,097 replaced the four blocks up to it. The top-up is now
+     in 163,101 (`000000003878e08d…`).
+   - Wave 5's reclaim moved with it: it was first in 163,099 (`000000000313c386…`) and is
+     now in 163,100 (`000000004532497a…`).
+   - The 41 vault fundings were recorded in 163,106 (`000000004628d502…`, 82
+     transactions), the top of an eight-block branch from 163,099. The other branch, now
+     the best chain, holds them in 163,105 (`0000000000a15c46…`, 89 transactions). The
+     split is in both branches, and the report's block for it, 163,102
+     (`000000008b4a8fb3…`), is still in the best chain.
+   - Real-difficulty block 163,107 built on that other branch and mined all 40 claims.
+     The move left the fundings one block deeper, nothing had to be sent again, and only
+     the audit's chain re-check shows it.
+   - At 163,126 the node knew fourteen other chain tips from height 163,100 up.
+3. **Every claim and every payout landed in a real-difficulty block.**
+   - All 40 claims went out at 163,106 and confirmed in 163,107, the disprove in 163,114,
+     and all 39 payouts in 163,122 (190 transactions).
+   - The payouts went out at 163,117 and 163,119 and waited through coinbase-only blocks.
+     Every minimum-difficulty block from 163,108 to 163,113 and from 163,115 to 163,121
+     held only its coinbase.
+   - 163,107 is stamped 97 minutes before its parent, and 163,122 81 minutes before its
+     parent.
+4. **Three real-difficulty blocks in 27.** They were 163,107, 163,114 and 163,122. Sixteen
+   of the 27 blocks from 163,100 to 163,126 held only their coinbase.
+
 ## Recovering what a wave leaves
 
 A row can end with coins still in a contract output:
@@ -569,13 +645,14 @@ A row can end with coins still in a contract output:
 - **Checks:** every spend whose timelock has passed is checked with `testmempoolaccept`.
 - **Broadcast:** only with `--broadcast`.
 
-Recovered so far:
+Recovered so far, and what is still waiting:
 
 | Wave | Output | Spend | Result |
 | --- | --- | --- | --- |
 | 1 | `reclaim_preempts_claim` claim output `4bfcefd1…:0`, 1,771 sats | presigned payout `b81cec35…` | 1,521 back to the wallet, block 161,859 |
 | 1 | `bond_self_slash` bond `6560a185…:1`, 1,000 sats | none | burned to the NUMS key |
-| 5 | `cut_and_choose_grindable` hardened vault `ac3e3358…:0`, 2,000 sats | desk reclaim `cdee3580…` | sent 2026-11-24, 1,750 back to the wallet; in the mempool at block 163,099 |
+| 5 | `cut_and_choose_grindable` hardened vault `ac3e3358…:0`, 2,000 sats | desk reclaim `cdee3580…` | sent 2026-11-24, 1,750 back to the wallet; first mined in block 163,099, which a branch replaced; now in 163,100 |
+| 8 | `garbling_unchecked` hardened vault `d47ac670…:0`, 2,000 sats | desk reclaim `30b19e7d…` | opens at block 163,249; 1,750 back to the wallet |
 
 The wave 1 payout has the same txid as the payout testnet4 refused as `non-BIP68-final`
 during wave 1. The rebuilt graph is byte for byte the one the row signed.

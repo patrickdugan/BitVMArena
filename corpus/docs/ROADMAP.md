@@ -50,36 +50,33 @@ Done:
     redirected payout failed its signature check and the honest payout landed. The split's
     own block was replaced, and real-difficulty block 161,882 mined the split and the
     funding together.
+  - **Wave 8:** the 41 rows left (the benign row of every recipe under both profiles and
+    the last two hardened attacks); 41 of 41 met. All 84 testnet4 rows have now met their
+    expectations on the public network. Two minimum-difficulty branches traded the lead
+    under the vault fundings, and real-difficulty blocks mined every claim and every
+    payout.
 
 Next:
 
 1. **More recipes at M14 scale.** Seed reuse needs the evaluator's input labels, which
    `m14-claim` does not export; the window and censorship recipes need the evaluation
    time measured on the watcher hardware a deployment expects.
-2. **The rest of the testnet4 catalog.**
-   - Left after wave 7:
-     - two hardened attacks:
-       - `garbling_unchecked`: the desk does not presign, so the claim is refused and the
-         vault waits for the desk's 144-block reclaim;
-       - `claim_sighash_none`: the rewritten claim is refused, and the watcher disproves the
-         false claim, which returns the coin;
-     - the 39 benign rows.
-   - `testnet4.WAVES["wave8"]` holds all 41. Its rehearsal with `--reorg-every 3` met
-     41 of 41: 80 transactions confirmed, 37 through a reorg, none sent again. On testnet4
-     it needs 100,300 sats of coins plus the split, about 103k in the staging wallet.
-   - The cost is fees, about 780–990 sats per row (funding, claim, disprove, payout), plus
-     a split per wave.
+2. **What the testnet4 catalog leaves.**
+   - Wave 8's hardened `garbling_unchecked` vault (2,000 sats) waits for the desk's
+     144-block reclaim, which opens at block 163,249 (`testnet4 recover`).
+   - The cost is fees, about 780–1,020 sats per row (funding, claim, disprove, payout),
+     plus a split per wave.
      - Wave 1 spent 17,740 of its 49,000 sats. It burned the hardened `bond_self_slash`
        bond (1,000 sats to the NUMS key), as that profile intends. It also left the
        reorg-lost row's claim output (1,771 sats) unpaid; `testnet4 recover` has since paid
        it out and returned 1,521.
-     - Wave 2 spent 9,677, wave 3 6,478, wave 4 4,275, wave 5 2,493, wave 6 2,045 and
-       wave 7 1,034.
+     - Wave 2 spent 9,677, wave 3 6,478, wave 4 4,275, wave 5 2,493, wave 6 2,045,
+       wave 7 1,034 and wave 8 34,029 (41 rows, about 830 per row).
      - Wave 5's hardened row left its 2,000-sat vault unspent, as a refused claim does.
        `testnet4 recover` sent the desk's reclaim (`cdee3580…`, 1,750 back) on
        2026-11-24.
-     - The staging wallet holds 2,008 sats after wave 7, 3,758 with the reclaim. The 41
-       rows left cost about 41k in fees (about 1,000 per row).
+     - Wave 8 needed a 102,000-sat top-up of the staging wallet, which held 69,729 sats
+       when it ended.
    - Running all 84 rows at once would need about 163k sats of coins in flight. Waves sized
      to the wallet recycle the same coins.
    - The recipes that need a miner or a topology (`disprove_censored_by_miner`,
