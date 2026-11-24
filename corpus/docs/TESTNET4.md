@@ -653,6 +653,9 @@ Recovered so far, and what is still waiting:
 | 1 | `bond_self_slash` bond `6560a185…:1`, 1,000 sats | none | burned to the NUMS key |
 | 5 | `cut_and_choose_grindable` hardened vault `ac3e3358…:0`, 2,000 sats | desk reclaim `cdee3580…` | sent 2026-11-24, 1,750 back to the wallet; first mined in block 163,099, which a branch replaced; now in 163,100 |
 | 8 | `garbling_unchecked` hardened vault `d47ac670…:0`, 2,000 sats | desk reclaim `30b19e7d…` | opens at block 163,249; 1,750 back to the wallet |
+| iob1 | `garbling_unchecked` vault `4a039c43…:0`, 2,000 sats | desk reclaim `5811f0bd…` | opens at block 163,294; 1,750 back to the wallet |
+| iob1 | `cut_and_choose_grindable` vault `019617ce…:0`, 2,000 sats | desk reclaim `83e1b706…` | opens at block 163,294; 1,750 back to the wallet |
+| iob1 | 15 bonds, 1,000 sats each | none | burned to the NUMS key |
 
 The wave 1 payout has the same txid as the payout testnet4 refused as `non-BIP68-final`
 during wave 1. The rebuilt graph is byte for byte the one the row signed.
@@ -676,7 +679,83 @@ Wave `iob1` holds the 21 attacks and the honest claim:
 - **Rehearsal** with `--reorg-every 3`: 22 of 22 met. 42 transactions confirmed and 29
   were refused, and 18 went through one of 12 reorgs, none sent again. Every transaction step
   matches the regtest run, and the report audits clean.
-- **Testnet4:** not run yet. It needs about 76,000 sats more in the staging wallet.
+- **Testnet4:** 22 of 22 met on 2026-11-24, every row step for step as on regtest (below).
+
+### Wave `iob1` on testnet4
+
+- **Funding:** the wallet held 3,758 sats, so it received 76,000 from another testnet4
+  wallet (`6d8543e8…`, real-difficulty block 163,143). The split `67857223…` spent that and
+  two coins of 1,750 and 1,521 sats. It made the 23 coins plus 411 sats of change.
+  - It was recorded in minimum-difficulty block 163,148 (`000000007f32d962…`).
+  - A sibling at the same height (`00000000add1c570…`) replaced that block, and it holds
+    the split too.
+- **Run:** 14:12 to 18:59 UTC, while the tip went from 163,148 to 163,184.
+- **Transactions:** 42 confirmed, 29 refused by mempool policy, the rehearsal's counts.
+  None was displaced, dropped, reorged during its row or left unconfirmed, and none had to
+  be sent again.
+- **Expectations:** 22 of 22 met. Every row took the same transaction steps as on regtest
+  ([`bitvm3-iob-core31.1.json`](../examples/native/bitvm3-iob-core31.1.json)): the same
+  verdicts, the same reject reasons and the same outcome.
+- **Audit:** offline, clean. Against the node's best chain it is valid, with one note: the
+  split moved to the sibling block.
+- **Cost:** 37,550 sats of fees, about 1,710 per row:
+  - 1,460 for the split;
+  - 300 per vault funding (6,900 for 23);
+  - 23,940 for the 21 claims, 1,140 sats each;
+  - 250 per disprove (3,750 for 15) and per payout (1,500 for 6).
+
+  On top of the fees, 15 bonds were burned: 15,000 sats to the NUMS key, the same 15 attacks
+  that burn their bond on regtest.
+- **Locked:** the vaults of the two refused claims, 2,000 sats each:
+  - `garbling_unchecked` (`4a039c43…:0`);
+  - `cut_and_choose_grindable` (`019617ce…:0`).
+
+  The desk's reclaims open at block 163,294. The bonds of those two rows were never spent
+  and are back in the wallet, which holds 23,208 sats in 26 coins.
+
+| Row (IOB-hardened) | What testnet4 did |
+| --- | --- |
+| `labels_offchain_withheld`, `output_polarity_swapped`, `claimant_unbonded`, `tables_delivered_late`, `disprove_unbumpable` attacks | claim 163,155; the watcher's disprove 163,158, burning the bond; payout refused `missing-inputs` |
+| `single_watcher_disprove` attack | claim 163,155; the watcher was offline, and another holder of the reject label disproved, 163,158, burning the bond; payout refused |
+| `claim_internal_key_spendable`, `claim_sighash_none`, `disprove_outputs_unbound`, `bond_self_slash` attacks | the claimant's own transaction (key-path sweep, rewritten claim, self-paying disprove, self-slash) refused `Invalid Schnorr signature`; claim 163,155; the watcher's disprove 163,158, burning the bond; payout refused |
+| `disprove_watcher_redirect` attack | claim 163,155; the watcher's disprove paying itself refused `Invalid Schnorr signature`; another holder of the reject label disproved, 163,158, burning the bond; payout refused |
+| `payout_csv_removed`, `payout_absolute_timelock` attacks | early payout refused `non-BIP68-final`; claim 163,155; disprove 163,158, burning the bond; payout refused |
+| `window_below_latency` attack | claim 163,155; the watcher's evaluation took 5 blocks; the early payout at 163,164 refused `non-BIP68-final`; disprove 163,167, 12 blocks after the claim and inside the 24-block window; payout refused |
+| `proof_replay_across_vaults` attack | both claims 163,158; the replayed claim disproven 163,159, its bond burned; first payout 163,184; second refused `missing-inputs` |
+| `garbling_unchecked`, `cut_and_choose_grindable` attacks | the desk's setup check failed and it did not presign; claim refused `Invalid Schnorr signature`; the vault waits for the reclaim |
+| `seed_reuse_across_claims` attack | honest claim 163,155; griefing disprove refused (`OP_EQUALVERIFY` failed); payout 163,184 |
+| `payout_sighash_none`, `desk_key_retained` attacks | honest claim 163,155; the redirected payout and the desk's lone payout refused `Invalid Schnorr signature`; the cosigned payout 163,184 |
+| `reclaim_preempts_claim` attack | the desk's early reclaim refused `non-BIP68-final` at 163,156; claim 163,158; payout 163,184 |
+| `labels_offchain_withheld` benign | claim 163,155; payout 163,184 |
+
+What the public network showed:
+
+1. **Every fix at once holds, step for step.**
+   - No attack landed, and every honest claim was paid (six, counting the replay's first
+     claim).
+   - Every row did on the public network what it did on regtest. That includes
+     `disprove_unbumpable`, whose single-fix row needs a zero-fee disprove and a fee
+     child: here the disprove paid its own fee and confirmed in 163,158.
+2. **An attack now costs the attacker.**
+   - 15 of the 21 attacks burned the claimant's 1,000-sat bond, the replay's second claim
+     included.
+   - The single-fix rows on testnet4 burned one bond in all, wave 1's `bond_self_slash`.
+     Only the two rows about the bond put one at stake there.
+3. **The labels on chain are what the design pays for.**
+   - Every IOB claim carries the input labels and spends the bond: 1,036 vB, 1,140 sats at
+     1.1 sat/vB.
+   - A single-fix hardened claim was 208 vB (229 sats), 283 vB with the bond, and 961 vB
+     with the labels (wave 1's `labels_offchain_withheld` rows).
+   - The claims are 64% of the wave's fees. Fees per row went from about 830 in wave 8 to
+     about 1,710.
+4. **The chain.**
+   - The top-up (163,143), 22 of the 23 vault fundings (163,150) and all six payouts
+     (163,184) landed in real-difficulty blocks.
+   - The claims, disproves and the replay's second funding landed in minimum-difficulty
+     blocks. 163,155 held 18 claims among 163 transactions.
+   - 6 of the 37 blocks from 163,148 to 163,184 were real difficulty.
+   - At 163,186 the node knew 27 other chain tips from height 163,142 up. The split was the
+     only wave transaction that moved.
 
 ## Running a wave
 

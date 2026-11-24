@@ -407,8 +407,12 @@ Results on Core 31.1 ([`examples/native/bitvm3-iob-core31.1.json`](../examples/n
     - in four, someone other than the claimant attacks an honest claim (seed reuse, the
       payout presignature, the early reclaim, the retained desk key).
 
-The testnet4 wave for this design, `iob1` (21 attacks and the honest claim), is defined and
-rehearsed ([TESTNET4.md](TESTNET4.md#the-iob-hardened-design)).
+The testnet4 wave for this design, `iob1` (21 attacks and the honest claim), met 22 of 22 on
+the public network ([TESTNET4.md](TESTNET4.md#wave-iob1-on-testnet4)).
+- Every row took the same transaction steps as here.
+- 15 bonds were burned, the 15 attacks that burn one on regtest.
+- Every claim carries the labels and the bond, so each one is 1,036 vB and paid 1,140 sats
+  at 1.1 sat/vB. The claims were most of the wave's fees.
 
 ## Fidelity limits
 

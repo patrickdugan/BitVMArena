@@ -22,7 +22,8 @@ Done:
   watcher;
 - the IOB graph with every hardened fix at once (`bitvm3-iob`, 46 rows on regtest): no
   attack succeeds, the fixes compose (every attack but one takes its single-fix row's
-  transaction steps), and 17 of the 23 attacks burn the claimant's bond;
+  transaction steps), and 17 of the 23 attacks burn the claimant's bond. On testnet4
+  (wave iob1, below) its 22 rows met 22 of 22;
 - a threat matrix for applications built on BitVM3 and a static design check
   (`native assess`) that maps a design to the recipes it is exposed to;
 - interactive episodes (`native episode`): a red-team agent plays the claimant, the desk,
@@ -58,6 +59,10 @@ Done:
     expectations on the public network. Two minimum-difficulty branches traded the lead
     under the vault fundings, and real-difficulty blocks mined every claim and every
     payout.
+  - **Wave iob1** (`bitvm3-iob-testnet4`): the IOB design with every fix at once, 21
+    attacks and the honest claim; 22 of 22 met, every row step for step as on regtest. 15
+    attacks burned the claimant's bond, and each claim, carrying the labels, paid 1,140
+    sats in fees.
 
 Next:
 
@@ -65,11 +70,9 @@ Next:
    `m14-claim` does not export; the window and censorship recipes need the evaluation
    time measured on the watcher hardware a deployment expects.
 2. **What the testnet4 catalog leaves.**
-   - The IOB-hardened wave `iob1` (21 attacks and the honest claim on the
-     `bitvm3-iob-testnet4` track) is defined and its rehearsal met 22 of 22. It needs
-     77,400 sats of coins plus the split, about 76,000 more than the staging wallet holds.
    - Wave 8's hardened `garbling_unchecked` vault (2,000 sats) waits for the desk's
-     144-block reclaim, which opens at block 163,249 (`testnet4 recover`).
+     144-block reclaim, which opens at block 163,249 (`testnet4 recover`). Wave iob1's
+     two refused-claim vaults (2,000 sats each) wait for theirs, which open at 163,294.
    - The cost is fees, about 780–1,020 sats per row (funding, claim, disprove, payout),
      plus a split per wave.
      - Wave 1 spent 17,740 of its 49,000 sats. It burned the hardened `bond_self_slash`
@@ -83,6 +86,8 @@ Next:
        2026-11-24.
      - Wave 8 needed a 102,000-sat top-up of the staging wallet, which held 69,729 sats
        when it ended.
+     - Wave iob1 spent 37,550 (22 rows, about 1,710 per row, 23,940 of it for the claims)
+       and burned 15,000 in bonds. It needed a 76,000-sat top-up.
    - Running all 84 rows at once would need about 163k sats of coins in flight. Waves sized
      to the wallet recycle the same coins.
    - The recipes that need a miner or a topology (`disprove_censored_by_miner`,
