@@ -75,7 +75,7 @@ jobs:
           for report in examples/native/bitvm3-setup-ssh-fleet*.json; do
             [ -e "$report" ] || continue
             python -m bitvm_corpus native audit "$report"
-            python tools/compare_setup_reports.py examples/native/bitvm3-setup-core31.1.json "$report"
+            python tools/compare_setup_reports.py examples/native/bitvm3-setup-core31.1.json "$report" --ssh-roles garbler,desk,guardian,watch
           done
       - name: Audit the saved episode reports offline
         run: |
@@ -169,7 +169,7 @@ jobs:
           report=reports/bitvm3-setup-ssh-fleet-linux.json
           python -m bitvm_corpus native run --track bitvm3-setup $(cat "$fleet/hosts.args") --ssh-config "$fleet/ssh_config" --output "$report"
           python -m bitvm_corpus native audit "$report"
-          python tools/compare_setup_reports.py examples/native/bitvm3-setup-core31.1.json "$report"
+          python tools/compare_setup_reports.py examples/native/bitvm3-setup-core31.1.json "$report" --ssh-roles garbler,desk,guardian,watch
       - name: Stop the fleet
         if: always()
         run: bash tools/ssh_fleet.sh down "$RUNNER_TEMP/fleet"
