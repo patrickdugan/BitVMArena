@@ -206,6 +206,13 @@ the same laptop took 348–401 s.
 All 8 trajectories met their expectations on Core 31.1 (20 confirmed, 2 rejected).
 Evidence: [`examples/native/bitvm3-m14-core31.1.json`](../examples/native/bitvm3-m14-core31.1.json).
 
+**These runs are of the circuit before the public-values digest check** (finding 10): the
+`04b6d3e` build, 785,442,492 gates. `m14-claim` built from garbled-snark-verifier `c39a3ec`
+or later has 792,546,673, and `m14.py` pins the earlier count, so the recorded runs and the
+constants `INPUT_BITS, CIPHERTEXTS` have to be re-recorded together before the track runs
+against the fixed circuit. The two recipes here do not depend on the missing check: a
+flipped input bit and a proof for another statement are rejected by both circuits.
+
 What M14 scale adds to the toy track's numbers:
 - each claim instance streams 785,442,492 ciphertexts, 12.57 GB at 16 bytes, which the
   evaluator must have. That is `tables_delivered_late` at full size;
@@ -250,8 +257,10 @@ removes front-running only by adding a single watcher.
 
 ## Findings for the IOB graph
 
-These are design observations about the concrete target. None of them is an exploit of
-the deployed testnet4 vaults, and nothing was broadcast outside regtest.
+Findings 1 to 9 are design observations about the concrete target. None of them is an
+exploit of the deployed testnet4 vaults, and nothing was broadcast outside regtest. Finding
+10 is a flaw in the verifier circuit those vaults were garbled from; it was not exercised
+against them.
 
 1. **Label delivery (T2) decides safety, not only liveness.** A claimant who withholds
    labels is paid for a false claim, because the window simply runs out.
@@ -320,6 +329,30 @@ the deployed testnet4 vaults, and nothing was broadcast outside regtest.
    desk that kept its key re-sign the matured payout to itself (`desk_key_retained`). The
    committee trust model in the IOB README depends on key deletion. Adding the claimant's
    signature to the payout leaf removes the dependence for this path.
+10. **M14 before 2026-11-24 did not bind the statement to the proof.** This one is a
+    soundness flaw in the verifier circuit, not in the graph. SP1's wrap machine constrains
+    8 of its 187 public values, the `digest` slots; the wrap program computes that digest
+    in-circuit over the guest key, the committed-values digest, the exit code, the recursion
+    key root and the proof nonce. M13's `verify_final` and the M14 circuit compared those
+    fields with the pins and did not recompute the digest. A claimant who runs the wrap
+    step can take any valid SP1 proof, write the pinned guest key and the vault's statement
+    digest into the public values before proving, and the result evaluates to the committed
+    **accept** label. No watcher can disprove it, whatever its hardware and however long the
+    window: the reject label never appears. Cost to the claimant: one shrink and one wrap
+    (minutes on a laptop). Every instance garbled from the `04b6d3e` circuit, including the
+    ones in this track's recorded runs and in the IOB testnet4 demonstration, has this
+    property.
+    - Fixed in garbled-snark-verifier `2137266` (M13) and `c39a3ec` (M14, +7,104,181 gates
+      for SP1's Poseidon2 over 53 elements) and in the zk-rusto-no-bitcoino mirror
+      (`d618707`, `43ff07c`). Both repositories' CI builds a wrap proof with replaced public
+      values, checks that its STARK verifies, and requires the final verifier to refuse it.
+    - It was found by reading the verifier against SP1 6.9.0's own
+      (`is_root_public_values_valid`), not by a trajectory here, and nothing was broadcast.
+      No recipe in this corpus exercises it: the toy circuit does not model proof soundness
+      ([Fidelity limits](#fidelity-limits)), and an M14-scale recipe needs a forged wrap
+      proof and an evaluation against the old and the fixed circuit.
+    - For a design under assessment: pin the verifier revision in the instance, not only
+      the statement, and treat any garbling from before the fix as paying whoever asks.
 
 ## Fidelity limits
 
