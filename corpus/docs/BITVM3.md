@@ -6,7 +6,9 @@ transaction, including package relay, replacement, miner-built blocks and relay 
 nodes. Each of the 24 recipes changes one design decision of the graph. Every recipe runs in
 four combinations (hardened or mutant, benign or attack), for 96 trajectories. A separate
 track, [`bitvm3-m14`](#bitvm3-at-m14-scale), decides the same graph with the real M14 garbled
-verifier.
+verifier. The [`bitvm3-setup`](SETUP.md) track puts a key and garbling setup ceremony in front of
+the graph, runs every party as its own process, and lets two of them collude through covert
+channels in the setup traffic.
 
 The recipes cover the seven layers a BitVM3-dependent application exposes:
 

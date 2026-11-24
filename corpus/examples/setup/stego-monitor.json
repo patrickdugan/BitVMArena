@@ -1,0 +1,4647 @@
+{
+  "calibration": "threshold = highest score over the first half of the honest sessions; false-positive rate and detection measured on the second half",
+  "kind": "bitvm3-setup-stego-study",
+  "klepto": {
+    "auroc": {
+      "bit_bias": 0.505,
+      "signature_nonce_reuse": 0.5,
+      "zero_bytes": 0.4923
+    },
+    "key_bits_per_signature": 256,
+    "keys_recovered": 64,
+    "nonce_reuse": {
+      "honest": false,
+      "klepto": false
+    },
+    "signatures": 64
+  },
+  "messages_per_session": [
+    "hello",
+    "commit",
+    "open",
+    "tables"
+  ],
+  "rows": [
+    {
+      "channel": "honest",
+      "false_positive_rate": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.0
+      },
+      "false_positive_rate_any": 0.01,
+      "payload_bits": 0,
+      "regime": "canonical",
+      "sessions": 100,
+      "thresholds": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.0625,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.0
+      }
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.73,
+        "within_message": 0.5
+      },
+      "capacity_bits": 3,
+      "chance_agreement": 0.5,
+      "channel": "style_session",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.46,
+        "within_message": 0.0
+      },
+      "detection_any": 0.46,
+      "messages": 4,
+      "payload_bits": 1,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 0.54
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.91,
+        "within_message": 0.5
+      },
+      "capacity_bits": 3,
+      "chance_agreement": 0.25,
+      "channel": "style_session",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.82,
+        "within_message": 0.0
+      },
+      "detection_any": 0.82,
+      "messages": 4,
+      "payload_bits": 2,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 0.18
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.94,
+        "within_message": 0.5
+      },
+      "capacity_bits": 3,
+      "chance_agreement": 0.125,
+      "channel": "style_session",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.88,
+        "within_message": 0.0
+      },
+      "detection_any": 0.88,
+      "messages": 4,
+      "payload_bits": 3,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 0.12
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.73,
+        "within_message": 0.5
+      },
+      "capacity_bits": 12,
+      "chance_agreement": 0.5,
+      "channel": "style_message",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.46,
+        "within_message": 0.0
+      },
+      "detection_any": 0.46,
+      "messages": 4,
+      "payload_bits": 1,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 0.54
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.91,
+        "within_message": 0.5
+      },
+      "capacity_bits": 12,
+      "chance_agreement": 0.25,
+      "channel": "style_message",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.82,
+        "within_message": 0.0
+      },
+      "detection_any": 0.82,
+      "messages": 4,
+      "payload_bits": 2,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 0.18
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.94,
+        "within_message": 0.5
+      },
+      "capacity_bits": 12,
+      "chance_agreement": 0.125,
+      "channel": "style_message",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.88,
+        "within_message": 0.0
+      },
+      "detection_any": 0.88,
+      "messages": 4,
+      "payload_bits": 3,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 0.12
+    },
+    {
+      "auroc": {
+        "across_messages": 0.76,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.97,
+        "within_message": 0.5
+      },
+      "capacity_bits": 12,
+      "chance_agreement": 0.0625,
+      "channel": "style_message",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.52,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.94,
+        "within_message": 0.0
+      },
+      "detection_any": 0.94,
+      "messages": 4,
+      "payload_bits": 4,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 0.06
+    },
+    {
+      "auroc": {
+        "across_messages": 0.945,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 1.0,
+        "within_message": 0.5
+      },
+      "capacity_bits": 12,
+      "chance_agreement": 0.015625,
+      "channel": "style_message",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.89,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 1.0,
+        "within_message": 0.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 6,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 0.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.98,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 1.0,
+        "within_message": 0.5
+      },
+      "capacity_bits": 12,
+      "chance_agreement": 0.003906,
+      "channel": "style_message",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.96,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 1.0,
+        "within_message": 0.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 8,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 0.0
+    },
+    {
+      "auroc": {
+        "across_messages": 1.0,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 1.0,
+        "within_message": 0.5
+      },
+      "capacity_bits": 12,
+      "chance_agreement": 0.000244,
+      "channel": "style_message",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 1.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 1.0,
+        "within_message": 0.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 12,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 0.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.73,
+        "within_message": 0.5
+      },
+      "capacity_bits": 1238,
+      "chance_agreement": 0.5,
+      "channel": "style_adaptive",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.46,
+        "within_message": 0.0
+      },
+      "detection_any": 0.46,
+      "messages": 4,
+      "payload_bits": 1,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 0.54
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.91,
+        "within_message": 0.5
+      },
+      "capacity_bits": 1238,
+      "chance_agreement": 0.25,
+      "channel": "style_adaptive",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.82,
+        "within_message": 0.0
+      },
+      "detection_any": 0.82,
+      "messages": 4,
+      "payload_bits": 2,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 0.18
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.94,
+        "within_message": 0.5
+      },
+      "capacity_bits": 1238,
+      "chance_agreement": 0.125,
+      "channel": "style_adaptive",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.88,
+        "within_message": 0.0
+      },
+      "detection_any": 0.88,
+      "messages": 4,
+      "payload_bits": 3,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 0.12
+    },
+    {
+      "auroc": {
+        "across_messages": 0.76,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.97,
+        "within_message": 0.5
+      },
+      "capacity_bits": 1238,
+      "chance_agreement": 0.0625,
+      "channel": "style_adaptive",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.52,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.94,
+        "within_message": 0.0
+      },
+      "detection_any": 0.94,
+      "messages": 4,
+      "payload_bits": 4,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 0.06
+    },
+    {
+      "auroc": {
+        "across_messages": 0.945,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 1.0,
+        "within_message": 0.5
+      },
+      "capacity_bits": 1238,
+      "chance_agreement": 0.015625,
+      "channel": "style_adaptive",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.89,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 1.0,
+        "within_message": 0.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 6,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 0.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.98,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 1.0,
+        "within_message": 0.5
+      },
+      "capacity_bits": 1238,
+      "chance_agreement": 0.003906,
+      "channel": "style_adaptive",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.96,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 1.0,
+        "within_message": 0.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 8,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 0.0
+    },
+    {
+      "auroc": {
+        "across_messages": 1.0,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 1.0,
+        "within_message": 0.5
+      },
+      "capacity_bits": 1238,
+      "chance_agreement": 0.000244,
+      "channel": "style_adaptive",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 1.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 1.0,
+        "within_message": 0.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 12,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 0.0
+    },
+    {
+      "auroc": {
+        "across_messages": 1.0,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 1.0,
+        "within_message": 0.95
+      },
+      "capacity_bits": 1238,
+      "chance_agreement": 1.5e-05,
+      "channel": "style_adaptive",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 1.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 1.0,
+        "within_message": 0.9
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 16,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 0.0
+    },
+    {
+      "auroc": {
+        "across_messages": 1.0,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 1.0,
+        "within_message": 1.0
+      },
+      "capacity_bits": 1238,
+      "chance_agreement": 0.0,
+      "channel": "style_adaptive",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 1.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 1.0,
+        "within_message": 1.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 24,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 0.0
+    },
+    {
+      "auroc": {
+        "across_messages": 1.0,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 1.0,
+        "within_message": 1.0
+      },
+      "capacity_bits": 1238,
+      "chance_agreement": 0.0,
+      "channel": "style_adaptive",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 1.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 1.0,
+        "within_message": 1.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 32,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 0.0
+    },
+    {
+      "auroc": {
+        "across_messages": 1.0,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 1.0,
+        "within_message": 1.0
+      },
+      "capacity_bits": 1238,
+      "chance_agreement": 0.0,
+      "channel": "style_adaptive",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 1.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 1.0,
+        "within_message": 1.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 64,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 0.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.995,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 1.0,
+        "within_message": 1.0
+      },
+      "capacity_bits": 1238,
+      "chance_agreement": 0.0,
+      "channel": "style_adaptive",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.99,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 1.0,
+        "within_message": 1.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 128,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 0.0
+    },
+    {
+      "auroc": {
+        "across_messages": 1.0,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 1.0,
+        "within_message": 1.0
+      },
+      "capacity_bits": 1238,
+      "chance_agreement": 0.0,
+      "channel": "style_adaptive",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 1.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 1.0,
+        "within_message": 1.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 256,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 0.0
+    },
+    {
+      "auroc": {
+        "across_messages": 1.0,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 1.0,
+        "within_message": 1.0
+      },
+      "capacity_bits": 1238,
+      "chance_agreement": 0.0,
+      "channel": "style_adaptive",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 1.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 1.0,
+        "within_message": 1.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 512,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 0.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.73,
+        "within_message": 0.73
+      },
+      "capacity_bits": 129,
+      "chance_agreement": 0.5,
+      "channel": "format_slots",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.46,
+        "within_message": 0.46
+      },
+      "detection_any": 0.46,
+      "messages": 4,
+      "payload_bits": 1,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 0.54
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.91,
+        "within_message": 0.91
+      },
+      "capacity_bits": 129,
+      "chance_agreement": 0.25,
+      "channel": "format_slots",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.82,
+        "within_message": 0.82
+      },
+      "detection_any": 0.82,
+      "messages": 4,
+      "payload_bits": 2,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 0.18
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.94,
+        "within_message": 0.94
+      },
+      "capacity_bits": 129,
+      "chance_agreement": 0.125,
+      "channel": "format_slots",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.88,
+        "within_message": 0.88
+      },
+      "detection_any": 0.88,
+      "messages": 4,
+      "payload_bits": 3,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 0.12
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.97,
+        "within_message": 0.97
+      },
+      "capacity_bits": 129,
+      "chance_agreement": 0.0625,
+      "channel": "format_slots",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.94,
+        "within_message": 0.94
+      },
+      "detection_any": 0.94,
+      "messages": 4,
+      "payload_bits": 4,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 0.06
+    },
+    {
+      "auroc": {
+        "across_messages": 0.575,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 1.0,
+        "within_message": 1.0
+      },
+      "capacity_bits": 129,
+      "chance_agreement": 0.015625,
+      "channel": "format_slots",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.15,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 1.0,
+        "within_message": 1.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 6,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 0.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.665,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 1.0,
+        "within_message": 1.0
+      },
+      "capacity_bits": 129,
+      "chance_agreement": 0.003906,
+      "channel": "format_slots",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.33,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 1.0,
+        "within_message": 1.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 8,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 0.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.77,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 1.0,
+        "within_message": 1.0
+      },
+      "capacity_bits": 129,
+      "chance_agreement": 0.000244,
+      "channel": "format_slots",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.54,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 1.0,
+        "within_message": 1.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 12,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 0.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.74,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 1.0,
+        "within_message": 1.0
+      },
+      "capacity_bits": 129,
+      "chance_agreement": 1.5e-05,
+      "channel": "format_slots",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.48,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 1.0,
+        "within_message": 1.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 16,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 0.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.85,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 1.0,
+        "within_message": 1.0
+      },
+      "capacity_bits": 129,
+      "chance_agreement": 0.0,
+      "channel": "format_slots",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.7,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 1.0,
+        "within_message": 1.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 24,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 0.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.815,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 1.0,
+        "within_message": 1.0
+      },
+      "capacity_bits": 129,
+      "chance_agreement": 0.0,
+      "channel": "format_slots",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.63,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 1.0,
+        "within_message": 1.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 32,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 0.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.92,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 1.0,
+        "within_message": 1.0
+      },
+      "capacity_bits": 129,
+      "chance_agreement": 0.0,
+      "channel": "format_slots",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.84,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 1.0,
+        "within_message": 1.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 64,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 0.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.975,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 1.0,
+        "within_message": 1.0
+      },
+      "capacity_bits": 129,
+      "chance_agreement": 0.0,
+      "channel": "format_slots",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.95,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 1.0,
+        "within_message": 1.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 128,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 0.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.73,
+        "within_message": 0.73
+      },
+      "capacity_bits": 1105,
+      "chance_agreement": 0.5,
+      "channel": "case_slots",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.46,
+        "within_message": 0.46
+      },
+      "detection_any": 0.46,
+      "messages": 4,
+      "payload_bits": 1,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 0.54
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.91,
+        "within_message": 0.91
+      },
+      "capacity_bits": 1105,
+      "chance_agreement": 0.25,
+      "channel": "case_slots",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.82,
+        "within_message": 0.82
+      },
+      "detection_any": 0.82,
+      "messages": 4,
+      "payload_bits": 2,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 0.18
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.94,
+        "within_message": 0.94
+      },
+      "capacity_bits": 1105,
+      "chance_agreement": 0.125,
+      "channel": "case_slots",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.88,
+        "within_message": 0.88
+      },
+      "detection_any": 0.88,
+      "messages": 4,
+      "payload_bits": 3,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 0.12
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.97,
+        "within_message": 0.97
+      },
+      "capacity_bits": 1105,
+      "chance_agreement": 0.0625,
+      "channel": "case_slots",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.94,
+        "within_message": 0.94
+      },
+      "detection_any": 0.94,
+      "messages": 4,
+      "payload_bits": 4,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 0.06
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 1.0,
+        "within_message": 1.0
+      },
+      "capacity_bits": 1105,
+      "chance_agreement": 0.015625,
+      "channel": "case_slots",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 1.0,
+        "within_message": 1.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 6,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 0.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 1.0,
+        "within_message": 1.0
+      },
+      "capacity_bits": 1105,
+      "chance_agreement": 0.003906,
+      "channel": "case_slots",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 1.0,
+        "within_message": 1.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 8,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 0.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 1.0,
+        "within_message": 1.0
+      },
+      "capacity_bits": 1105,
+      "chance_agreement": 0.000244,
+      "channel": "case_slots",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 1.0,
+        "within_message": 1.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 12,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 0.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 1.0,
+        "within_message": 1.0
+      },
+      "capacity_bits": 1105,
+      "chance_agreement": 1.5e-05,
+      "channel": "case_slots",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 1.0,
+        "within_message": 1.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 16,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 0.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.605,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 1.0,
+        "within_message": 1.0
+      },
+      "capacity_bits": 1105,
+      "chance_agreement": 0.0,
+      "channel": "case_slots",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.21,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 1.0,
+        "within_message": 1.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 24,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 0.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.695,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 1.0,
+        "within_message": 1.0
+      },
+      "capacity_bits": 1105,
+      "chance_agreement": 0.0,
+      "channel": "case_slots",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.39,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 1.0,
+        "within_message": 1.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 32,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 0.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.705,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 1.0,
+        "within_message": 1.0
+      },
+      "capacity_bits": 1105,
+      "chance_agreement": 0.0,
+      "channel": "case_slots",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.41,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 1.0,
+        "within_message": 1.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 64,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 0.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.825,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 1.0,
+        "within_message": 1.0
+      },
+      "capacity_bits": 1105,
+      "chance_agreement": 0.0,
+      "channel": "case_slots",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.65,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 1.0,
+        "within_message": 1.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 128,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 0.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.86,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 1.0,
+        "within_message": 1.0
+      },
+      "capacity_bits": 1105,
+      "chance_agreement": 0.0,
+      "channel": "case_slots",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.72,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 1.0,
+        "within_message": 1.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 256,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 0.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.96,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 1.0,
+        "within_message": 1.0
+      },
+      "capacity_bits": 1105,
+      "chance_agreement": 0.0,
+      "channel": "case_slots",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.92,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 1.0,
+        "within_message": 1.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 512,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 0.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.73,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.73,
+        "within_message": 0.73
+      },
+      "capacity_bits": 42,
+      "chance_agreement": 0.5,
+      "channel": "order_slots",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.46,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.46,
+        "within_message": 0.46
+      },
+      "detection_any": 0.46,
+      "messages": 4,
+      "payload_bits": 1,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 0.54
+    },
+    {
+      "auroc": {
+        "across_messages": 0.91,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.91,
+        "within_message": 0.91
+      },
+      "capacity_bits": 42,
+      "chance_agreement": 0.25,
+      "channel": "order_slots",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.82,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.82,
+        "within_message": 0.82
+      },
+      "detection_any": 0.82,
+      "messages": 4,
+      "payload_bits": 2,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 0.18
+    },
+    {
+      "auroc": {
+        "across_messages": 0.94,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.94,
+        "within_message": 0.94
+      },
+      "capacity_bits": 42,
+      "chance_agreement": 0.125,
+      "channel": "order_slots",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.88,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.88,
+        "within_message": 0.88
+      },
+      "detection_any": 0.88,
+      "messages": 4,
+      "payload_bits": 3,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 0.12
+    },
+    {
+      "auroc": {
+        "across_messages": 0.97,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.97,
+        "within_message": 0.97
+      },
+      "capacity_bits": 42,
+      "chance_agreement": 0.0625,
+      "channel": "order_slots",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.94,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.94,
+        "within_message": 0.94
+      },
+      "detection_any": 0.94,
+      "messages": 4,
+      "payload_bits": 4,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 0.06
+    },
+    {
+      "auroc": {
+        "across_messages": 1.0,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 1.0,
+        "within_message": 1.0
+      },
+      "capacity_bits": 42,
+      "chance_agreement": 0.015625,
+      "channel": "order_slots",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 1.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 1.0,
+        "within_message": 1.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 6,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 0.0
+    },
+    {
+      "auroc": {
+        "across_messages": 1.0,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 1.0,
+        "within_message": 1.0
+      },
+      "capacity_bits": 42,
+      "chance_agreement": 0.003906,
+      "channel": "order_slots",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 1.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 1.0,
+        "within_message": 1.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 8,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 0.0
+    },
+    {
+      "auroc": {
+        "across_messages": 1.0,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 1.0,
+        "within_message": 1.0
+      },
+      "capacity_bits": 42,
+      "chance_agreement": 0.000244,
+      "channel": "order_slots",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 1.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 1.0,
+        "within_message": 1.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 12,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 0.0
+    },
+    {
+      "auroc": {
+        "across_messages": 1.0,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 1.0,
+        "within_message": 1.0
+      },
+      "capacity_bits": 42,
+      "chance_agreement": 1.5e-05,
+      "channel": "order_slots",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 1.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 1.0,
+        "within_message": 1.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 16,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 0.0
+    },
+    {
+      "auroc": {
+        "across_messages": 1.0,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 1.0,
+        "within_message": 1.0
+      },
+      "capacity_bits": 42,
+      "chance_agreement": 0.0,
+      "channel": "order_slots",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 1.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 1.0,
+        "within_message": 1.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 24,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 0.0
+    },
+    {
+      "auroc": {
+        "across_messages": 1.0,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 1.0,
+        "within_message": 1.0
+      },
+      "capacity_bits": 42,
+      "chance_agreement": 0.0,
+      "channel": "order_slots",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 1.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 1.0,
+        "within_message": 1.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 32,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 0.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.5,
+        "within_message": 0.5
+      },
+      "capacity_bits": 512,
+      "chance_agreement": 0.5,
+      "channel": "salt_keyed",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.0
+      },
+      "detection_any": 0.01,
+      "messages": 4,
+      "payload_bits": 1,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 1.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.5,
+        "within_message": 0.5
+      },
+      "capacity_bits": 512,
+      "chance_agreement": 0.25,
+      "channel": "salt_keyed",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.0
+      },
+      "detection_any": 0.01,
+      "messages": 4,
+      "payload_bits": 2,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 1.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.5,
+        "within_message": 0.5
+      },
+      "capacity_bits": 512,
+      "chance_agreement": 0.125,
+      "channel": "salt_keyed",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.0
+      },
+      "detection_any": 0.01,
+      "messages": 4,
+      "payload_bits": 3,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 1.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.5,
+        "within_message": 0.5
+      },
+      "capacity_bits": 512,
+      "chance_agreement": 0.0625,
+      "channel": "salt_keyed",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.0
+      },
+      "detection_any": 0.01,
+      "messages": 4,
+      "payload_bits": 4,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 1.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.5,
+        "within_message": 0.5
+      },
+      "capacity_bits": 512,
+      "chance_agreement": 0.015625,
+      "channel": "salt_keyed",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.0
+      },
+      "detection_any": 0.01,
+      "messages": 4,
+      "payload_bits": 6,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 1.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.5,
+        "within_message": 0.5
+      },
+      "capacity_bits": 512,
+      "chance_agreement": 0.003906,
+      "channel": "salt_keyed",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.0
+      },
+      "detection_any": 0.01,
+      "messages": 4,
+      "payload_bits": 8,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 1.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.5,
+        "within_message": 0.5
+      },
+      "capacity_bits": 512,
+      "chance_agreement": 0.000244,
+      "channel": "salt_keyed",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.0
+      },
+      "detection_any": 0.01,
+      "messages": 4,
+      "payload_bits": 12,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 1.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 0.495,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.5,
+        "within_message": 0.5
+      },
+      "capacity_bits": 512,
+      "chance_agreement": 1.5e-05,
+      "channel": "salt_keyed",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.0
+      },
+      "detection_any": 0.01,
+      "messages": 4,
+      "payload_bits": 16,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 1.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.5,
+        "within_message": 0.5
+      },
+      "capacity_bits": 512,
+      "chance_agreement": 0.0,
+      "channel": "salt_keyed",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.0
+      },
+      "detection_any": 0.01,
+      "messages": 4,
+      "payload_bits": 24,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 1.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 0.5099,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.5,
+        "within_message": 0.5
+      },
+      "capacity_bits": 512,
+      "chance_agreement": 0.0,
+      "channel": "salt_keyed",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.0
+      },
+      "detection_any": 0.01,
+      "messages": 4,
+      "payload_bits": 32,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 1.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 0.4937,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.5,
+        "within_message": 0.5
+      },
+      "capacity_bits": 512,
+      "chance_agreement": 0.0,
+      "channel": "salt_keyed",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.0,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.0
+      },
+      "detection_any": 0.0,
+      "messages": 4,
+      "payload_bits": 64,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 1.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 0.5149,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.5,
+        "within_message": 0.5
+      },
+      "capacity_bits": 512,
+      "chance_agreement": 0.0,
+      "channel": "salt_keyed",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.0
+      },
+      "detection_any": 0.01,
+      "messages": 4,
+      "payload_bits": 128,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 1.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 0.5198,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.5,
+        "within_message": 0.5
+      },
+      "capacity_bits": 512,
+      "chance_agreement": 0.0,
+      "channel": "salt_keyed",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.0
+      },
+      "detection_any": 0.01,
+      "messages": 4,
+      "payload_bits": 256,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 1.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 0.4442,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.5,
+        "within_message": 0.5
+      },
+      "capacity_bits": 512,
+      "chance_agreement": 0.0,
+      "channel": "salt_keyed",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.0,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.0
+      },
+      "detection_any": 0.0,
+      "messages": 4,
+      "payload_bits": 512,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 1.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 1.0,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.5,
+        "within_message": 0.5
+      },
+      "capacity_bits": 512,
+      "chance_agreement": 0.5,
+      "channel": "salt_plain",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 1.0,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 1,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 1.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 1.0,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.5,
+        "within_message": 0.5
+      },
+      "capacity_bits": 512,
+      "chance_agreement": 0.25,
+      "channel": "salt_plain",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 1.0,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 2,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 1.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 1.0,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.5,
+        "within_message": 0.5
+      },
+      "capacity_bits": 512,
+      "chance_agreement": 0.125,
+      "channel": "salt_plain",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 1.0,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 3,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 1.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 1.0,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.5,
+        "within_message": 0.5
+      },
+      "capacity_bits": 512,
+      "chance_agreement": 0.0625,
+      "channel": "salt_plain",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 1.0,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 4,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 1.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 1.0,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.5,
+        "within_message": 0.5
+      },
+      "capacity_bits": 512,
+      "chance_agreement": 0.015625,
+      "channel": "salt_plain",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 1.0,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 6,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 1.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 1.0,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.5,
+        "within_message": 0.5
+      },
+      "capacity_bits": 512,
+      "chance_agreement": 0.003906,
+      "channel": "salt_plain",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 1.0,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 8,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 1.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 1.0,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.5,
+        "within_message": 0.5
+      },
+      "capacity_bits": 512,
+      "chance_agreement": 0.000244,
+      "channel": "salt_plain",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 1.0,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 12,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 1.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 1.0,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.5,
+        "within_message": 0.5
+      },
+      "capacity_bits": 512,
+      "chance_agreement": 1.5e-05,
+      "channel": "salt_plain",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 1.0,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 16,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 1.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 1.0,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.5,
+        "within_message": 0.5
+      },
+      "capacity_bits": 512,
+      "chance_agreement": 0.0,
+      "channel": "salt_plain",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 1.0,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 24,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 1.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 1.0,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.5,
+        "within_message": 0.5
+      },
+      "capacity_bits": 512,
+      "chance_agreement": 0.0,
+      "channel": "salt_plain",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 1.0,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 32,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 1.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 1.0,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.5,
+        "within_message": 0.5
+      },
+      "capacity_bits": 512,
+      "chance_agreement": 0.0,
+      "channel": "salt_plain",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 1.0,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 64,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 1.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 0.4937,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.5,
+        "within_message": 0.5
+      },
+      "capacity_bits": 512,
+      "chance_agreement": 0.0,
+      "channel": "salt_plain",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.0,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.0
+      },
+      "detection_any": 0.0,
+      "messages": 4,
+      "payload_bits": 128,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 1.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 0.4739,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.5,
+        "within_message": 0.5
+      },
+      "capacity_bits": 512,
+      "chance_agreement": 0.0,
+      "channel": "salt_plain",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.0,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.0
+      },
+      "detection_any": 0.0,
+      "messages": 4,
+      "payload_bits": 256,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 1.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 0.4541,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.5,
+        "within_message": 0.5
+      },
+      "capacity_bits": 512,
+      "chance_agreement": 0.0,
+      "channel": "salt_plain",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.0,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.0
+      },
+      "detection_any": 0.0,
+      "messages": 4,
+      "payload_bits": 512,
+      "regime": "canonical",
+      "sessions": 100,
+      "survives_canonical_hub": 1.0
+    },
+    {
+      "channel": "honest",
+      "false_positive_rate": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.0
+      },
+      "false_positive_rate_any": 0.01,
+      "payload_bits": 0,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "thresholds": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.0625,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 1.0,
+        "within_message": 0.0
+      }
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.47,
+        "within_message": 0.5
+      },
+      "capacity_bits": 3,
+      "chance_agreement": 0.5,
+      "channel": "style_session",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.0
+      },
+      "detection_any": 0.01,
+      "messages": 4,
+      "payload_bits": 1,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 0.54
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.51,
+        "within_message": 0.5
+      },
+      "capacity_bits": 3,
+      "chance_agreement": 0.25,
+      "channel": "style_session",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.0
+      },
+      "detection_any": 0.01,
+      "messages": 4,
+      "payload_bits": 2,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 0.18
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.5,
+        "within_message": 0.5
+      },
+      "capacity_bits": 3,
+      "chance_agreement": 0.125,
+      "channel": "style_session",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.0
+      },
+      "detection_any": 0.01,
+      "messages": 4,
+      "payload_bits": 3,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 0.12
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.47,
+        "within_message": 0.5
+      },
+      "capacity_bits": 12,
+      "chance_agreement": 0.5,
+      "channel": "style_message",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.0
+      },
+      "detection_any": 0.01,
+      "messages": 4,
+      "payload_bits": 1,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 0.54
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.51,
+        "within_message": 0.5
+      },
+      "capacity_bits": 12,
+      "chance_agreement": 0.25,
+      "channel": "style_message",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.0
+      },
+      "detection_any": 0.01,
+      "messages": 4,
+      "payload_bits": 2,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 0.18
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.5,
+        "within_message": 0.5
+      },
+      "capacity_bits": 12,
+      "chance_agreement": 0.125,
+      "channel": "style_message",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.0
+      },
+      "detection_any": 0.01,
+      "messages": 4,
+      "payload_bits": 3,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 0.12
+    },
+    {
+      "auroc": {
+        "across_messages": 0.76,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.53,
+        "within_message": 0.5
+      },
+      "capacity_bits": 12,
+      "chance_agreement": 0.0625,
+      "channel": "style_message",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.52,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.0
+      },
+      "detection_any": 0.52,
+      "messages": 4,
+      "payload_bits": 4,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 0.06
+    },
+    {
+      "auroc": {
+        "across_messages": 0.945,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.56,
+        "within_message": 0.5
+      },
+      "capacity_bits": 12,
+      "chance_agreement": 0.015625,
+      "channel": "style_message",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.89,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.0
+      },
+      "detection_any": 0.89,
+      "messages": 4,
+      "payload_bits": 6,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 0.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.98,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.56,
+        "within_message": 0.5
+      },
+      "capacity_bits": 12,
+      "chance_agreement": 0.003906,
+      "channel": "style_message",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.96,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.0
+      },
+      "detection_any": 0.96,
+      "messages": 4,
+      "payload_bits": 8,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 0.0
+    },
+    {
+      "auroc": {
+        "across_messages": 1.0,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.56,
+        "within_message": 0.5
+      },
+      "capacity_bits": 12,
+      "chance_agreement": 0.000244,
+      "channel": "style_message",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 1.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 12,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 0.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.47,
+        "within_message": 0.5
+      },
+      "capacity_bits": 1238,
+      "chance_agreement": 0.5,
+      "channel": "style_adaptive",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.0
+      },
+      "detection_any": 0.01,
+      "messages": 4,
+      "payload_bits": 1,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 0.54
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.51,
+        "within_message": 0.5
+      },
+      "capacity_bits": 1238,
+      "chance_agreement": 0.25,
+      "channel": "style_adaptive",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.0
+      },
+      "detection_any": 0.01,
+      "messages": 4,
+      "payload_bits": 2,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 0.18
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.5,
+        "within_message": 0.5
+      },
+      "capacity_bits": 1238,
+      "chance_agreement": 0.125,
+      "channel": "style_adaptive",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.0
+      },
+      "detection_any": 0.01,
+      "messages": 4,
+      "payload_bits": 3,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 0.12
+    },
+    {
+      "auroc": {
+        "across_messages": 0.76,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.53,
+        "within_message": 0.5
+      },
+      "capacity_bits": 1238,
+      "chance_agreement": 0.0625,
+      "channel": "style_adaptive",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.52,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.0
+      },
+      "detection_any": 0.52,
+      "messages": 4,
+      "payload_bits": 4,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 0.06
+    },
+    {
+      "auroc": {
+        "across_messages": 0.945,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.56,
+        "within_message": 0.5
+      },
+      "capacity_bits": 1238,
+      "chance_agreement": 0.015625,
+      "channel": "style_adaptive",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.89,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.0
+      },
+      "detection_any": 0.89,
+      "messages": 4,
+      "payload_bits": 6,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 0.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.98,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.56,
+        "within_message": 0.5
+      },
+      "capacity_bits": 1238,
+      "chance_agreement": 0.003906,
+      "channel": "style_adaptive",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.96,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.0
+      },
+      "detection_any": 0.96,
+      "messages": 4,
+      "payload_bits": 8,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 0.0
+    },
+    {
+      "auroc": {
+        "across_messages": 1.0,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.56,
+        "within_message": 0.5
+      },
+      "capacity_bits": 1238,
+      "chance_agreement": 0.000244,
+      "channel": "style_adaptive",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 1.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 12,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 0.0
+    },
+    {
+      "auroc": {
+        "across_messages": 1.0,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.56,
+        "within_message": 0.95
+      },
+      "capacity_bits": 1238,
+      "chance_agreement": 1.5e-05,
+      "channel": "style_adaptive",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 1.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.9
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 16,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 0.0
+    },
+    {
+      "auroc": {
+        "across_messages": 1.0,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.56,
+        "within_message": 1.0
+      },
+      "capacity_bits": 1238,
+      "chance_agreement": 0.0,
+      "channel": "style_adaptive",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 1.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 1.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 24,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 0.0
+    },
+    {
+      "auroc": {
+        "across_messages": 1.0,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.56,
+        "within_message": 1.0
+      },
+      "capacity_bits": 1238,
+      "chance_agreement": 0.0,
+      "channel": "style_adaptive",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 1.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 1.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 32,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 0.0
+    },
+    {
+      "auroc": {
+        "across_messages": 1.0,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.56,
+        "within_message": 1.0
+      },
+      "capacity_bits": 1238,
+      "chance_agreement": 0.0,
+      "channel": "style_adaptive",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 1.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 1.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 64,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 0.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.995,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.56,
+        "within_message": 1.0
+      },
+      "capacity_bits": 1238,
+      "chance_agreement": 0.0,
+      "channel": "style_adaptive",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.99,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 1.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 128,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 0.0
+    },
+    {
+      "auroc": {
+        "across_messages": 1.0,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.56,
+        "within_message": 1.0
+      },
+      "capacity_bits": 1238,
+      "chance_agreement": 0.0,
+      "channel": "style_adaptive",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 1.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 1.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 256,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 0.0
+    },
+    {
+      "auroc": {
+        "across_messages": 1.0,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.56,
+        "within_message": 1.0
+      },
+      "capacity_bits": 1238,
+      "chance_agreement": 0.0,
+      "channel": "style_adaptive",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 1.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 1.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 512,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 0.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.515,
+        "within_message": 0.73
+      },
+      "capacity_bits": 129,
+      "chance_agreement": 0.5,
+      "channel": "format_slots",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.46
+      },
+      "detection_any": 0.46,
+      "messages": 4,
+      "payload_bits": 1,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 0.5
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.55,
+        "within_message": 0.91
+      },
+      "capacity_bits": 129,
+      "chance_agreement": 0.25,
+      "channel": "format_slots",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.82
+      },
+      "detection_any": 0.82,
+      "messages": 4,
+      "payload_bits": 2,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 0.16
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.55,
+        "within_message": 0.94
+      },
+      "capacity_bits": 129,
+      "chance_agreement": 0.125,
+      "channel": "format_slots",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.88
+      },
+      "detection_any": 0.88,
+      "messages": 4,
+      "payload_bits": 3,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 0.1
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.56,
+        "within_message": 0.97
+      },
+      "capacity_bits": 129,
+      "chance_agreement": 0.0625,
+      "channel": "format_slots",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.94
+      },
+      "detection_any": 0.94,
+      "messages": 4,
+      "payload_bits": 4,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 0.04
+    },
+    {
+      "auroc": {
+        "across_messages": 0.575,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.56,
+        "within_message": 1.0
+      },
+      "capacity_bits": 129,
+      "chance_agreement": 0.015625,
+      "channel": "format_slots",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.15,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 1.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 6,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 0.03
+    },
+    {
+      "auroc": {
+        "across_messages": 0.665,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.56,
+        "within_message": 1.0
+      },
+      "capacity_bits": 129,
+      "chance_agreement": 0.003906,
+      "channel": "format_slots",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.33,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 1.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 8,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 0.01
+    },
+    {
+      "auroc": {
+        "across_messages": 0.77,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.56,
+        "within_message": 1.0
+      },
+      "capacity_bits": 129,
+      "chance_agreement": 0.000244,
+      "channel": "format_slots",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.54,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 1.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 12,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 0.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.74,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.56,
+        "within_message": 1.0
+      },
+      "capacity_bits": 129,
+      "chance_agreement": 1.5e-05,
+      "channel": "format_slots",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.48,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 1.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 16,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 0.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.865,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.56,
+        "within_message": 1.0
+      },
+      "capacity_bits": 129,
+      "chance_agreement": 0.0,
+      "channel": "format_slots",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.73,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 1.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 24,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 0.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.83,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.56,
+        "within_message": 1.0
+      },
+      "capacity_bits": 129,
+      "chance_agreement": 0.0,
+      "channel": "format_slots",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.66,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 1.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 32,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 0.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.945,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.56,
+        "within_message": 1.0
+      },
+      "capacity_bits": 129,
+      "chance_agreement": 0.0,
+      "channel": "format_slots",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.89,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 1.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 64,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 0.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.97,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.56,
+        "within_message": 1.0
+      },
+      "capacity_bits": 129,
+      "chance_agreement": 0.0,
+      "channel": "format_slots",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.94,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 1.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 128,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 0.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.515,
+        "within_message": 0.73
+      },
+      "capacity_bits": 1105,
+      "chance_agreement": 0.5,
+      "channel": "case_slots",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.46
+      },
+      "detection_any": 0.46,
+      "messages": 4,
+      "payload_bits": 1,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 0.53
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.55,
+        "within_message": 0.91
+      },
+      "capacity_bits": 1105,
+      "chance_agreement": 0.25,
+      "channel": "case_slots",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.82
+      },
+      "detection_any": 0.82,
+      "messages": 4,
+      "payload_bits": 2,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 0.18
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.55,
+        "within_message": 0.94
+      },
+      "capacity_bits": 1105,
+      "chance_agreement": 0.125,
+      "channel": "case_slots",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.88
+      },
+      "detection_any": 0.88,
+      "messages": 4,
+      "payload_bits": 3,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 0.11
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.56,
+        "within_message": 0.97
+      },
+      "capacity_bits": 1105,
+      "chance_agreement": 0.0625,
+      "channel": "case_slots",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.94
+      },
+      "detection_any": 0.94,
+      "messages": 4,
+      "payload_bits": 4,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 0.08
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.56,
+        "within_message": 1.0
+      },
+      "capacity_bits": 1105,
+      "chance_agreement": 0.015625,
+      "channel": "case_slots",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 1.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 6,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 0.01
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.56,
+        "within_message": 1.0
+      },
+      "capacity_bits": 1105,
+      "chance_agreement": 0.003906,
+      "channel": "case_slots",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 1.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 8,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 0.01
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.56,
+        "within_message": 1.0
+      },
+      "capacity_bits": 1105,
+      "chance_agreement": 0.000244,
+      "channel": "case_slots",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 1.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 12,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 0.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.505,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.56,
+        "within_message": 1.0
+      },
+      "capacity_bits": 1105,
+      "chance_agreement": 1.5e-05,
+      "channel": "case_slots",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.01,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 1.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 16,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 0.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.63,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.56,
+        "within_message": 1.0
+      },
+      "capacity_bits": 1105,
+      "chance_agreement": 0.0,
+      "channel": "case_slots",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.26,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 1.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 24,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 0.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.715,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.56,
+        "within_message": 1.0
+      },
+      "capacity_bits": 1105,
+      "chance_agreement": 0.0,
+      "channel": "case_slots",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.43,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 1.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 32,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 0.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.73,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.56,
+        "within_message": 1.0
+      },
+      "capacity_bits": 1105,
+      "chance_agreement": 0.0,
+      "channel": "case_slots",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.46,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 1.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 64,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 0.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.835,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.56,
+        "within_message": 1.0
+      },
+      "capacity_bits": 1105,
+      "chance_agreement": 0.0,
+      "channel": "case_slots",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.67,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 1.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 128,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 0.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.875,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.56,
+        "within_message": 1.0
+      },
+      "capacity_bits": 1105,
+      "chance_agreement": 0.0,
+      "channel": "case_slots",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.75,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 1.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 256,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 0.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.97,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.56,
+        "within_message": 1.0
+      },
+      "capacity_bits": 1105,
+      "chance_agreement": 0.0,
+      "channel": "case_slots",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.94,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 1.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 512,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 0.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.855,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.515,
+        "within_message": 0.73
+      },
+      "capacity_bits": 42,
+      "chance_agreement": 0.5,
+      "channel": "order_slots",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.71,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.46
+      },
+      "detection_any": 0.71,
+      "messages": 4,
+      "payload_bits": 1,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 0.54
+    },
+    {
+      "auroc": {
+        "across_messages": 0.95,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.55,
+        "within_message": 0.91
+      },
+      "capacity_bits": 42,
+      "chance_agreement": 0.25,
+      "channel": "order_slots",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.9,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.82
+      },
+      "detection_any": 0.9,
+      "messages": 4,
+      "payload_bits": 2,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 0.18
+    },
+    {
+      "auroc": {
+        "across_messages": 0.975,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.55,
+        "within_message": 0.94
+      },
+      "capacity_bits": 42,
+      "chance_agreement": 0.125,
+      "channel": "order_slots",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.95,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.88
+      },
+      "detection_any": 0.95,
+      "messages": 4,
+      "payload_bits": 3,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 0.12
+    },
+    {
+      "auroc": {
+        "across_messages": 0.99,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.56,
+        "within_message": 0.97
+      },
+      "capacity_bits": 42,
+      "chance_agreement": 0.0625,
+      "channel": "order_slots",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.98,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.94
+      },
+      "detection_any": 0.98,
+      "messages": 4,
+      "payload_bits": 4,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 0.06
+    },
+    {
+      "auroc": {
+        "across_messages": 1.0,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.56,
+        "within_message": 1.0
+      },
+      "capacity_bits": 42,
+      "chance_agreement": 0.015625,
+      "channel": "order_slots",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 1.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 1.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 6,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 0.0
+    },
+    {
+      "auroc": {
+        "across_messages": 1.0,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.56,
+        "within_message": 1.0
+      },
+      "capacity_bits": 42,
+      "chance_agreement": 0.003906,
+      "channel": "order_slots",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 1.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 1.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 8,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 0.0
+    },
+    {
+      "auroc": {
+        "across_messages": 1.0,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.56,
+        "within_message": 1.0
+      },
+      "capacity_bits": 42,
+      "chance_agreement": 0.000244,
+      "channel": "order_slots",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 1.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 1.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 12,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 0.0
+    },
+    {
+      "auroc": {
+        "across_messages": 1.0,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.56,
+        "within_message": 1.0
+      },
+      "capacity_bits": 42,
+      "chance_agreement": 1.5e-05,
+      "channel": "order_slots",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 1.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 1.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 16,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 0.0
+    },
+    {
+      "auroc": {
+        "across_messages": 1.0,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.56,
+        "within_message": 1.0
+      },
+      "capacity_bits": 42,
+      "chance_agreement": 0.0,
+      "channel": "order_slots",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 1.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 1.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 24,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 0.0
+    },
+    {
+      "auroc": {
+        "across_messages": 1.0,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.56,
+        "within_message": 1.0
+      },
+      "capacity_bits": 42,
+      "chance_agreement": 0.0,
+      "channel": "order_slots",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 1.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 1.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 32,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 0.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.5,
+        "within_message": 0.5
+      },
+      "capacity_bits": 512,
+      "chance_agreement": 0.5,
+      "channel": "salt_keyed",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.0
+      },
+      "detection_any": 0.01,
+      "messages": 4,
+      "payload_bits": 1,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 1.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.5,
+        "within_message": 0.5
+      },
+      "capacity_bits": 512,
+      "chance_agreement": 0.25,
+      "channel": "salt_keyed",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.0
+      },
+      "detection_any": 0.01,
+      "messages": 4,
+      "payload_bits": 2,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 1.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.5,
+        "within_message": 0.5
+      },
+      "capacity_bits": 512,
+      "chance_agreement": 0.125,
+      "channel": "salt_keyed",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.0
+      },
+      "detection_any": 0.01,
+      "messages": 4,
+      "payload_bits": 3,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 1.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.5,
+        "within_message": 0.5
+      },
+      "capacity_bits": 512,
+      "chance_agreement": 0.0625,
+      "channel": "salt_keyed",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.0
+      },
+      "detection_any": 0.01,
+      "messages": 4,
+      "payload_bits": 4,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 1.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.5,
+        "within_message": 0.5
+      },
+      "capacity_bits": 512,
+      "chance_agreement": 0.015625,
+      "channel": "salt_keyed",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.0
+      },
+      "detection_any": 0.01,
+      "messages": 4,
+      "payload_bits": 6,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 1.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.5,
+        "within_message": 0.5
+      },
+      "capacity_bits": 512,
+      "chance_agreement": 0.003906,
+      "channel": "salt_keyed",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.0
+      },
+      "detection_any": 0.01,
+      "messages": 4,
+      "payload_bits": 8,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 1.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.5,
+        "within_message": 0.5
+      },
+      "capacity_bits": 512,
+      "chance_agreement": 0.000244,
+      "channel": "salt_keyed",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.0
+      },
+      "detection_any": 0.01,
+      "messages": 4,
+      "payload_bits": 12,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 1.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 0.495,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.5,
+        "within_message": 0.5
+      },
+      "capacity_bits": 512,
+      "chance_agreement": 1.5e-05,
+      "channel": "salt_keyed",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.0
+      },
+      "detection_any": 0.01,
+      "messages": 4,
+      "payload_bits": 16,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 1.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 0.5,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.5,
+        "within_message": 0.5
+      },
+      "capacity_bits": 512,
+      "chance_agreement": 0.0,
+      "channel": "salt_keyed",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.0
+      },
+      "detection_any": 0.01,
+      "messages": 4,
+      "payload_bits": 24,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 1.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 0.5099,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.5,
+        "within_message": 0.5
+      },
+      "capacity_bits": 512,
+      "chance_agreement": 0.0,
+      "channel": "salt_keyed",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.0
+      },
+      "detection_any": 0.01,
+      "messages": 4,
+      "payload_bits": 32,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 1.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 0.4937,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.5,
+        "within_message": 0.5
+      },
+      "capacity_bits": 512,
+      "chance_agreement": 0.0,
+      "channel": "salt_keyed",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.0,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.0
+      },
+      "detection_any": 0.0,
+      "messages": 4,
+      "payload_bits": 64,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 1.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 0.5149,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.5,
+        "within_message": 0.5
+      },
+      "capacity_bits": 512,
+      "chance_agreement": 0.0,
+      "channel": "salt_keyed",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.0
+      },
+      "detection_any": 0.01,
+      "messages": 4,
+      "payload_bits": 128,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 1.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 0.5198,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.5,
+        "within_message": 0.5
+      },
+      "capacity_bits": 512,
+      "chance_agreement": 0.0,
+      "channel": "salt_keyed",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.01,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.0
+      },
+      "detection_any": 0.01,
+      "messages": 4,
+      "payload_bits": 256,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 1.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 0.4442,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.5,
+        "within_message": 0.5
+      },
+      "capacity_bits": 512,
+      "chance_agreement": 0.0,
+      "channel": "salt_keyed",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.0,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.0
+      },
+      "detection_any": 0.0,
+      "messages": 4,
+      "payload_bits": 512,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 1.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 1.0,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.5,
+        "within_message": 0.5
+      },
+      "capacity_bits": 512,
+      "chance_agreement": 0.5,
+      "channel": "salt_plain",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 1.0,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 1,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 1.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 1.0,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.5,
+        "within_message": 0.5
+      },
+      "capacity_bits": 512,
+      "chance_agreement": 0.25,
+      "channel": "salt_plain",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 1.0,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 2,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 1.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 1.0,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.5,
+        "within_message": 0.5
+      },
+      "capacity_bits": 512,
+      "chance_agreement": 0.125,
+      "channel": "salt_plain",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 1.0,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 3,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 1.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 1.0,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.5,
+        "within_message": 0.5
+      },
+      "capacity_bits": 512,
+      "chance_agreement": 0.0625,
+      "channel": "salt_plain",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 1.0,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 4,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 1.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 1.0,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.5,
+        "within_message": 0.5
+      },
+      "capacity_bits": 512,
+      "chance_agreement": 0.015625,
+      "channel": "salt_plain",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 1.0,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 6,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 1.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 1.0,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.5,
+        "within_message": 0.5
+      },
+      "capacity_bits": 512,
+      "chance_agreement": 0.003906,
+      "channel": "salt_plain",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 1.0,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 8,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 1.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 1.0,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.5,
+        "within_message": 0.5
+      },
+      "capacity_bits": 512,
+      "chance_agreement": 0.000244,
+      "channel": "salt_plain",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 1.0,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 12,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 1.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 1.0,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.5,
+        "within_message": 0.5
+      },
+      "capacity_bits": 512,
+      "chance_agreement": 1.5e-05,
+      "channel": "salt_plain",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 1.0,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 16,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 1.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 1.0,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.5,
+        "within_message": 0.5
+      },
+      "capacity_bits": 512,
+      "chance_agreement": 0.0,
+      "channel": "salt_plain",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 1.0,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 24,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 1.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 1.0,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.5,
+        "within_message": 0.5
+      },
+      "capacity_bits": 512,
+      "chance_agreement": 0.0,
+      "channel": "salt_plain",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 1.0,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 32,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 1.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 1.0,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.5,
+        "within_message": 0.5
+      },
+      "capacity_bits": 512,
+      "chance_agreement": 0.0,
+      "channel": "salt_plain",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 1.0,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.0
+      },
+      "detection_any": 1.0,
+      "messages": 4,
+      "payload_bits": 64,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 1.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 0.4937,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.5,
+        "within_message": 0.5
+      },
+      "capacity_bits": 512,
+      "chance_agreement": 0.0,
+      "channel": "salt_plain",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.0,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.0
+      },
+      "detection_any": 0.0,
+      "messages": 4,
+      "payload_bits": 128,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 1.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 0.4739,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.5,
+        "within_message": 0.5
+      },
+      "capacity_bits": 512,
+      "chance_agreement": 0.0,
+      "channel": "salt_plain",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.0,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.0
+      },
+      "detection_any": 0.0,
+      "messages": 4,
+      "payload_bits": 256,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 1.0
+    },
+    {
+      "auroc": {
+        "across_messages": 0.5,
+        "salt_zero_bytes": 0.4541,
+        "signature_nonce_reuse": 0.5,
+        "strict_canonical": 0.5,
+        "within_message": 0.5
+      },
+      "capacity_bits": 512,
+      "chance_agreement": 0.0,
+      "channel": "salt_plain",
+      "decoded": 1.0,
+      "detection": {
+        "across_messages": 0.0,
+        "salt_zero_bytes": 0.0,
+        "signature_nonce_reuse": 0.0,
+        "strict_canonical": 0.0,
+        "within_message": 0.0
+      },
+      "detection_any": 0.0,
+      "messages": 4,
+      "payload_bits": 512,
+      "regime": "heterogeneous",
+      "sessions": 100,
+      "survives_canonical_hub": 1.0
+    }
+  ],
+  "schema_version": 1,
+  "sender": "garbler",
+  "sessions": 200
+}

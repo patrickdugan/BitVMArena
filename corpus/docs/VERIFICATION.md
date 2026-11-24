@@ -52,6 +52,7 @@ Core 31.1): **76 tests passed**. They cover:
 | bitvm3 | 31.1.0 (GPG-verified) | 96/96 | 192 / 53 | 0 problems |
 | bitvm2 | 31.1.0 (GPG-verified) | 32/32 | 106 / 27 | 0 problems |
 | bitvm3-m14 | 31.1.0 (GPG-verified) | 8/8 | 20 / 2 | 0 problems; recorded M14 runs consistent |
+| bitvm3-setup | 31.1.0 (GPG-verified) | 16/16 | 25 / 6 | 0 problems; every party replayed byte for byte |
 | bitvm3 | 31.2.0 (checksum-matched) | 96/96 | 192 / 53 | 0 problems; every step verdict identical to 31.1 |
 
 The BitVM3 rows are the 24-recipe track. Its first 20 recipes (80 trajectories) gave the

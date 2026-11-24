@@ -166,7 +166,8 @@ from the steps with the recorded attacker role.
 ## Limits
 
 * One claim graph and one vault. The attacker plays one role, optionally colluding with a
-  miner (`--miner`); the others follow the scripts above. Roles do not collude with each other.
+  miner (`--miner`); the others follow the scripts above. Roles do not collude with each other
+  here; colluding setup parties are the [`bitvm3-setup`](SETUP.md) track.
 * The desk can reclaim or sign a payout, but not sign a disprove.
 * The garbling is the toy 16-bit adder circuit, and evaluation latency is a block count.
 * The attacker cannot reorder, replace or fork blocks beyond what `mine` allows; there

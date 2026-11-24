@@ -33,6 +33,12 @@ There are two evidence levels, and the library labels which one each result has:
   - **BitVM3 at M14 scale** (`bitvm3-m14`, 8 trajectories): the same graph decided by the
     real M14 garbled verifier on the M16 mainnet payment proof, from recorded `m14-claim`
     runs;
+  - **BitVM3 setup collusion** (`bitvm3-setup`, 16 trajectories): the key and garbling setup
+    as the attack surface. Every party runs as its own process (locally, in WSL or over SSH),
+    and two colluders coordinate only through covert channels hidden in the protocol
+    messages: a kleptographic signature nonce, salt fields, JSON separators, hex case and key
+    order. A passive monitor reads the same traffic, with detection rate measured against
+    payload size ([setup track](docs/SETUP.md));
   - **BitVM3 on testnet4** (`bitvm3-testnet4`, 84 rows): the same trajectories broadcast
     on the public testnet4 network, where real relay, real miners and real block timing
     decide them, with a regtest rehearsal (including reorgs) first
