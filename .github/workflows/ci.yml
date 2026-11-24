@@ -67,7 +67,7 @@ jobs:
       - run: python -m bitvm_corpus validate
       - name: Audit the saved Core 31.1 evidence offline
         run: |
-          for track in primitive bitvm3 bitvm2 bitvm3-m14; do
+          for track in primitive bitvm3 bitvm2 bitvm3-m14 bitvm3-setup; do
             python -m bitvm_corpus native audit "examples/native/$track-core31.1.json"
           done
       - name: Audit the saved episode reports offline
@@ -107,6 +107,7 @@ jobs:
       - run: python -m unittest discover -s tests -p 'test_native.py' -v
       - run: python -m unittest discover -s tests -p 'test_episode.py' -v
       - run: python -m unittest discover -s tests -p 'test_m14.py' -v
+      - run: python -m unittest discover -s tests -p 'test_ceremony.py' -v
       - run: python -m unittest discover -s tests -p 'test_testnet4.py' -v
       - name: Rehearse every testnet4 row on regtest (blocks on a timer, every third a reorg, cases concurrent)
         run: |
@@ -118,7 +119,7 @@ jobs:
       - name: Run every native track on regtest and audit the reports
         run: |
           mkdir -p reports
-          for track in primitive bitvm3 bitvm2 bitvm3-m14; do
+          for track in primitive bitvm3 bitvm2 bitvm3-m14 bitvm3-setup; do
             python -m bitvm_corpus native run --track "$track" --output "reports/$track-core$CORE_VERSION-linux.json"
             python -m bitvm_corpus native audit "reports/$track-core$CORE_VERSION-linux.json"
           done

@@ -36,7 +36,8 @@ def select(args):
     return rows
 
 
-TRACK_MODULES = {"primitive": "native", "bitvm2": "bitvm2", "bitvm3": "bitvm3", "bitvm3-m14": "m14"}
+TRACK_MODULES = {"primitive": "native", "bitvm2": "bitvm2", "bitvm3": "bitvm3", "bitvm3-m14": "m14",
+                 "bitvm3-setup": "ceremony"}
 
 
 def track_module(name):
@@ -57,6 +58,12 @@ def native_command(args):
         return episode_command(args)
     if args.action == "assess":
         emit(assess_command(args), args.output)
+        return 0
+    if args.action == "stego-study":
+        from .ceremony import stego_study
+        if not 2 <= args.sessions <= 2000:
+            raise ValidationError("sessions must be in [2, 2000]")
+        emit(stego_study(args.sessions), args.output)
         return 0
     if args.action == "audit":
         if args.report is None:
@@ -84,7 +91,13 @@ def native_command(args):
     root = Path(__file__).resolve().parents[1]
     default = root / "work/toolchains/core-31.2/bitcoind.exe"
     binary = args.bitcoind or Path(os.environ.get("BITVM_ARENA_BITCOIND", default))
-    report = module.execute(binary, root / "work" / "regtest" / uuid.uuid4().hex, rows)
+    extra = {}
+    if args.track == "bitvm3-setup":
+        from .ceremony import parse_hosts
+        extra = {"hosts": parse_hosts(args.host), "ssh_identity": args.ssh_identity}
+    elif args.host:
+        raise ValidationError("--host applies to the bitvm3-setup track only")
+    report = module.execute(binary, root / "work" / "regtest" / uuid.uuid4().hex, rows, **extra)
     emit(report, args.output)
     if args.output:
         print(f"bitvm-corpus: {json.dumps(report['summary'])}", file=sys.stderr)
@@ -260,7 +273,7 @@ def main(argv=None):
     p.add_argument("--argv", required=True, help="JSON argv array for a local adapter")
     p.add_argument("--output", type=Path)
     p = sub.add_parser("native", help="native Bitcoin Core regtest tracks (primitive, bitvm2, bitvm3)")
-    p.add_argument("action", choices=("list", "run", "audit", "apps", "episode", "assess"))
+    p.add_argument("action", choices=("list", "run", "audit", "apps", "episode", "assess", "stego-study"))
     p.add_argument("report", nargs="?", type=Path, help="report file for audit")
     p.add_argument("--track", choices=tuple(TRACK_MODULES), default="bitvm3")
     p.add_argument("--bitcoind", type=Path, help="bitcoind binary (default: $BITVM_ARENA_BITCOIND or work/toolchains)")
@@ -274,6 +287,10 @@ def main(argv=None):
                    help="episode: the role the attacker plays; the other roles are scripted honestly")
     p.add_argument("--miner", action="store_true", help="episode: grant the attacker the miner capability")
     p.add_argument("--actions", type=Path, help="episode: JSONL actions file (default: stdin)")
+    p.add_argument("--host", action="append", default=[],
+                   help="bitvm3-setup: run a party elsewhere, role=local|wsl[:distro]|ssh:user@host (repeatable)")
+    p.add_argument("--ssh-identity", type=Path, help="bitvm3-setup: private key file for ssh: hosts")
+    p.add_argument("--sessions", type=int, default=200, help="stego-study: honest setup sessions to sample")
     p = sub.add_parser("testnet4", help="stage bitvm3 trajectories on testnet4 (rehearse on regtest first)")
     p.add_argument("action", choices=("list", "rehearse", "run", "audit", "recover"))
     p.add_argument("report", nargs="?", type=Path, help="report file for audit and recover")
