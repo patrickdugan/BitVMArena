@@ -363,6 +363,53 @@ against them.
     - For a design under assessment: pin the verifier revision in the instance, not only
       the statement, and treat any garbling from before the fix as paying whoever asks.
 
+## The IOB graph with every fix (`bitvm3-iob`)
+
+The hardened profile above closes one recipe's flaw per row and leaves the rest of the graph
+as IOB built it. The `bitvm3-iob` track ([`iob.py`](../bitvm_corpus/iob.py)) runs one design
+that carries every hardened fix at once (`bitvm3.iob_config`):
+- input labels in the claim witness;
+- a disprove presigned by the desk: any label holder can broadcast it, nobody can choose
+  its outputs, and it pays its own fee;
+- the 24-block window;
+- a bond, burned when the claim is disproven;
+- interactive cut-and-choose;
+- a payout leaf the claimant co-signs.
+
+The other `Config` fields already hold the hardened choice by default: reject polarity, a
+CSV payout, SIGHASH_DEFAULT presignatures, a NUMS internal key, the 144-block reclaim, one
+statement per vault, tables checked at setup, a fresh seed per claim and independent watcher
+peers. `native assess` flags nothing for this design. A test checks that it takes every
+field in which a recipe's hardened and mutant designs differ, except the anchor on a zero-fee
+disprove, which this design does not need.
+
+Each recipe's benign and attack trajectories run unchanged against it: 23 recipes, 46 rows.
+`disprove_anchor_pinned` is left out, because its mechanism is a zero-fee disprove with an
+anchor, and this disprove pays its own fee. The expectations are the hardened rows'.
+
+Results on Core 31.1 ([`examples/native/bitvm3-iob-core31.1.json`](../examples/native/bitvm3-iob-core31.1.json)):
+- **46 of 46 met.** 90 transactions confirmed and 32 were refused. No attack succeeds, and
+  every honest claim the hardened rows pay is paid.
+- **The fixes compose.** 22 of the 23 attacks take the same transaction steps as their
+  single-fix hardened rows: the same labels, the same accept or refuse verdicts with the
+  same reject reasons, the same confirmations. None of the fixes blocks a transaction
+  another fix relies on. The 23rd, `disprove_unbumpable`, needs no fee child, because the
+  disprove pays its own fee.
+- **What changes is what an attack costs.**
+  - In the single-fix rows, a disproven false claim costs the claimant nothing, except in
+    the two rows about the bond.
+  - Here 17 of the 23 attacks burn the claimant's bond. That includes the replay attack:
+    the claim on the first vault is paid, and the replayed claim on the second vault is
+    disproven and its bond burned.
+  - The other six burn nothing:
+    - in two, the desk never presigned, so the claim was refused and the bond stayed with
+      the claimant (`garbling_unchecked`, `cut_and_choose_grindable`);
+    - in four, someone other than the claimant attacks an honest claim (seed reuse, the
+      payout presignature, the early reclaim, the retained desk key).
+
+The testnet4 wave for this design, `iob1` (21 attacks and the honest claim), is defined and
+rehearsed ([TESTNET4.md](TESTNET4.md#the-iob-hardened-design)).
+
 ## Fidelity limits
 
 - The circuit is a 16-bit adder check, not a SNARK verifier, so the label counts and

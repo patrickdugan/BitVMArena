@@ -39,6 +39,9 @@ from .core import CoreError, Regtest, safe_json
 from .track import SATS, Session
 
 TRACK = "bitvm3-testnet4"
+# The IOB-hardened design (`bitvm3.iob_config`, every fix at once) staged the same way.
+IOB_TRACK = "bitvm3-iob-testnet4"
+TRACKS = (TRACK, IOB_TRACK)
 NETWORK = "testnet4"
 EVIDENCE_LEVEL = "bitcoin-core-testnet4-transactions"
 EXCLUDED = {
@@ -159,6 +162,11 @@ WAVES = {
         "disprove_outputs_unbound", "disprove_unbumpable", "bond_self_slash",
         "disprove_watcher_redirect", "desk_key_retained",
     )] + [f"{TRACK}.{recipe}.hardened.attack" for recipe in ("garbling_unchecked", "claim_sighash_none")],
+    # The IOB-hardened design (every fix at once) against every attack testnet4 can stage, plus
+    # the honest claim. Every row is bonded, so each coin carries the vault and the bond.
+    "iob1": [f"{IOB_TRACK}.{recipe}.{bitvm3.IOB_PROFILE}.attack" for recipe in bitvm3.RECIPES
+             if recipe not in EXCLUDED and recipe not in bitvm3.IOB_EXCLUDED]
+            + [f"{IOB_TRACK}.labels_offchain_withheld.{bitvm3.IOB_PROFILE}.benign"],
 }
 
 
@@ -170,19 +178,24 @@ def btc(sats):
     return format(Decimal(sats) / SATS, "f")
 
 
-def catalog():
-    """The bitvm3 rows whose trajectories need no miner or topology control, renamed."""
+def catalog(track=TRACK):
+    """The rows whose trajectories need no miner or topology control, renamed: the bitvm3
+    catalog for TRACK, the IOB-hardened catalog (`bitvm3.iob_catalog`) for IOB_TRACK."""
+    if track not in TRACKS:
+        raise ValidationError(f"unknown staging track {track!r}")
+    source, prefix = ((bitvm3.catalog(), bitvm3.TRACK) if track == TRACK
+                      else (bitvm3.iob_catalog(), bitvm3.IOB_TRACK))
     rows = []
-    for row in bitvm3.catalog():
+    for row in source:
         if row["recipe"] in EXCLUDED:
             continue
-        rows.append({**row, "id": TRACK + row["id"][len(bitvm3.TRACK):], "track": TRACK,
+        rows.append({**row, "id": track + row["id"][len(prefix):], "track": track,
                      "evidence_level": EVIDENCE_LEVEL})
     return rows
 
 
 def select(names=(), wave=None):
-    rows = catalog()
+    rows = [r for track in TRACKS for r in catalog(track)]
     by_id = {r["id"]: r for r in rows}
     wanted = list(WAVES[wave]) if wave else []
     for name in names:
@@ -192,6 +205,8 @@ def select(names=(), wave=None):
         wanted += [m for m in matches if m not in wanted]
     if not wanted:
         raise ValidationError("select a wave or rows")
+    if len({by_id[i]["track"] for i in wanted}) > 1:
+        raise ValidationError(f"a wave runs the rows of one track; this selection spans {list(TRACKS)}")
     return [by_id[i] for i in wanted]
 
 
@@ -720,21 +735,22 @@ def run_wave(node, rows, stage, state, *, wave, feerate=FUNDING_FEERATE, patienc
         chain.stop()
     cases = [results[r["id"]] for r in rows]
     report = finalize(wave, start_prov, node.provenance(), started, now(), stage, split, cases, patience,
-                      rehearsal() if rehearsal else None)
+                      rehearsal() if rehearsal else None, track=rows[0]["track"])
     journal.write(kind="wave end", wave=wave, summary=report["summary"])
     return report
 
 
-def finalize(wave, start_prov, end_prov, started, ended, stage, split, cases, patience, rehearsal=None):
+def finalize(wave, start_prov, end_prov, started, ended, stage, split, cases, patience, rehearsal=None, *,
+             track=TRACK):
     tx_steps = [s for c in cases for s in c["steps"] if s["kind"] == "tx"]
     provenance = {"start": start_prov, "end": end_prov, "started": started, "ended": ended,
                   "patience_blocks": patience}
     if rehearsal is not None:
         provenance["rehearsal_network"] = rehearsal
-    report = {"schema_version": 1, "track": TRACK, "network": start_prov["chain"], "wave": wave,
+    report = {"schema_version": 1, "track": track, "network": start_prov["chain"], "wave": wave,
               "evidence_level": EVIDENCE_LEVEL if start_prov["chain"] == NETWORK else "staging-rehearsal-regtest",
               "provenance": provenance,
-              "stage": stage_record(stage), "funding": split, "catalog_hash": digest(catalog()),
+              "stage": stage_record(stage), "funding": split, "catalog_hash": digest(catalog(track)),
               "rows": [c["id"] for c in cases], "cases": cases,
               "summary": {"cases": len(cases),
                           "confirmed_transactions": sum(1 for s in tx_steps if s.get("confirmed")),
@@ -826,9 +842,11 @@ def audit(report):
     body = {k: v for k, v in report.items() if k != "evidence_hash"}
     if digest(body) != report.get("evidence_hash"):
         problems.append("evidence_hash does not match the report body")
-    if report.get("track") != TRACK:
+    track = report.get("track")
+    if track not in TRACKS:
         problems.append("wrong track")
-    rows = catalog()
+        track = TRACK
+    rows = catalog(track)
     if report.get("catalog_hash") != digest(rows):
         problems.append("catalog_hash does not match this library's catalog")
     by_id = {r["id"]: r for r in rows}
@@ -937,7 +955,10 @@ def recover(report, stage, node, *, send=False):
     whose timelock has passed is checked with testmempoolaccept and, with `send`, broadcast."""
     if stage.public_keys() != report["stage"]["keys"]:
         raise ValidationError("this stage's keys are not the report's")
-    by_id = {r["id"]: r for r in catalog()}
+    track = report.get("track", TRACK)
+    if track not in TRACKS:
+        raise ValidationError("not a staging report of a known track")
+    by_id = {r["id"]: r for r in catalog(track)}
     tip = node.rpc("getblockcount")
     found = []
     for case in report["cases"]:

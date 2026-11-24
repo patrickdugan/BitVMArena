@@ -51,6 +51,7 @@ Core 31.1): **76 tests passed**. They cover:
 | primitive | 31.1.0 (GPG-verified) | 56/56 | 42 / 16 | 0 problems |
 | bitvm3 | 31.1.0 (GPG-verified) | 96/96 | 192 / 53 | 0 problems |
 | bitvm2 | 31.1.0 (GPG-verified) | 32/32 | 106 / 27 | 0 problems |
+| bitvm3-iob | 31.1.0 (GPG-verified) | 46/46 | 90 / 32 | 0 problems |
 | bitvm3-m14 | 31.1.0 (GPG-verified) | 8/8 | 20 / 2 | 0 problems; recorded M14 runs consistent |
 | bitvm3-setup | 31.1.0 (GPG-verified) | 16/16 | 25 / 6 | 0 problems; every party replayed byte for byte |
 | bitvm3-setup, ssh fleet (clean and netem) | 31.1.0 (GPG-verified) | 16/16 each | 25 / 6 each | 0 problems; same verdicts as the local run |

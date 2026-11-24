@@ -20,6 +20,9 @@ Done:
   relay, anchor pinning under a congested fee floor, censoring miners through
   `generateblock`, and P2P relay between three owned loopback nodes for an eclipsed
   watcher;
+- the IOB graph with every hardened fix at once (`bitvm3-iob`, 46 rows on regtest): no
+  attack succeeds, the fixes compose (every attack but one takes its single-fix row's
+  transaction steps), and 17 of the 23 attacks burn the claimant's bond;
 - a threat matrix for applications built on BitVM3 and a static design check
   (`native assess`) that maps a design to the recipes it is exposed to;
 - interactive episodes (`native episode`): a red-team agent plays the claimant, the desk,
@@ -62,6 +65,9 @@ Next:
    `m14-claim` does not export; the window and censorship recipes need the evaluation
    time measured on the watcher hardware a deployment expects.
 2. **What the testnet4 catalog leaves.**
+   - The IOB-hardened wave `iob1` (21 attacks and the honest claim on the
+     `bitvm3-iob-testnet4` track) is defined and its rehearsal met 22 of 22. It needs
+     77,400 sats of coins plus the split, about 76,000 more than the staging wallet holds.
    - Wave 8's hardened `garbling_unchecked` vault (2,000 sats) waits for the desk's
      144-block reclaim, which opens at block 163,249 (`testnet4 recover`).
    - The cost is fees, about 780–1,020 sats per row (funding, claim, disprove, payout),

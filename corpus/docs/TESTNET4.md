@@ -657,6 +657,27 @@ Recovered so far, and what is still waiting:
 The wave 1 payout has the same txid as the payout testnet4 refused as `non-BIP68-final`
 during wave 1. The rebuilt graph is byte for byte the one the row signed.
 
+## The IOB-hardened design
+
+The second staging track, `bitvm3-iob-testnet4`, stages the `bitvm3-iob` rows: one design
+with every hardened fix at once ([BITVM3.md](BITVM3.md#the-iob-graph-with-every-fix-bitvm3-iob)).
+Its catalog is the regtest track's, renamed, without the three regtest-only recipes: 21
+recipes, 42 rows. A wave runs the rows of one track, and each report records its track and
+that track's catalog hash, so the reports of the first track audit unchanged.
+
+Wave `iob1` holds the 21 attacks and the honest claim:
+- **Coins:** every row is bonded, so each coin carries the 2,000-sat vault and the 1,000-sat
+  bond. That is 22 coins of 3,300 sats, two for the replay attack's two vaults, plus 4,800
+  for `disprove_unbumpable`, which also funds the watcher's fee coin: 77,400 sats and the
+  split.
+- **Cost:** on regtest, 15 of these attacks burn the claimant's bond: 15,000 sats on
+  testnet4, on top of the fees. The two refused claims leave their vaults for the desk's
+  144-block reclaim.
+- **Rehearsal** with `--reorg-every 3`: 22 of 22 met. 42 transactions confirmed and 29
+  were refused, and 18 went through one of 12 reorgs, none sent again. Every transaction step
+  matches the regtest run, and the report audits clean.
+- **Testnet4:** not run yet. It needs about 76,000 sats more in the staging wallet.
+
 ## Running a wave
 
 ```bash

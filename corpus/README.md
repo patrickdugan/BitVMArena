@@ -30,6 +30,10 @@ There are two evidence levels, and the library labels which one each result has:
     liveness and economics, with a threat matrix for applications built on BitVM3.
     Interactive episodes let a red-team agent attack an application design against
     Core ([episodes](docs/EPISODES.md));
+  - **BitVM3 with every fix** (`bitvm3-iob`, 46 trajectories): the same graph as IOB would
+    deploy it with every hardened fix at once, against every recipe's attack. No attack
+    succeeds, and 17 of the 23 attacks burn the claimant's bond
+    ([results](docs/BITVM3.md#the-iob-graph-with-every-fix-bitvm3-iob));
   - **BitVM3 at M14 scale** (`bitvm3-m14`, 8 trajectories): the same graph decided by the
     real M14 garbled verifier on the M16 mainnet payment proof, from recorded `m14-claim`
     runs;

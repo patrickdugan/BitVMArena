@@ -36,8 +36,8 @@ def select(args):
     return rows
 
 
-TRACK_MODULES = {"primitive": "native", "bitvm2": "bitvm2", "bitvm3": "bitvm3", "bitvm3-m14": "m14",
-                 "bitvm3-setup": "ceremony"}
+TRACK_MODULES = {"primitive": "native", "bitvm2": "bitvm2", "bitvm3": "bitvm3", "bitvm3-iob": "iob",
+                 "bitvm3-m14": "m14", "bitvm3-setup": "ceremony"}
 
 
 def track_module(name):

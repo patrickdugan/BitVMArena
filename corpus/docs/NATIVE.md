@@ -16,12 +16,13 @@ refuses to start if it sees a peer that is not one of those loopback connections
 | --- | --- | --- | --- |
 | `primitive` | [`native.py`](../bitvm_corpus/native.py) | 56 = 14 recipes x 4 | Fund one contract, optionally spend a challenge connector or wait out a timelock, then attempt one spend |
 | `bitvm3` | [`bitvm3.py`](../bitvm_corpus/bitvm3.py) | 96 = 24 recipes x 4 | A garbled-circuit claim graph: setup, claim, label handover, evaluation, disprove, payout, across seven layers from garbling to miners ([BITVM3.md](BITVM3.md)). Interactive attacker-driven episodes run on the same graph ([EPISODES.md](EPISODES.md)) |
+| `bitvm3-iob` | [`iob.py`](../bitvm_corpus/iob.py) | 46 = 23 recipes x 2 | The same claim graph as IOB would deploy it with every hardened fix at once; each recipe's benign and attack trajectories run against that one design ([BITVM3.md](BITVM3.md#the-iob-graph-with-every-fix-bitvm3-iob)) |
 | `bitvm3-m14` | [`m14.py`](../bitvm_corpus/m14.py) | 8 = 2 recipes x 4 | The same claim graph decided by the real M14 garbled verifier (792,546,673 gates) on the M16 mainnet payment proof, replaying recorded `m14-claim` runs ([BITVM3.md](BITVM3.md#bitvm3-at-m14-scale)) |
 | `bitvm3-setup` | [`ceremony.py`](../bitvm_corpus/ceremony.py) + [`party.py`](../bitvm_corpus/party.py) + [`stego.py`](../bitvm_corpus/stego.py) | 16 = 4 recipes x 4 | The same claim graph behind a key and garbling setup ceremony. Each party is its own OS process (locally, in WSL or over SSH), and two colluders coordinate only through covert channels inside the protocol messages ([SETUP.md](SETUP.md)) |
 | `bitvm2` | [`bitvm2.py`](../bitvm_corpus/bitvm2.py) + [`wots.py`](../bitvm_corpus/wots.py) | 32 = 8 recipes x 4 | The BitVM2 bridge graph at BitVM/BitVM `c620dbfa`: kick-off, challenge, take 1, assert with Winternitz commitments, disprove, take 2. It is the baseline for the comparison in [BITVM3.md](BITVM3.md) |
 
 The four combinations per recipe are `hardened` or `mutant` crossed with `benign` or
-`attack`. Expected outcomes are declared in each track's `catalog()`. Outcomes are
+`attack`; `bitvm3-iob` has one profile, `iob_hardened`, and two combinations. Expected outcomes are declared in each track's `catalog()`. Outcomes are
 scored only from the transactions Core confirmed; a scorer never reads the expectation.
 
 ## Run
@@ -110,6 +111,7 @@ even after the attacker recomputes the body hash.
 | [`examples/native/primitive-core31.1.json`](../examples/native/primitive-core31.1.json) | 31.1.0 | 56/56 met; 42 confirmed, 16 rejected transactions |
 | [`examples/native/bitvm3-core31.1.json`](../examples/native/bitvm3-core31.1.json) | 31.1.0 | 96/96 met; 192 confirmed, 53 rejected transactions |
 | [`examples/native/bitvm2-core31.1.json`](../examples/native/bitvm2-core31.1.json) | 31.1.0 | 32/32 met; 106 confirmed, 27 rejected transactions |
+| [`examples/native/bitvm3-iob-core31.1.json`](../examples/native/bitvm3-iob-core31.1.json) | 31.1.0 | 46/46 met; 90 confirmed, 32 rejected transactions |
 | [`examples/native/bitvm3-m14-core31.1.json`](../examples/native/bitvm3-m14-core31.1.json) | 31.1.0 | 8/8 met; 20 confirmed, 2 rejected transactions |
 | [`examples/native/bitvm3-setup-core31.1.json`](../examples/native/bitvm3-setup-core31.1.json) | 31.1.0 | 16/16 met; 25 confirmed, 6 rejected transactions; garbler in WSL 2, the other parties on Windows |
 | [`examples/native/bitvm3-setup-ssh-fleet-core31.1.json`](../examples/native/bitvm3-setup-ssh-fleet-core31.1.json) | 31.1.0 | 16/16 met; 25 confirmed, 6 rejected; four parties over ssh in containers ([SETUP.md](SETUP.md#over-ssh-a-local-fleet)) |

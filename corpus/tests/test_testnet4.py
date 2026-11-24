@@ -34,10 +34,29 @@ class CatalogTests(unittest.TestCase):
             self.assertEqual(row["expected"], base["expected"])
             self.assertEqual(row["evidence_level"], testnet4.EVIDENCE_LEVEL)
 
+    def test_iob_catalog_is_the_iob_track_without_miner_or_topology_recipes(self):
+        rows = testnet4.catalog(testnet4.IOB_TRACK)
+        regtest = {r["id"].split(".", 1)[1]: r for r in bitvm3.iob_catalog()}
+        self.assertEqual(len(rows), 2 * (len(bitvm3.RECIPES) - len(testnet4.EXCLUDED)))
+        for row in rows:
+            self.assertTrue(row["id"].startswith(testnet4.IOB_TRACK + "."))
+            self.assertEqual(row["profile"], bitvm3.IOB_PROFILE)
+            self.assertEqual(row["expected"], regtest[row["id"].split(".", 1)[1]]["expected"])
+            self.assertFalse(row["expected"]["attack_success"])
+        with self.assertRaises(Exception):
+            testnet4.catalog("bitvm3")
+
+    def test_a_selection_stays_within_one_track(self):
+        self.assertEqual({r["track"] for r in testnet4.select(["bitvm3-testnet4"])}, {testnet4.TRACK})
+        self.assertEqual({r["track"] for r in testnet4.select(["bitvm3-iob-testnet4"])}, {testnet4.IOB_TRACK})
+        with self.assertRaises(Exception):
+            testnet4.select(["labels_offchain_withheld"])
+
     def test_waves_name_catalog_rows(self):
-        ids = {r["id"] for r in testnet4.catalog()}
+        ids = {r["id"] for track in testnet4.TRACKS for r in testnet4.catalog(track)}
         for wave, members in testnet4.WAVES.items():
             self.assertTrue(set(members) <= ids, wave)
+            self.assertEqual(len({m.split(".", 1)[0] for m in members}), 1, wave)
             self.assertEqual(len(members), len(set(members)), wave)
             with redirect_stdout(io.StringIO()) as out:
                 self.assertEqual(main(["testnet4", "list", "--wave", wave]), 0)
@@ -76,7 +95,7 @@ class StageTests(unittest.TestCase):
     def test_claim_fee_matches_the_signed_claim(self):
         stage = testnet4.new_stage()
         dummy = {"txid": "11" * 32, "vout": 0, "amount": 0, "script_pubkey": ""}
-        for row in testnet4.catalog():
+        for row in testnet4.catalog() + testnet4.catalog(testnet4.IOB_TRACK):
             prep = bitvm3.prepare(row, stage=stage)
             graph = bitvm3.Graph(prep, cltv_height=500 if prep.cfg.payout_timelock == "cltv" else None)
             utxos = {"vault": dict(dummy, script_pubkey=graph.V.script_pubkey.hex(), amount=stage.vault),
@@ -87,7 +106,7 @@ class StageTests(unittest.TestCase):
 
     def test_testnet4_amounts_stay_above_dust(self):
         stage = testnet4.new_stage()
-        for row in testnet4.catalog():
+        for row in testnet4.catalog() + testnet4.catalog(testnet4.IOB_TRACK):
             prep = bitvm3.prepare(row, stage=stage)
             graph = bitvm3.Graph(prep, cltv_height=500 if prep.cfg.payout_timelock == "cltv" else None)
             fake = Transaction([], graph.claim_outputs())

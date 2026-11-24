@@ -194,6 +194,40 @@ PAID_ON_ATTACK = {"seed_reuse_across_claims": {"hardened": True},
                   "desk_key_retained": {"hardened": True}}
 
 
+# The IOB claim graph with every hardened fix of the catalog at once (`iob_config`). The
+# hardened profile closes one recipe's flaw per row; this profile is one design, so every
+# recipe's attack meets all the fixes together.
+IOB_TRACK, IOB_PROFILE = "bitvm3-iob", "iob_hardened"
+# The pinning recipe needs a zero-fee presigned disprove with an anchor. The IOB-hardened
+# disprove pays its own fee and carries no anchor, so there is nothing to pin.
+IOB_EXCLUDED = {"disprove_anchor_pinned"}
+
+
+def iob_config():
+    """Every hardened fix at once: input labels in the claim witness, a disprove presigned by
+    the desk (any label holder can broadcast it, nobody can choose its outputs), the 24-block
+    window, a bond burned on a disproven claim, interactive cut-and-choose, and a payout leaf
+    the claimant co-signs. The remaining fields are already the hardened choice by default:
+    reject polarity, a CSV payout, SIGHASH_DEFAULT presignatures, a NUMS internal key, the
+    144-block reclaim, one statement per vault, tables checked at setup, a fresh seed per
+    claim, a disprove that pays its own fee, independent watcher peers."""
+    return Config(labels_onchain=True, disprove_mode="presigned", window=HARDENED_WINDOW, bond=True,
+                  bond_burn=True, cut_and_choose="interactive", payout_cosigned=True)
+
+
+def iob_catalog():
+    """One row per recipe and variant under the IOB-hardened design. The expectations are the
+    hardened profile's: no attack succeeds, and an honest claim is paid wherever the hardened
+    row pays it."""
+    rows = []
+    for row in catalog():
+        if row["profile"] != "hardened" or row["recipe"] in IOB_EXCLUDED:
+            continue
+        rows.append({**row, "id": f"{IOB_TRACK}.{row['recipe']}.{IOB_PROFILE}.{row['variant']}",
+                     "track": IOB_TRACK, "profile": IOB_PROFILE})
+    return rows
+
+
 def catalog():
     rows = []
     for recipe, meta in RECIPES.items():
@@ -317,6 +351,8 @@ class Config:
 
 
 def config(recipe, profile):
+    if profile == IOB_PROFILE:
+        return iob_config()
     m = profile == "mutant"
     disprove = "watcher"
     if recipe == "single_watcher_disprove" and not m or recipe in ("disprove_unbumpable", "disprove_anchor_pinned"):
