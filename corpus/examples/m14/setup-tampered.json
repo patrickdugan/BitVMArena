@@ -1,10 +1,10 @@
 {
-  "accept_label_sha256": "d4a7156622d513476d45cd3ab8c27c83c7582851ef089183e4c67b1b84359b48",
-  "ciphertext_commitment_blake3": "203000462e075607e5bdade739d11b705b089aef4b52e7edd56bd9422b004046",
-  "ciphertexts": 785442492,
+  "accept_label_sha256": "4fdd80221c0f8add6f9d883ffe3515ad10130641cba393660b0d10dec35cb2ea",
+  "ciphertext_commitment_blake3": "eef97c12d23f8e939ac8abcc092eaa9fd2431cc9a4ecbf3a39a67fe61b3e3c68",
+  "ciphertexts": 792546673,
   "input_bits": 8635080,
-  "reject_label_sha256": "fa241d5dd555d5af39031e362becddbcd92d69f036cfc055297bd1729193cde6",
-  "seconds": 415.763156917,
+  "reject_label_sha256": "9719be7e26df8ab64e7fc8298d7bd5fdfcfef6fad3021d7b9e911bef916d4e46",
+  "seconds": 158.273798732,
   "seed_sha256": "16983c1ef7159342dba59bb0ecc24f5aacf0293bf27b421e9ec7bcc23665651f",
   "statement": {
     "committed_values_sha256": "cae6068f7ad8c4891cb3220702a88b0bc3df54013f45e65df11a9ced531bc869",

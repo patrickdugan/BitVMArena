@@ -1,14 +1,16 @@
 """BitVM3 at M14 scale: the claim graph decided by the real garbled final verifier.
 
 The toy BitVM3 track decides claims with a 103-gate adder. This track decides them with
-M14, the complete garbled final verifier of the Nova/SP1 stack (785,442,492 gates and
+M14, the complete garbled final verifier of the Nova/SP1 stack (792,546,673 gates and
 8,635,080 input bits per instance), garbled per seed and statement by `m14-claim` from
-patrickdugan/garbled-snark-verifier at 04b6d3e. Each vault's disprove leaf commits to the
+patrickdugan/garbled-snark-verifier at 25c6c23, the circuit with the public-values digest
+check (BITVM3.md, finding 10). Each vault's disprove leaf commits to the
 SHA-256 of that garbling's real reject label, and a disprove spends with the label the M14
 evaluator actually produced.
 
-The M14 runs are expensive (minutes and about 10 GB each), so they are recorded once in
-`examples/m14/` by `tools/m14_runs.sh`, with their timings and peak memory. The Core
+The M14 runs are expensive (minutes and 10 to 16 GB each), so they are recorded once in
+`examples/m14/` by `tools/m14_runs.sh` on a hosted runner (the "Record M14 runs" workflow,
+collected with `tools/m14_collect.py --ci`), with their timings and peak memory. The Core
 trajectories here replay those recorded outputs on regtest, and the audit checks that every
 recorded label hashes to what its garbling committed.
 
@@ -34,7 +36,7 @@ from .track import Session, audit_transactions, check_report_envelope, confirmed
 TRACK = "bitvm3-m14"
 ARTIFACTS = Path(__file__).resolve().parents[1] / "examples" / "m14"
 UPSTREAM = {"target": "M14 garbled final verifier as a BitVM3 claim instance",
-            "repository": "patrickdugan/garbled-snark-verifier", "commit": "04b6d3e",
+            "repository": "patrickdugan/garbled-snark-verifier", "commit": "25c6c23",
             "tool": "nova-bitvm3/m14/e2e/src/bin/m14-claim.rs",
             "claim_graph": "In-and-Out-Burger BitVM3 claim graph (patrickdugan/Spiral 76071a0)"}
 FIXTURES = {"m16-statement.json": "9f2824907a5af8bd2838f4fb3554775223cd01f8cff538d3dc3a69ee6f154528",
@@ -42,7 +44,7 @@ FIXTURES = {"m16-statement.json": "9f2824907a5af8bd2838f4fb3554775223cd01f8cff53
             "m16-wrap-blake3-v2.bin": "97871e86cd0809e4b21d744343c43737cb56073f65e671da727e9db6051326e3"}
 STATEMENT_A, STATEMENT_B = FIXTURES["m16-statement.json"], FIXTURES["c4-statement.json"]
 PROOF_A = FIXTURES["m16-wrap-blake3-v2.bin"]
-INPUT_BITS, CIPHERTEXTS, LABEL_BYTES = 8_635_080, 785_442_492, 16
+INPUT_BITS, CIPHERTEXTS, LABEL_BYTES = 8_635_080, 792_546_673, 16
 FLIP_BIT = 8_635_040
 # Which recorded evaluation decides which vault of which case.
 RUNS = {"honest": "eval-honest", "tampered": "eval-tampered", "statement_b": "eval-wrong-statement",

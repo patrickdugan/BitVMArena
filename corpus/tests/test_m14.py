@@ -33,7 +33,8 @@ class RecordedRunTests(unittest.TestCase):
     def test_runs_are_consistent_and_full_scale(self):
         self.assertEqual(m14.check_runs(self.runs), [])
         meta = json.loads((m14.ARTIFACTS / "runs.json").read_text(encoding="utf-8"))
-        self.assertEqual(meta["commit"], "04b6d3e")
+        self.assertEqual(meta["commit"], m14.UPSTREAM["commit"])
+        self.assertEqual(meta["commit"], "25c6c23")
         for name in m14.RUNS.values():
             self.assertEqual(meta["runs"][name]["exit_status"], 0)
 

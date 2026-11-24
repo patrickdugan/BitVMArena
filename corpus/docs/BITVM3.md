@@ -54,7 +54,7 @@ accepts a proof `(a, b)` exactly when `a + b == statement` over 16 bits, with no
 out. The statement is a circuit constant, as M14 pins its statement.
 
 - Size: 103 gates, 32 of them AND (64 ciphertexts), and 32 input bits. M14 is
-  785,442,492 gates with 8,635,080 input bits.
+  792,546,673 gates with 8,635,080 input bits.
 - A false claim is a proof that does not satisfy the statement. Evaluating the circuit
   on it yields the reject label, which is the preimage the disprove leaf asks for.
 - The garbler made every label, so the claimant always knows the reject label of its own
@@ -171,16 +171,20 @@ design.
 ## BitVM3 at M14 scale
 
 The `bitvm3-m14` track ([`m14.py`](../bitvm_corpus/m14.py)) runs the same claim graph,
-decided by M14, the complete garbled final verifier: 785,442,492 gates and 8,635,080
+decided by M14, the complete garbled final verifier: 792,546,673 gates and 8,635,080
 input bits per instance. The garbler is `m14-claim` from
-patrickdugan/garbled-snark-verifier at `04b6d3e` (binary sha256 `9624c2ad…`). The proof is
+patrickdugan/garbled-snark-verifier at `25c6c23` (binary sha256 `2cf5daf6…`), the revision
+pinned in [`tools/m14_record.json`](../tools/m14_record.json). The proof is
 the M16 mainnet SPV payment proof (wrap v2, sha256 `97871e86…`); the vault statements are
 the M16 statement and, as a different statement, c4's. Each vault's disprove leaf commits
 to its garbling's real reject-label hash. A disprove spends with the label the M14
 evaluator produced, and Core checks that hash.
 
-The M14 runs are recorded once in [`examples/m14/`](../examples/m14/) by
-`tools/m14_runs.sh` and `tools/m14_collect.py`, with public fixture seeds. The Core
+The M14 runs are recorded once in [`examples/m14/`](../examples/m14/) with public fixture
+seeds. The workflow [`m14-record.yml`](../../.github/workflows/m14-record.yml) builds
+`m14-claim` at the pinned revision on a hosted runner, runs `tools/m14_runs.sh` and
+publishes each run's record as an annotation; `tools/m14_collect.py --ci RUN_ID` reads
+them back. The Core
 trajectories replay them. The audit checks that every recorded output label hashes to its
 garbling's committed accept or reject label, that garbler and evaluator saw the same
 ciphertext stream, and that the setup run committed to the same labels and stream before
@@ -188,15 +192,19 @@ the tampered-proof evaluation.
 
 | Run | Seed | Verdict | Wall time | Peak RSS |
 | --- | --- | --- | --- | --- |
-| setup (tampered-proof instance) | `9844fd70…` | commits accept/reject hashes | 416 s | 10.6 GB |
-| honest M16 proof, M16 statement | `ff1f4762…` | accept | 1,330 s | 18.2 GB |
-| same proof, one input bit flipped | `9844fd70…` | reject, the label the setup committed | 1,073 s | 18.3 GB |
-| same proof, c4 statement | `582c650d…` | reject | 627 s | 18.6 GB |
-| same proof, second vault for the M16 statement | `e0565615…` | accept | 769 s | 16.7 GB |
+| setup (tampered-proof instance) | `9844fd70…` | commits accept/reject hashes | 158 s | 10.6 GB |
+| honest M16 proof, M16 statement | `ff1f4762…` | accept | 279 s | 15.5 GB |
+| same proof, one input bit flipped | `9844fd70…` | reject, the label the setup committed | 244 s | 15.6 GB |
+| same proof, c4 statement | `582c650d…` | reject | 237 s | 15.6 GB |
+| same proof, second vault for the M16 statement | `e0565615…` | accept | 260 s | 15.6 GB |
 
-Measured on this laptop in WSL with a 20 GB memory cap (48 GB swap). Evaluate runs the
-garbler and evaluator together and swapped. The IOB testnet4 runs of the same binary on
-the same laptop took 348–401 s.
+Measured on a GitHub-hosted runner (ubuntu-latest, 16 GB of RAM plus 16 GB of swap) by
+[workflow run 45374706843](https://github.com/patrickdugan/BitVMArena/actions/runs/45374706843).
+Evaluate runs the garbler and evaluator together. Every run streamed 792,546,673 ciphertexts.
+
+The track's first recording was of the `04b6d3e` build (785,442,492 gates) on one laptop, in
+WSL with a 20 GB memory cap: 627–1,330 s and 16.7–18.6 GB per evaluation, swapping. The IOB
+testnet4 runs of that binary on the same laptop took 348–401 s.
 
 | Recipe | Hardened attack | Mutant attack |
 | --- | --- | --- |
@@ -206,18 +214,18 @@ the same laptop took 348–401 s.
 All 8 trajectories met their expectations on Core 31.1 (20 confirmed, 2 rejected).
 Evidence: [`examples/native/bitvm3-m14-core31.1.json`](../examples/native/bitvm3-m14-core31.1.json).
 
-**These runs are of the circuit before the public-values digest check** (finding 10): the
-`04b6d3e` build, 785,442,492 gates. `m14-claim` built from garbled-snark-verifier `c39a3ec`
-or later has 792,546,673, and `m14.py` pins the earlier count, so the recorded runs and the
-constants `INPUT_BITS, CIPHERTEXTS` have to be re-recorded together before the track runs
-against the fixed circuit. The two recipes here do not depend on the missing check: a
-flipped input bit and a proof for another statement are rejected by both circuits.
+These runs are of the circuit with the public-values digest check (finding 10). Until
+2026-11-24 the track replayed runs of the `04b6d3e` build, which lacks it. The two recipes
+here do not depend on the check: a flipped input bit and a proof for another statement are
+rejected by both circuits. What the earlier circuit accepted is a proof whose public values
+were replaced before proving, and no recipe here builds one.
 
 What M14 scale adds to the toy track's numbers:
-- each claim instance streams 785,442,492 ciphertexts, 12.57 GB at 16 bytes, which the
+- each claim instance streams 792,546,673 ciphertexts, 12.68 GB at 16 bytes, which the
   evaluator must have. That is `tables_delivered_late` at full size;
 - the input-label handover is 138 MB, `labels_offchain_withheld` at full size;
-- evaluation takes 6–22 minutes on one laptop, depending on memory (finding 2).
+- evaluation takes 4 to 22 minutes depending on memory: 237–279 s on a 16 GB hosted runner,
+  6–22 minutes on one laptop (finding 2).
 
 ## What BitVM3 changes relative to BitVM2
 
@@ -272,8 +280,9 @@ against them.
      behind the "statement on-chain, rest by data availability or a succinct wrapper"
      direction in the S6 notes.
 2. **The window has to fit the slowest honest watcher.** Measured M14 evaluation on one
-   laptop ranges from 348–401 s (IOB runs) to 627–1,330 s (this track, swapping under a
-   20 GB memory cap); an earlier note recorded about 60 minutes. At mainnet block rates
+   laptop ranges from 348–401 s (IOB runs) to 627–1,330 s (this track's first recording,
+   swapping under a 20 GB memory cap); an earlier note recorded about 60 minutes. A hosted
+   runner with 16 GB takes 237–279 s. At mainnet block rates
    (Poisson, 6 blocks per hour) the chance that a 6-block window ends before the
    evaluation finishes:
 
@@ -283,7 +292,7 @@ against them.
    | 1,330 s (swapping) | 0.38 | 0.026 | 0.0005 | 0.000004 |
    | 60 min | 0.94 | 0.55 | 0.15 | 0.020 |
 
-   That is before label and table transfer (138 MB and 12.57 GB per claim) and broadcast.
+   That is before label and table transfer (138 MB and 12.68 GB per claim) and broadcast.
    Testnet4's minimum-difficulty blocks shorten the window further. Staging wave 1 measured
    a median of 461 s per block over 42 waits. From the claim's block (161,704) to the tip at
    which a 6-block-CSV payout is accepted (161,709) took 36 minutes. Minimum-difficulty blocks are also reorganized routinely: a claim mined in
@@ -299,7 +308,7 @@ against them.
    reward front-running. If it is presigned at zero fee for a desk that may be offline,
    it needs a P2A anchor (`disprove_unbumpable`).
 4. **A false claim is free.** The vault pays the claim fee, so a disproven claimant loses
-   nothing, while each claim forces an M14 evaluation (6–22 min and about 18 GB measured) and a
+   nothing, while each claim forces an M14 evaluation (4–22 min and 16–18 GB measured) and a
    fresh setup. A claimant bond input on the claim tx makes lying cost something, but
    only if a disproven bond is burned or paid to a fixed party: a bond that goes to
    whoever disproves comes back to the claimant, who knows the reject label
@@ -340,7 +349,7 @@ against them.
     **accept** label. No watcher can disprove it, whatever its hardware and however long the
     window: the reject label never appears. Cost to the claimant: one shrink and one wrap
     (minutes on a laptop). Every instance garbled from the `04b6d3e` circuit, including the
-    ones in this track's recorded runs and in the IOB testnet4 demonstration, has this
+    ones this track replayed until 2026-11-24 and those of the IOB testnet4 demonstration, has this
     property.
     - Fixed in garbled-snark-verifier `2137266` (M13) and `c39a3ec` (M14, +7,104,181 gates
       for SP1's Poseidon2 over 53 elements) and in the zk-rusto-no-bitcoino mirror

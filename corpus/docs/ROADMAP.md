@@ -14,7 +14,7 @@ Done:
   signers, mempool and miners, liveness and economics. The BitVM2 baseline mirrors the
   BitVM/BitVM bridge graph at c620dbfa;
 - BitVM3 at M14 scale (`bitvm3-m14`): the same claim graph decided by the complete garbled
-  final verifier (785,442,492 gates) on the M16 mainnet payment proof, with recorded
+  final verifier (792,546,673 gates) on the M16 mainnet payment proof, with recorded
   evaluation time and memory;
 - mempool, miner and network dynamics on regtest: full-RBF replacement, TRUC/P2A package
   relay, anchor pinning under a congested fee floor, censoring miners through
