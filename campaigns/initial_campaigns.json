@@ -584,8 +584,8 @@
         "commit": "9cf56a56d02e8b63de91e435b9fcd7823a66bb9d",
         "path": "proof-grove/evidence/proof-backed-release"
       },
-      "arena_execution_status": "adapter_pending",
-      "evidence_level": "upstream_recorded_regtest",
+      "arena_execution_status": "replayed_and_reconstructed_regtest",
+      "evidence_level": "arena_replayed_regtest",
       "funded_target": {
         "network": "regtest",
         "reserve_outpoint": "a147db7c729fcaed10954a8163a81bc0bf40dd7560dbcba3cc1e2a82eb4367fb:1",
@@ -614,25 +614,37 @@
         "The holder-only CSV exit remains available whenever the proof-backed release is blocked.",
         "Garbler loss, holder payout and attacker success are measured separately."
       ],
-      "local_reconstruction": null,
+      "local_reconstruction": {
+        "replay_track": {
+          "path": "corpus/bitvm_corpus/cashu_replay.py",
+          "track": "cashu-release-replay",
+          "evidence_level": "arena_replayed_regtest",
+          "receipts": "corpus/examples/native/cashu-release-replay-core31.1.json"
+        },
+        "ceremony_and_attacks_track": {
+          "path": "corpus/bitvm_corpus/cashu_release.py",
+          "track": "cashu-release",
+          "evidence_level": "arena_reconstruction_regtest",
+          "receipts": "corpus/examples/native/cashu-release-core31.1.json"
+        }
+      },
       "upstream_commands": [],
       "next_acceptance_gates": [
-        "Write an adapter that replays the pinned evidence archive (5446141e...) and its walletless Core block replay inside Arena, reproducing the recorded honest payout and the six recorded witness/settlement rejections.",
-        "Port the BVA-BITVM3 cut-and-choose (k=4) and setup-collusion recipes to the Cashu M14 package and replace the trusted single-use garbler with a ceremony in which the evaluator or guardian chooses the kept instance.",
-        "Execute each malicious-garbler family as hardened/mutant x benign/attack trajectories on regtest and record receipts with the required fields.",
+        "Scale the k=4 cut-and-choose ceremony from the 32-AND-gate half-gates reconstruction to four full 971,724,042-gate M14 garblings and record setup/open/evaluate receipts.",
         "Testnet4: bind a new withdrawal statement to the testnet4 genesis and a funded testnet4 reserve, re-prove Core and recursion, and replay hardened profiles on testnet4 only with explicit broadcast approval."
       ],
       "limits": [
-        "Recorded in Spiral on regtest with a trusted single-use garbler (private OS-random seed) and v2 collateral approval; no cut-and-choose, so a malicious garbler is outside the recorded evidence.",
-        "The proven withdrawal statement pins the regtest genesis and the regtest reserve outpoint; it cannot authorize a testnet4 payout without a new proof.",
-        "Arena has not replayed the recorded evidence; every scenario family above is a design hypothesis until an adapter and checked receipt exist."
+        "The arena_replayed_regtest receipt replays the pinned Spiral regtest archive (5446141e...db556a9b) verbatim on walletless Bitcoin Core 31.1; that upstream v2 run used a trusted single-use garbler with no cut-and-choose.",
+        "The k=4 cut-and-choose ceremony and 10 malicious-garbler attack families (40 trajectories) executed on Bitcoin Core 31.1 regtest at evidence_level arena_reconstruction_regtest using Taproot outputs carrying the exact Cashu amounts (25,000 / 25,250 / 24,750 sats) and gc.py half-gates/free-XOR (32 AND gates per instance) standing in for the 971,724,042-gate M14 verifier.",
+        "Full-scale 4x971M-gate M14 cut-and-choose execution and a re-proved testnet4 release remain design hypotheses until executed with checked receipts."
       ],
       "sources": [
         "https://github.com/patrickdugan/Spiral/tree/9cf56a56d02e8b63de91e435b9fcd7823a66bb9d/proof-grove/evidence/proof-backed-release",
         "https://github.com/patrickdugan/Spiral/blob/9cf56a56d02e8b63de91e435b9fcd7823a66bb9d/proof-grove/evidence/proof-backed-release/EVIDENCE.md"
       ],
       "completed_checks": [
-        "Recorded upstream (not replayed by Arena): SP1 Core 37,309 shards independently verified; compressed proof re-verified by sp1-sdk-light; M13 wrap pinned_wrap_v2_verified; M14 accept over 971,724,042 non-free gates with a one-byte-mutated input rejected; 971,724,042 ciphertexts authenticated and a seedless evaluation matched the pinned package; regtest payout 32e9951d... confirmed at height 212 and replayed on walletless Core with 6 substitution controls rejected."
+        "Arena walletless Core 31.1 replay (cashu-release-replay, evidence_level arena_replayed_regtest, 0 wallets loaded, 212 blocks): verified archive sha256 5446141e...db556a9b and all 47 manifest members; reproduced honest payout 32e9951d...f564 (24,750 sats to holder at height 212), holder CSV fallback before/after release, reorg restoration and competing 8-block timeout fork, and all 6 substitution rejections (accept label, holder signature, issuance preimage, challenger approval, holder approval, beneficiary); 10/10 expectations met, offline audit 0 problems.",
+        "Ported BVA-BITVM3 k=4 joint commit-reveal cut-and-choose ceremony (holder + guardian choose kept instance) and all 10 malicious-garbler attack families to Cashu M14 (cashu-release, evidence_level arena_reconstruction_regtest): 10 families x hardened/mutant x benign/attack = 40/40 expectations met on isolated Bitcoin Core 31.1 regtest (34 confirmed, 10 rejected transactions), with separate scoring for legitimate completion, unauthorized release, diverted principal and selective-failure bit leakage; offline audit 0 problems."
       ]
     }
   ]

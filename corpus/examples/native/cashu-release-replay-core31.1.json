@@ -1,0 +1,913 @@
+{
+  "archive_verification": {
+    "accept_label_sha256": "9be3b02b3f0dea66e37e32dccb3f665d0e07481777b62c642da9d6dae2da9c18",
+    "archive_sha256": "5446141e6c12c5ce4681f9c07a82ad7f1607a7accaadc51726492350db556a9b",
+    "confirmed_blocks_count": 212,
+    "confirmed_blocks_sha256": "35dcb0c563638ce3783fdf59521db992e908eea0f9e285e84a7dd7e86873e524",
+    "issuance_preimage_sha256": "9f5b0f986f9311cc266ebb1b73cab7ac81de3bcaad86255076b94f382b76d697",
+    "m14_setup_sha256": "dd041853e7755facb96c55044187f75c0264284b6af575aac74c3490104803f4",
+    "reject_label_sha256": "dced7c6b11d301e7eae29e6d83e758ab24436b2e3cb90ad48e83b3b315c07b1b",
+    "statement_sha256": "8fd9bc7f9340d1e969d2d4d22b2fdc23a5ba7a7701d94894d88355fb8ef4e33f",
+    "verified_member_count": 47
+  },
+  "campaign_id": "BVA-CASHU-RELEASE",
+  "cases": [
+    {
+      "action_trace": [
+        {
+          "action": "testmempoolaccept",
+          "label": "honest_joint_payout",
+          "raw_transaction": "02000000000102fb6743eb822a1ecca3cbdb6075dd40bfc01ba863814a9510edca9f727cdb47a1010000000006000000294f22daaf25a71de0855fd0ec5200f917ba34da0fb8b58cb6c1e238f400a42b0100000000fdffffff02ae6000000000000016001446b4c5aecb7ab99fb1fee82c82cbca92eef1e79fae60000000000000160014f9d71f9832b3d2200e8f43c89f1924fcbbda938f0400483045022100b4aeb8f362b4aef490413bf2a08a9af5d63b9c5a8add9f07d5256795e21ea3ad02201d2cc89ea9a6da62408576eb6436357349fc7877b8f4269c5f9d745e4d3bf7d601203975d40d1e70b71a8a964abea5e9855ded7f15f15e18ce58bb7a4d12dadf74877282012088a8209f5b0f986f9311cc266ebb1b73cab7ac81de3bcaad86255076b94f382b76d69788210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ad632102c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5ac6756b268064830450221008182b5ca464f0cddf3f24218e9086d08c87ad5b118912648ccf0d06ec716433802205b05ead61714034530becbf27c4c496f4b4e594e99be4b3c4b1d9c73e1f13b9a01483045022100da61f7b167e12662bb2e6fb55276ba3573d7a9feeac1cc262a084b811334af6b02203584e5abe5d30045520e7cd4ae65a362ab67b4e993851a422e55858df65e9d000147304402203a237da4cc01f14fe79369169bc083563b0e46c6345d19f2071d781682a9948802207d5de480139010e7408adc9782917310226a3eb4d529877e98751d554e89258c0110ad807cb72d66637235d1de168cb455d90101fd27012002934d758df64de43bd4f91d6b9715a94e2c5c721e4a0e558e0d434cf76d37ce7563826088a8209be3b02b3f0dea66e37e32dccb3f665d0e07481777b62c642da9d6dae2da9c188821027bca7bed47f0c83d1212bd89c0a060e5c7fc10064245d5792d02928674fc7e27ac6763826088a820dced7c6b11d301e7eae29e6d83e758ab24436b2e3cb90ad48e83b3b315c07b1b882103cc236055f8f151002dd7d9cf001f9a4132845e2ad11c4d11d4abbc14ac35589bac6758b27521033745dbfb44fddadd315e9531ae2d9ec3aab5b2340498e11abc5b857086ab4a5eac686869210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ad2103a83edd0f3068548432c481e465ac8e788818cde35d8cab69adb84abc19de1705ac00000000",
+          "result": {
+            "allowed": true,
+            "fees": {
+              "base": "0.00000750",
+              "effective-feerate": "0.00002173",
+              "effective-includes": [
+                "456fdc6d9c8527106986f07c26efe549dbbd959793c06bed5c15bd0dac996e01"
+              ]
+            },
+            "txid": "32e9951df57f6cf0687b4682427bcafa5b7f5cc11f4f71f618082cc71884f564",
+            "vsize": 345,
+            "wtxid": "456fdc6d9c8527106986f07c26efe549dbbd959793c06bed5c15bd0dac996e01"
+          },
+          "step": 0,
+          "txid": "32e9951df57f6cf0687b4682427bcafa5b7f5cc11f4f71f618082cc71884f564",
+          "wtxid": "456fdc6d9c8527106986f07c26efe549dbbd959793c06bed5c15bd0dac996e01"
+        },
+        {
+          "action": "submit_block",
+          "blockhash": "60434f6b92d0d50ff7ccfb5693bac57eaa5f8ad8733f977c5f0d10971871e60f",
+          "confirmations": 1,
+          "confirmed_txid": "32e9951df57f6cf0687b4682427bcafa5b7f5cc11f4f71f618082cc71884f564",
+          "height": 212,
+          "step": 1
+        }
+      ],
+      "attacker_success": false,
+      "diverted_principal_sats": 0,
+      "evidence_level": "arena_replayed_regtest",
+      "expectation_met": true,
+      "expected": {
+        "attacker_success": false,
+        "diverted_principal_sats": 0,
+        "legitimate_completion": true,
+        "legitimate_success": true,
+        "unauthorized_release": false
+      },
+      "family": "honest_joint_release",
+      "funded_target": {
+        "authorization": "proof-grove/m14/cashu-joint-release/v2",
+        "collateral_outpoint": "2ba400f438e2c1b68cb5b80fda34ba17f90052ecd05f85e01da725afda224f29:1",
+        "collateral_sats": 25250,
+        "evidence_archive_sha256": "5446141e6c12c5ce4681f9c07a82ad7f1607a7accaadc51726492350db556a9b",
+        "holder_payout_sats": 24750,
+        "holder_script": "001446b4c5aecb7ab99fb1fee82c82cbca92eef1e79f",
+        "network": "regtest",
+        "recorded_payout_txid": "32e9951df57f6cf0687b4682427bcafa5b7f5cc11f4f71f618082cc71884f564",
+        "reserve_outpoint": "a147db7c729fcaed10954a8163a81bc0bf40dd7560dbcba3cc1e2a82eb4367fb:1",
+        "reserve_sats": 25000
+      },
+      "id": "cashu-release-replay.honest_payout",
+      "legitimate_completion": true,
+      "legitimate_success": true,
+      "observed_final_state": {
+        "collateral_refund_sats": 24750,
+        "collateral_spent": true,
+        "fee_sats": 750,
+        "height": 212,
+        "holder_payout_sats": 24750,
+        "payout_txid": "32e9951df57f6cf0687b4682427bcafa5b7f5cc11f4f71f618082cc71884f564",
+        "payout_wtxid": "456fdc6d9c8527106986f07c26efe549dbbd959793c06bed5c15bd0dac996e01",
+        "reserve_spent": true,
+        "tip_hash": "60434f6b92d0d50ff7ccfb5693bac57eaa5f8ad8733f977c5f0d10971871e60f",
+        "wallets_loaded": 0
+      },
+      "outcome": {
+        "attacker_success": false,
+        "diverted_principal_sats": 0,
+        "legitimate_completion": true,
+        "legitimate_success": true,
+        "unauthorized_release": false
+      },
+      "profile": "pinned_upstream_v2",
+      "recipe": "honest_payout",
+      "scenario_id": "cashu-release-replay.honest_payout",
+      "schema_version": 1,
+      "source_revision": {
+        "commit": "9cf56a56d02e8b63de91e435b9fcd7823a66bb9d",
+        "path": "proof-grove/evidence/proof-backed-release",
+        "ref": "cashu/proof-backed-release-evidence",
+        "repository": "patrickdugan/Spiral"
+      },
+      "track": "cashu-release-replay",
+      "unauthorized_release": false,
+      "variant": "benign"
+    },
+    {
+      "action_trace": [
+        {
+          "action": "submit_blocks",
+          "height": 211,
+          "step": 0,
+          "tip_hash": "0d06fcf78d2e9bb8fb88f9ba74643b06af1f5b3fafed1af7b8bd35a4f862b726",
+          "wallets_loaded": 0
+        },
+        {
+          "action": "testmempoolaccept",
+          "label": "holder_fallback_before_release",
+          "raw_transaction": "02000000000101fb6743eb822a1ecca3cbdb6075dd40bfc01ba863814a9510edca9f727cdb47a101000000000600000001ae6000000000000016001446b4c5aecb7ab99fb1fee82c82cbca92eef1e79f0400473044022040495ffe79660e543dd3aed81278edd1b5838c8ec30428be33e2b728a1aca645022027181318cc1ac7fdbfa36eb42df6492c4be281b9ca3cc54f160f922c3b35462f01203975d40d1e70b71a8a964abea5e9855ded7f15f15e18ce58bb7a4d12dadf74877282012088a8209f5b0f986f9311cc266ebb1b73cab7ac81de3bcaad86255076b94f382b76d69788210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ad632102c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5ac6756b26800000000",
+          "result": {
+            "allowed": true,
+            "fees": {
+              "base": "0.00000250",
+              "effective-feerate": "0.00001811",
+              "effective-includes": [
+                "4e0b6794a3e0d05fd4bf2b960af4e558e2d7102b06c84ea8e21b6d58a74b0f9d"
+              ]
+            },
+            "txid": "084310bdd55345f8eb0ac04f07e4cc6b4d7ce62ae6c99a2f3d0bb4f45c42c9e5",
+            "vsize": 138,
+            "wtxid": "4e0b6794a3e0d05fd4bf2b960af4e558e2d7102b06c84ea8e21b6d58a74b0f9d"
+          },
+          "step": 1,
+          "txid": "084310bdd55345f8eb0ac04f07e4cc6b4d7ce62ae6c99a2f3d0bb4f45c42c9e5",
+          "wtxid": "4e0b6794a3e0d05fd4bf2b960af4e558e2d7102b06c84ea8e21b6d58a74b0f9d"
+        }
+      ],
+      "attacker_success": false,
+      "diverted_principal_sats": 0,
+      "evidence_level": "arena_replayed_regtest",
+      "expectation_met": true,
+      "expected": {
+        "attacker_success": false,
+        "diverted_principal_sats": 0,
+        "legitimate_completion": true,
+        "legitimate_success": true,
+        "unauthorized_release": false
+      },
+      "family": "holder_csv_exit",
+      "funded_target": {
+        "authorization": "proof-grove/m14/cashu-joint-release/v2",
+        "collateral_outpoint": "2ba400f438e2c1b68cb5b80fda34ba17f90052ecd05f85e01da725afda224f29:1",
+        "collateral_sats": 25250,
+        "evidence_archive_sha256": "5446141e6c12c5ce4681f9c07a82ad7f1607a7accaadc51726492350db556a9b",
+        "holder_payout_sats": 24750,
+        "holder_script": "001446b4c5aecb7ab99fb1fee82c82cbca92eef1e79f",
+        "network": "regtest",
+        "recorded_payout_txid": "32e9951df57f6cf0687b4682427bcafa5b7f5cc11f4f71f618082cc71884f564",
+        "reserve_outpoint": "a147db7c729fcaed10954a8163a81bc0bf40dd7560dbcba3cc1e2a82eb4367fb:1",
+        "reserve_sats": 25000
+      },
+      "id": "cashu-release-replay.holder_fallback_before_release",
+      "legitimate_completion": true,
+      "legitimate_success": true,
+      "observed_final_state": {
+        "fallback_allowed": true,
+        "height": 211,
+        "holder_payout_sats": 24750,
+        "reserve_unspent": true,
+        "wallets_loaded": 0
+      },
+      "outcome": {
+        "attacker_success": false,
+        "diverted_principal_sats": 0,
+        "legitimate_completion": true,
+        "legitimate_success": true,
+        "unauthorized_release": false
+      },
+      "profile": "pinned_upstream_v2",
+      "recipe": "holder_fallback_before_release",
+      "scenario_id": "cashu-release-replay.holder_fallback_before_release",
+      "schema_version": 1,
+      "source_revision": {
+        "commit": "9cf56a56d02e8b63de91e435b9fcd7823a66bb9d",
+        "path": "proof-grove/evidence/proof-backed-release",
+        "ref": "cashu/proof-backed-release-evidence",
+        "repository": "patrickdugan/Spiral"
+      },
+      "track": "cashu-release-replay",
+      "unauthorized_release": false,
+      "variant": "benign"
+    },
+    {
+      "action_trace": [
+        {
+          "action": "testmempoolaccept",
+          "label": "holder_fallback_after_release",
+          "raw_transaction": "02000000000101fb6743eb822a1ecca3cbdb6075dd40bfc01ba863814a9510edca9f727cdb47a101000000000600000001ae6000000000000016001446b4c5aecb7ab99fb1fee82c82cbca92eef1e79f0400473044022040495ffe79660e543dd3aed81278edd1b5838c8ec30428be33e2b728a1aca645022027181318cc1ac7fdbfa36eb42df6492c4be281b9ca3cc54f160f922c3b35462f01203975d40d1e70b71a8a964abea5e9855ded7f15f15e18ce58bb7a4d12dadf74877282012088a8209f5b0f986f9311cc266ebb1b73cab7ac81de3bcaad86255076b94f382b76d69788210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ad632102c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5ac6756b26800000000",
+          "result": {
+            "allowed": false,
+            "reject-reason": "missing-inputs",
+            "txid": "084310bdd55345f8eb0ac04f07e4cc6b4d7ce62ae6c99a2f3d0bb4f45c42c9e5",
+            "wtxid": "4e0b6794a3e0d05fd4bf2b960af4e558e2d7102b06c84ea8e21b6d58a74b0f9d"
+          },
+          "step": 0,
+          "txid": "084310bdd55345f8eb0ac04f07e4cc6b4d7ce62ae6c99a2f3d0bb4f45c42c9e5",
+          "wtxid": "4e0b6794a3e0d05fd4bf2b960af4e558e2d7102b06c84ea8e21b6d58a74b0f9d"
+        }
+      ],
+      "attacker_success": false,
+      "diverted_principal_sats": 0,
+      "evidence_level": "arena_replayed_regtest",
+      "expectation_met": true,
+      "expected": {
+        "attacker_success": false,
+        "diverted_principal_sats": 0,
+        "legitimate_completion": false,
+        "legitimate_success": false,
+        "unauthorized_release": false
+      },
+      "family": "double_spend_prevention",
+      "funded_target": {
+        "authorization": "proof-grove/m14/cashu-joint-release/v2",
+        "collateral_outpoint": "2ba400f438e2c1b68cb5b80fda34ba17f90052ecd05f85e01da725afda224f29:1",
+        "collateral_sats": 25250,
+        "evidence_archive_sha256": "5446141e6c12c5ce4681f9c07a82ad7f1607a7accaadc51726492350db556a9b",
+        "holder_payout_sats": 24750,
+        "holder_script": "001446b4c5aecb7ab99fb1fee82c82cbca92eef1e79f",
+        "network": "regtest",
+        "recorded_payout_txid": "32e9951df57f6cf0687b4682427bcafa5b7f5cc11f4f71f618082cc71884f564",
+        "reserve_outpoint": "a147db7c729fcaed10954a8163a81bc0bf40dd7560dbcba3cc1e2a82eb4367fb:1",
+        "reserve_sats": 25000
+      },
+      "id": "cashu-release-replay.holder_fallback_after_release",
+      "legitimate_completion": false,
+      "legitimate_success": false,
+      "observed_final_state": {
+        "allowed": false,
+        "height": 212,
+        "reject_reason": "missing-inputs",
+        "wallets_loaded": 0
+      },
+      "outcome": {
+        "attacker_success": false,
+        "diverted_principal_sats": 0,
+        "legitimate_completion": false,
+        "legitimate_success": false,
+        "unauthorized_release": false
+      },
+      "profile": "pinned_upstream_v2",
+      "recipe": "holder_fallback_after_release",
+      "scenario_id": "cashu-release-replay.holder_fallback_after_release",
+      "schema_version": 1,
+      "source_revision": {
+        "commit": "9cf56a56d02e8b63de91e435b9fcd7823a66bb9d",
+        "path": "proof-grove/evidence/proof-backed-release",
+        "ref": "cashu/proof-backed-release-evidence",
+        "repository": "patrickdugan/Spiral"
+      },
+      "track": "cashu-release-replay",
+      "unauthorized_release": false,
+      "variant": "attack"
+    },
+    {
+      "action_trace": [
+        {
+          "action": "mutate_output_beneficiary",
+          "original_holder_script": "001446b4c5aecb7ab99fb1fee82c82cbca92eef1e79f",
+          "step": 0,
+          "substituted_script": "001472c57ad04c09afdd9c9042d54a3d9ffc5e81af29"
+        },
+        {
+          "action": "testmempoolaccept",
+          "label": "substituted_beneficiary",
+          "raw_transaction": "02000000000102fb6743eb822a1ecca3cbdb6075dd40bfc01ba863814a9510edca9f727cdb47a1010000000006000000294f22daaf25a71de0855fd0ec5200f917ba34da0fb8b58cb6c1e238f400a42b0100000000fdffffff02ae6000000000000016001472c57ad04c09afdd9c9042d54a3d9ffc5e81af29ae60000000000000160014f9d71f9832b3d2200e8f43c89f1924fcbbda938f0400483045022100b4aeb8f362b4aef490413bf2a08a9af5d63b9c5a8add9f07d5256795e21ea3ad02201d2cc89ea9a6da62408576eb6436357349fc7877b8f4269c5f9d745e4d3bf7d601203975d40d1e70b71a8a964abea5e9855ded7f15f15e18ce58bb7a4d12dadf74877282012088a8209f5b0f986f9311cc266ebb1b73cab7ac81de3bcaad86255076b94f382b76d69788210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ad632102c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5ac6756b268064830450221008182b5ca464f0cddf3f24218e9086d08c87ad5b118912648ccf0d06ec716433802205b05ead61714034530becbf27c4c496f4b4e594e99be4b3c4b1d9c73e1f13b9a01483045022100da61f7b167e12662bb2e6fb55276ba3573d7a9feeac1cc262a084b811334af6b02203584e5abe5d30045520e7cd4ae65a362ab67b4e993851a422e55858df65e9d000147304402203a237da4cc01f14fe79369169bc083563b0e46c6345d19f2071d781682a9948802207d5de480139010e7408adc9782917310226a3eb4d529877e98751d554e89258c0110ad807cb72d66637235d1de168cb455d90101fd27012002934d758df64de43bd4f91d6b9715a94e2c5c721e4a0e558e0d434cf76d37ce7563826088a8209be3b02b3f0dea66e37e32dccb3f665d0e07481777b62c642da9d6dae2da9c188821027bca7bed47f0c83d1212bd89c0a060e5c7fc10064245d5792d02928674fc7e27ac6763826088a820dced7c6b11d301e7eae29e6d83e758ab24436b2e3cb90ad48e83b3b315c07b1b882103cc236055f8f151002dd7d9cf001f9a4132845e2ad11c4d11d4abbc14ac35589bac6758b27521033745dbfb44fddadd315e9531ae2d9ec3aab5b2340498e11abc5b857086ab4a5eac686869210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ad2103a83edd0f3068548432c481e465ac8e788818cde35d8cab69adb84abc19de1705ac00000000",
+          "result": {
+            "allowed": false,
+            "reject-details": "mempool-script-verify-flag-failed (Signature must be zero for failed CHECK(MULTI)SIG operation), input 0 of 918251dd60239f88bc5f86c62e35668c11088f7008376971beea583f2bb3c5b4 (wtxid 62470e6a91bf2ea2ee5caffe8c08a9a30d75af3355db50be1d3d94589caae6b2), spending a147db7c729fcaed10954a8163a81bc0bf40dd7560dbcba3cc1e2a82eb4367fb:1",
+            "reject-reason": "mempool-script-verify-flag-failed (Signature must be zero for failed CHECK(MULTI)SIG operation)",
+            "txid": "918251dd60239f88bc5f86c62e35668c11088f7008376971beea583f2bb3c5b4",
+            "wtxid": "62470e6a91bf2ea2ee5caffe8c08a9a30d75af3355db50be1d3d94589caae6b2"
+          },
+          "step": 1,
+          "txid": "918251dd60239f88bc5f86c62e35668c11088f7008376971beea583f2bb3c5b4",
+          "wtxid": "62470e6a91bf2ea2ee5caffe8c08a9a30d75af3355db50be1d3d94589caae6b2"
+        }
+      ],
+      "attacker_success": false,
+      "diverted_principal_sats": 0,
+      "evidence_level": "arena_replayed_regtest",
+      "expectation_met": true,
+      "expected": {
+        "attacker_success": false,
+        "diverted_principal_sats": 0,
+        "legitimate_completion": false,
+        "legitimate_success": false,
+        "unauthorized_release": false
+      },
+      "family": "settlement_binding",
+      "funded_target": {
+        "authorization": "proof-grove/m14/cashu-joint-release/v2",
+        "collateral_outpoint": "2ba400f438e2c1b68cb5b80fda34ba17f90052ecd05f85e01da725afda224f29:1",
+        "collateral_sats": 25250,
+        "evidence_archive_sha256": "5446141e6c12c5ce4681f9c07a82ad7f1607a7accaadc51726492350db556a9b",
+        "holder_payout_sats": 24750,
+        "holder_script": "001446b4c5aecb7ab99fb1fee82c82cbca92eef1e79f",
+        "network": "regtest",
+        "recorded_payout_txid": "32e9951df57f6cf0687b4682427bcafa5b7f5cc11f4f71f618082cc71884f564",
+        "reserve_outpoint": "a147db7c729fcaed10954a8163a81bc0bf40dd7560dbcba3cc1e2a82eb4367fb:1",
+        "reserve_sats": 25000
+      },
+      "id": "cashu-release-replay.substituted_beneficiary",
+      "legitimate_completion": false,
+      "legitimate_success": false,
+      "observed_final_state": {
+        "allowed": false,
+        "collateral_unspent": true,
+        "expected_reason_fragment_matched": true,
+        "height": 211,
+        "reject_reason": "mempool-script-verify-flag-failed (Signature must be zero for failed CHECK(MULTI)SIG operation)",
+        "reserve_unspent": true,
+        "wallets_loaded": 0
+      },
+      "outcome": {
+        "attacker_success": false,
+        "diverted_principal_sats": 0,
+        "legitimate_completion": false,
+        "legitimate_success": false,
+        "unauthorized_release": false
+      },
+      "profile": "pinned_upstream_v2",
+      "recipe": "substituted_beneficiary",
+      "scenario_id": "cashu-release-replay.substituted_beneficiary",
+      "schema_version": 1,
+      "source_revision": {
+        "commit": "9cf56a56d02e8b63de91e435b9fcd7823a66bb9d",
+        "path": "proof-grove/evidence/proof-backed-release",
+        "ref": "cashu/proof-backed-release-evidence",
+        "repository": "patrickdugan/Spiral"
+      },
+      "track": "cashu-release-replay",
+      "unauthorized_release": false,
+      "variant": "attack"
+    },
+    {
+      "action_trace": [
+        {
+          "action": "mutate_witness",
+          "byte_index": 0,
+          "description": "Flip a bit in the 16-byte M14 accept label on collateral input 1.",
+          "input_index": 1,
+          "mutation": "substituted_accept_label",
+          "step": 0,
+          "witness_index": 3,
+          "wtxid_matches_upstream_control": true
+        },
+        {
+          "action": "testmempoolaccept",
+          "label": "substituted_accept_label",
+          "raw_transaction": "02000000000102fb6743eb822a1ecca3cbdb6075dd40bfc01ba863814a9510edca9f727cdb47a1010000000006000000294f22daaf25a71de0855fd0ec5200f917ba34da0fb8b58cb6c1e238f400a42b0100000000fdffffff02ae6000000000000016001446b4c5aecb7ab99fb1fee82c82cbca92eef1e79fae60000000000000160014f9d71f9832b3d2200e8f43c89f1924fcbbda938f0400483045022100b4aeb8f362b4aef490413bf2a08a9af5d63b9c5a8add9f07d5256795e21ea3ad02201d2cc89ea9a6da62408576eb6436357349fc7877b8f4269c5f9d745e4d3bf7d601203975d40d1e70b71a8a964abea5e9855ded7f15f15e18ce58bb7a4d12dadf74877282012088a8209f5b0f986f9311cc266ebb1b73cab7ac81de3bcaad86255076b94f382b76d69788210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ad632102c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5ac6756b268064830450221008182b5ca464f0cddf3f24218e9086d08c87ad5b118912648ccf0d06ec716433802205b05ead61714034530becbf27c4c496f4b4e594e99be4b3c4b1d9c73e1f13b9a01483045022100da61f7b167e12662bb2e6fb55276ba3573d7a9feeac1cc262a084b811334af6b02203584e5abe5d30045520e7cd4ae65a362ab67b4e993851a422e55858df65e9d000147304402203a237da4cc01f14fe79369169bc083563b0e46c6345d19f2071d781682a9948802207d5de480139010e7408adc9782917310226a3eb4d529877e98751d554e89258c0110ac807cb72d66637235d1de168cb455d90101fd27012002934d758df64de43bd4f91d6b9715a94e2c5c721e4a0e558e0d434cf76d37ce7563826088a8209be3b02b3f0dea66e37e32dccb3f665d0e07481777b62c642da9d6dae2da9c188821027bca7bed47f0c83d1212bd89c0a060e5c7fc10064245d5792d02928674fc7e27ac6763826088a820dced7c6b11d301e7eae29e6d83e758ab24436b2e3cb90ad48e83b3b315c07b1b882103cc236055f8f151002dd7d9cf001f9a4132845e2ad11c4d11d4abbc14ac35589bac6758b27521033745dbfb44fddadd315e9531ae2d9ec3aab5b2340498e11abc5b857086ab4a5eac686869210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ad2103a83edd0f3068548432c481e465ac8e788818cde35d8cab69adb84abc19de1705ac00000000",
+          "result": {
+            "allowed": false,
+            "reject-details": "mempool-script-verify-flag-failed (Script failed an OP_EQUALVERIFY operation), input 1 of 32e9951df57f6cf0687b4682427bcafa5b7f5cc11f4f71f618082cc71884f564 (wtxid 9bf0adf32719543dd5d7be9be091e33092731189167666eff4a7cc11d666ed85), spending 2ba400f438e2c1b68cb5b80fda34ba17f90052ecd05f85e01da725afda224f29:1",
+            "reject-reason": "mempool-script-verify-flag-failed (Script failed an OP_EQUALVERIFY operation)",
+            "txid": "32e9951df57f6cf0687b4682427bcafa5b7f5cc11f4f71f618082cc71884f564",
+            "wtxid": "9bf0adf32719543dd5d7be9be091e33092731189167666eff4a7cc11d666ed85"
+          },
+          "step": 1,
+          "txid": "32e9951df57f6cf0687b4682427bcafa5b7f5cc11f4f71f618082cc71884f564",
+          "wtxid": "9bf0adf32719543dd5d7be9be091e33092731189167666eff4a7cc11d666ed85"
+        }
+      ],
+      "attacker_success": false,
+      "diverted_principal_sats": 0,
+      "evidence_level": "arena_replayed_regtest",
+      "expectation_met": true,
+      "expected": {
+        "attacker_success": false,
+        "diverted_principal_sats": 0,
+        "legitimate_completion": false,
+        "legitimate_success": false,
+        "unauthorized_release": false
+      },
+      "family": "witness_control",
+      "funded_target": {
+        "authorization": "proof-grove/m14/cashu-joint-release/v2",
+        "collateral_outpoint": "2ba400f438e2c1b68cb5b80fda34ba17f90052ecd05f85e01da725afda224f29:1",
+        "collateral_sats": 25250,
+        "evidence_archive_sha256": "5446141e6c12c5ce4681f9c07a82ad7f1607a7accaadc51726492350db556a9b",
+        "holder_payout_sats": 24750,
+        "holder_script": "001446b4c5aecb7ab99fb1fee82c82cbca92eef1e79f",
+        "network": "regtest",
+        "recorded_payout_txid": "32e9951df57f6cf0687b4682427bcafa5b7f5cc11f4f71f618082cc71884f564",
+        "reserve_outpoint": "a147db7c729fcaed10954a8163a81bc0bf40dd7560dbcba3cc1e2a82eb4367fb:1",
+        "reserve_sats": 25000
+      },
+      "id": "cashu-release-replay.substituted_accept_label",
+      "legitimate_completion": false,
+      "legitimate_success": false,
+      "observed_final_state": {
+        "allowed": false,
+        "collateral_unspent": true,
+        "expected_reason_fragment_matched": true,
+        "height": 211,
+        "reject_reason": "mempool-script-verify-flag-failed (Script failed an OP_EQUALVERIFY operation)",
+        "reserve_unspent": true,
+        "wallets_loaded": 0
+      },
+      "outcome": {
+        "attacker_success": false,
+        "diverted_principal_sats": 0,
+        "legitimate_completion": false,
+        "legitimate_success": false,
+        "unauthorized_release": false
+      },
+      "profile": "pinned_upstream_v2",
+      "recipe": "substituted_accept_label",
+      "scenario_id": "cashu-release-replay.substituted_accept_label",
+      "schema_version": 1,
+      "source_revision": {
+        "commit": "9cf56a56d02e8b63de91e435b9fcd7823a66bb9d",
+        "path": "proof-grove/evidence/proof-backed-release",
+        "ref": "cashu/proof-backed-release-evidence",
+        "repository": "patrickdugan/Spiral"
+      },
+      "track": "cashu-release-replay",
+      "unauthorized_release": false,
+      "variant": "attack"
+    },
+    {
+      "action_trace": [
+        {
+          "action": "mutate_witness",
+          "byte_index": -2,
+          "description": "Flip a bit in the holder ECDSA signature on reserve input 0.",
+          "input_index": 0,
+          "mutation": "substituted_holder_signature",
+          "step": 0,
+          "witness_index": 1,
+          "wtxid_matches_upstream_control": true
+        },
+        {
+          "action": "testmempoolaccept",
+          "label": "substituted_holder_signature",
+          "raw_transaction": "02000000000102fb6743eb822a1ecca3cbdb6075dd40bfc01ba863814a9510edca9f727cdb47a1010000000006000000294f22daaf25a71de0855fd0ec5200f917ba34da0fb8b58cb6c1e238f400a42b0100000000fdffffff02ae6000000000000016001446b4c5aecb7ab99fb1fee82c82cbca92eef1e79fae60000000000000160014f9d71f9832b3d2200e8f43c89f1924fcbbda938f0400483045022100b4aeb8f362b4aef490413bf2a08a9af5d63b9c5a8add9f07d5256795e21ea3ad02201d2cc89ea9a6da62408576eb6436357349fc7877b8f4269c5f9d745e4d3bf7d701203975d40d1e70b71a8a964abea5e9855ded7f15f15e18ce58bb7a4d12dadf74877282012088a8209f5b0f986f9311cc266ebb1b73cab7ac81de3bcaad86255076b94f382b76d69788210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ad632102c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5ac6756b268064830450221008182b5ca464f0cddf3f24218e9086d08c87ad5b118912648ccf0d06ec716433802205b05ead61714034530becbf27c4c496f4b4e594e99be4b3c4b1d9c73e1f13b9a01483045022100da61f7b167e12662bb2e6fb55276ba3573d7a9feeac1cc262a084b811334af6b02203584e5abe5d30045520e7cd4ae65a362ab67b4e993851a422e55858df65e9d000147304402203a237da4cc01f14fe79369169bc083563b0e46c6345d19f2071d781682a9948802207d5de480139010e7408adc9782917310226a3eb4d529877e98751d554e89258c0110ad807cb72d66637235d1de168cb455d90101fd27012002934d758df64de43bd4f91d6b9715a94e2c5c721e4a0e558e0d434cf76d37ce7563826088a8209be3b02b3f0dea66e37e32dccb3f665d0e07481777b62c642da9d6dae2da9c188821027bca7bed47f0c83d1212bd89c0a060e5c7fc10064245d5792d02928674fc7e27ac6763826088a820dced7c6b11d301e7eae29e6d83e758ab24436b2e3cb90ad48e83b3b315c07b1b882103cc236055f8f151002dd7d9cf001f9a4132845e2ad11c4d11d4abbc14ac35589bac6758b27521033745dbfb44fddadd315e9531ae2d9ec3aab5b2340498e11abc5b857086ab4a5eac686869210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ad2103a83edd0f3068548432c481e465ac8e788818cde35d8cab69adb84abc19de1705ac00000000",
+          "result": {
+            "allowed": false,
+            "reject-details": "mempool-script-verify-flag-failed (Signature must be zero for failed CHECK(MULTI)SIG operation), input 0 of 32e9951df57f6cf0687b4682427bcafa5b7f5cc11f4f71f618082cc71884f564 (wtxid d4b8b7a6500c1f3860e1a0edc2f650dc761e52c30768c37fd9e3a15999fe58b6), spending a147db7c729fcaed10954a8163a81bc0bf40dd7560dbcba3cc1e2a82eb4367fb:1",
+            "reject-reason": "mempool-script-verify-flag-failed (Signature must be zero for failed CHECK(MULTI)SIG operation)",
+            "txid": "32e9951df57f6cf0687b4682427bcafa5b7f5cc11f4f71f618082cc71884f564",
+            "wtxid": "d4b8b7a6500c1f3860e1a0edc2f650dc761e52c30768c37fd9e3a15999fe58b6"
+          },
+          "step": 1,
+          "txid": "32e9951df57f6cf0687b4682427bcafa5b7f5cc11f4f71f618082cc71884f564",
+          "wtxid": "d4b8b7a6500c1f3860e1a0edc2f650dc761e52c30768c37fd9e3a15999fe58b6"
+        }
+      ],
+      "attacker_success": false,
+      "diverted_principal_sats": 0,
+      "evidence_level": "arena_replayed_regtest",
+      "expectation_met": true,
+      "expected": {
+        "attacker_success": false,
+        "diverted_principal_sats": 0,
+        "legitimate_completion": false,
+        "legitimate_success": false,
+        "unauthorized_release": false
+      },
+      "family": "witness_control",
+      "funded_target": {
+        "authorization": "proof-grove/m14/cashu-joint-release/v2",
+        "collateral_outpoint": "2ba400f438e2c1b68cb5b80fda34ba17f90052ecd05f85e01da725afda224f29:1",
+        "collateral_sats": 25250,
+        "evidence_archive_sha256": "5446141e6c12c5ce4681f9c07a82ad7f1607a7accaadc51726492350db556a9b",
+        "holder_payout_sats": 24750,
+        "holder_script": "001446b4c5aecb7ab99fb1fee82c82cbca92eef1e79f",
+        "network": "regtest",
+        "recorded_payout_txid": "32e9951df57f6cf0687b4682427bcafa5b7f5cc11f4f71f618082cc71884f564",
+        "reserve_outpoint": "a147db7c729fcaed10954a8163a81bc0bf40dd7560dbcba3cc1e2a82eb4367fb:1",
+        "reserve_sats": 25000
+      },
+      "id": "cashu-release-replay.substituted_holder_signature",
+      "legitimate_completion": false,
+      "legitimate_success": false,
+      "observed_final_state": {
+        "allowed": false,
+        "collateral_unspent": true,
+        "expected_reason_fragment_matched": true,
+        "height": 211,
+        "reject_reason": "mempool-script-verify-flag-failed (Signature must be zero for failed CHECK(MULTI)SIG operation)",
+        "reserve_unspent": true,
+        "wallets_loaded": 0
+      },
+      "outcome": {
+        "attacker_success": false,
+        "diverted_principal_sats": 0,
+        "legitimate_completion": false,
+        "legitimate_success": false,
+        "unauthorized_release": false
+      },
+      "profile": "pinned_upstream_v2",
+      "recipe": "substituted_holder_signature",
+      "scenario_id": "cashu-release-replay.substituted_holder_signature",
+      "schema_version": 1,
+      "source_revision": {
+        "commit": "9cf56a56d02e8b63de91e435b9fcd7823a66bb9d",
+        "path": "proof-grove/evidence/proof-backed-release",
+        "ref": "cashu/proof-backed-release-evidence",
+        "repository": "patrickdugan/Spiral"
+      },
+      "track": "cashu-release-replay",
+      "unauthorized_release": false,
+      "variant": "attack"
+    },
+    {
+      "action_trace": [
+        {
+          "action": "mutate_witness",
+          "byte_index": 0,
+          "description": "Flip a bit in the 32-byte Cashu issuance preimage on reserve input 0.",
+          "input_index": 0,
+          "mutation": "substituted_issuance_preimage",
+          "step": 0,
+          "witness_index": 2,
+          "wtxid_matches_upstream_control": true
+        },
+        {
+          "action": "testmempoolaccept",
+          "label": "substituted_issuance_preimage",
+          "raw_transaction": "02000000000102fb6743eb822a1ecca3cbdb6075dd40bfc01ba863814a9510edca9f727cdb47a1010000000006000000294f22daaf25a71de0855fd0ec5200f917ba34da0fb8b58cb6c1e238f400a42b0100000000fdffffff02ae6000000000000016001446b4c5aecb7ab99fb1fee82c82cbca92eef1e79fae60000000000000160014f9d71f9832b3d2200e8f43c89f1924fcbbda938f0400483045022100b4aeb8f362b4aef490413bf2a08a9af5d63b9c5a8add9f07d5256795e21ea3ad02201d2cc89ea9a6da62408576eb6436357349fc7877b8f4269c5f9d745e4d3bf7d601203875d40d1e70b71a8a964abea5e9855ded7f15f15e18ce58bb7a4d12dadf74877282012088a8209f5b0f986f9311cc266ebb1b73cab7ac81de3bcaad86255076b94f382b76d69788210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ad632102c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5ac6756b268064830450221008182b5ca464f0cddf3f24218e9086d08c87ad5b118912648ccf0d06ec716433802205b05ead61714034530becbf27c4c496f4b4e594e99be4b3c4b1d9c73e1f13b9a01483045022100da61f7b167e12662bb2e6fb55276ba3573d7a9feeac1cc262a084b811334af6b02203584e5abe5d30045520e7cd4ae65a362ab67b4e993851a422e55858df65e9d000147304402203a237da4cc01f14fe79369169bc083563b0e46c6345d19f2071d781682a9948802207d5de480139010e7408adc9782917310226a3eb4d529877e98751d554e89258c0110ad807cb72d66637235d1de168cb455d90101fd27012002934d758df64de43bd4f91d6b9715a94e2c5c721e4a0e558e0d434cf76d37ce7563826088a8209be3b02b3f0dea66e37e32dccb3f665d0e07481777b62c642da9d6dae2da9c188821027bca7bed47f0c83d1212bd89c0a060e5c7fc10064245d5792d02928674fc7e27ac6763826088a820dced7c6b11d301e7eae29e6d83e758ab24436b2e3cb90ad48e83b3b315c07b1b882103cc236055f8f151002dd7d9cf001f9a4132845e2ad11c4d11d4abbc14ac35589bac6758b27521033745dbfb44fddadd315e9531ae2d9ec3aab5b2340498e11abc5b857086ab4a5eac686869210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ad2103a83edd0f3068548432c481e465ac8e788818cde35d8cab69adb84abc19de1705ac00000000",
+          "result": {
+            "allowed": false,
+            "reject-details": "mempool-script-verify-flag-failed (Script failed an OP_EQUALVERIFY operation), input 0 of 32e9951df57f6cf0687b4682427bcafa5b7f5cc11f4f71f618082cc71884f564 (wtxid d15b4a654a84dc11de41227a7563ad5f34807b5da7cbe1704c3b849f235a966c), spending a147db7c729fcaed10954a8163a81bc0bf40dd7560dbcba3cc1e2a82eb4367fb:1",
+            "reject-reason": "mempool-script-verify-flag-failed (Script failed an OP_EQUALVERIFY operation)",
+            "txid": "32e9951df57f6cf0687b4682427bcafa5b7f5cc11f4f71f618082cc71884f564",
+            "wtxid": "d15b4a654a84dc11de41227a7563ad5f34807b5da7cbe1704c3b849f235a966c"
+          },
+          "step": 1,
+          "txid": "32e9951df57f6cf0687b4682427bcafa5b7f5cc11f4f71f618082cc71884f564",
+          "wtxid": "d15b4a654a84dc11de41227a7563ad5f34807b5da7cbe1704c3b849f235a966c"
+        }
+      ],
+      "attacker_success": false,
+      "diverted_principal_sats": 0,
+      "evidence_level": "arena_replayed_regtest",
+      "expectation_met": true,
+      "expected": {
+        "attacker_success": false,
+        "diverted_principal_sats": 0,
+        "legitimate_completion": false,
+        "legitimate_success": false,
+        "unauthorized_release": false
+      },
+      "family": "witness_control",
+      "funded_target": {
+        "authorization": "proof-grove/m14/cashu-joint-release/v2",
+        "collateral_outpoint": "2ba400f438e2c1b68cb5b80fda34ba17f90052ecd05f85e01da725afda224f29:1",
+        "collateral_sats": 25250,
+        "evidence_archive_sha256": "5446141e6c12c5ce4681f9c07a82ad7f1607a7accaadc51726492350db556a9b",
+        "holder_payout_sats": 24750,
+        "holder_script": "001446b4c5aecb7ab99fb1fee82c82cbca92eef1e79f",
+        "network": "regtest",
+        "recorded_payout_txid": "32e9951df57f6cf0687b4682427bcafa5b7f5cc11f4f71f618082cc71884f564",
+        "reserve_outpoint": "a147db7c729fcaed10954a8163a81bc0bf40dd7560dbcba3cc1e2a82eb4367fb:1",
+        "reserve_sats": 25000
+      },
+      "id": "cashu-release-replay.substituted_issuance_preimage",
+      "legitimate_completion": false,
+      "legitimate_success": false,
+      "observed_final_state": {
+        "allowed": false,
+        "collateral_unspent": true,
+        "expected_reason_fragment_matched": true,
+        "height": 211,
+        "reject_reason": "mempool-script-verify-flag-failed (Script failed an OP_EQUALVERIFY operation)",
+        "reserve_unspent": true,
+        "wallets_loaded": 0
+      },
+      "outcome": {
+        "attacker_success": false,
+        "diverted_principal_sats": 0,
+        "legitimate_completion": false,
+        "legitimate_success": false,
+        "unauthorized_release": false
+      },
+      "profile": "pinned_upstream_v2",
+      "recipe": "substituted_issuance_preimage",
+      "scenario_id": "cashu-release-replay.substituted_issuance_preimage",
+      "schema_version": 1,
+      "source_revision": {
+        "commit": "9cf56a56d02e8b63de91e435b9fcd7823a66bb9d",
+        "path": "proof-grove/evidence/proof-backed-release",
+        "ref": "cashu/proof-backed-release-evidence",
+        "repository": "patrickdugan/Spiral"
+      },
+      "track": "cashu-release-replay",
+      "unauthorized_release": false,
+      "variant": "attack"
+    },
+    {
+      "action_trace": [
+        {
+          "action": "mutate_witness",
+          "byte_index": -2,
+          "description": "Flip a bit in the challenger approval signature on collateral input 1.",
+          "input_index": 1,
+          "mutation": "substituted_challenger_approval",
+          "step": 0,
+          "witness_index": 0,
+          "wtxid_matches_upstream_control": true
+        },
+        {
+          "action": "testmempoolaccept",
+          "label": "substituted_challenger_approval",
+          "raw_transaction": "02000000000102fb6743eb822a1ecca3cbdb6075dd40bfc01ba863814a9510edca9f727cdb47a1010000000006000000294f22daaf25a71de0855fd0ec5200f917ba34da0fb8b58cb6c1e238f400a42b0100000000fdffffff02ae6000000000000016001446b4c5aecb7ab99fb1fee82c82cbca92eef1e79fae60000000000000160014f9d71f9832b3d2200e8f43c89f1924fcbbda938f0400483045022100b4aeb8f362b4aef490413bf2a08a9af5d63b9c5a8add9f07d5256795e21ea3ad02201d2cc89ea9a6da62408576eb6436357349fc7877b8f4269c5f9d745e4d3bf7d601203975d40d1e70b71a8a964abea5e9855ded7f15f15e18ce58bb7a4d12dadf74877282012088a8209f5b0f986f9311cc266ebb1b73cab7ac81de3bcaad86255076b94f382b76d69788210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ad632102c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5ac6756b268064830450221008182b5ca464f0cddf3f24218e9086d08c87ad5b118912648ccf0d06ec716433802205b05ead61714034530becbf27c4c496f4b4e594e99be4b3c4b1d9c73e1f13b9b01483045022100da61f7b167e12662bb2e6fb55276ba3573d7a9feeac1cc262a084b811334af6b02203584e5abe5d30045520e7cd4ae65a362ab67b4e993851a422e55858df65e9d000147304402203a237da4cc01f14fe79369169bc083563b0e46c6345d19f2071d781682a9948802207d5de480139010e7408adc9782917310226a3eb4d529877e98751d554e89258c0110ad807cb72d66637235d1de168cb455d90101fd27012002934d758df64de43bd4f91d6b9715a94e2c5c721e4a0e558e0d434cf76d37ce7563826088a8209be3b02b3f0dea66e37e32dccb3f665d0e07481777b62c642da9d6dae2da9c188821027bca7bed47f0c83d1212bd89c0a060e5c7fc10064245d5792d02928674fc7e27ac6763826088a820dced7c6b11d301e7eae29e6d83e758ab24436b2e3cb90ad48e83b3b315c07b1b882103cc236055f8f151002dd7d9cf001f9a4132845e2ad11c4d11d4abbc14ac35589bac6758b27521033745dbfb44fddadd315e9531ae2d9ec3aab5b2340498e11abc5b857086ab4a5eac686869210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ad2103a83edd0f3068548432c481e465ac8e788818cde35d8cab69adb84abc19de1705ac00000000",
+          "result": {
+            "allowed": false,
+            "reject-details": "mempool-script-verify-flag-failed (Signature must be zero for failed CHECK(MULTI)SIG operation), input 1 of 32e9951df57f6cf0687b4682427bcafa5b7f5cc11f4f71f618082cc71884f564 (wtxid 184d72ca7d1cf2e8d1929eeade9bc195f22b44b2ff24336087872d4898b85a10), spending 2ba400f438e2c1b68cb5b80fda34ba17f90052ecd05f85e01da725afda224f29:1",
+            "reject-reason": "mempool-script-verify-flag-failed (Signature must be zero for failed CHECK(MULTI)SIG operation)",
+            "txid": "32e9951df57f6cf0687b4682427bcafa5b7f5cc11f4f71f618082cc71884f564",
+            "wtxid": "184d72ca7d1cf2e8d1929eeade9bc195f22b44b2ff24336087872d4898b85a10"
+          },
+          "step": 1,
+          "txid": "32e9951df57f6cf0687b4682427bcafa5b7f5cc11f4f71f618082cc71884f564",
+          "wtxid": "184d72ca7d1cf2e8d1929eeade9bc195f22b44b2ff24336087872d4898b85a10"
+        }
+      ],
+      "attacker_success": false,
+      "diverted_principal_sats": 0,
+      "evidence_level": "arena_replayed_regtest",
+      "expectation_met": true,
+      "expected": {
+        "attacker_success": false,
+        "diverted_principal_sats": 0,
+        "legitimate_completion": false,
+        "legitimate_success": false,
+        "unauthorized_release": false
+      },
+      "family": "witness_control",
+      "funded_target": {
+        "authorization": "proof-grove/m14/cashu-joint-release/v2",
+        "collateral_outpoint": "2ba400f438e2c1b68cb5b80fda34ba17f90052ecd05f85e01da725afda224f29:1",
+        "collateral_sats": 25250,
+        "evidence_archive_sha256": "5446141e6c12c5ce4681f9c07a82ad7f1607a7accaadc51726492350db556a9b",
+        "holder_payout_sats": 24750,
+        "holder_script": "001446b4c5aecb7ab99fb1fee82c82cbca92eef1e79f",
+        "network": "regtest",
+        "recorded_payout_txid": "32e9951df57f6cf0687b4682427bcafa5b7f5cc11f4f71f618082cc71884f564",
+        "reserve_outpoint": "a147db7c729fcaed10954a8163a81bc0bf40dd7560dbcba3cc1e2a82eb4367fb:1",
+        "reserve_sats": 25000
+      },
+      "id": "cashu-release-replay.substituted_challenger_approval",
+      "legitimate_completion": false,
+      "legitimate_success": false,
+      "observed_final_state": {
+        "allowed": false,
+        "collateral_unspent": true,
+        "expected_reason_fragment_matched": true,
+        "height": 211,
+        "reject_reason": "mempool-script-verify-flag-failed (Signature must be zero for failed CHECK(MULTI)SIG operation)",
+        "reserve_unspent": true,
+        "wallets_loaded": 0
+      },
+      "outcome": {
+        "attacker_success": false,
+        "diverted_principal_sats": 0,
+        "legitimate_completion": false,
+        "legitimate_success": false,
+        "unauthorized_release": false
+      },
+      "profile": "pinned_upstream_v2",
+      "recipe": "substituted_challenger_approval",
+      "scenario_id": "cashu-release-replay.substituted_challenger_approval",
+      "schema_version": 1,
+      "source_revision": {
+        "commit": "9cf56a56d02e8b63de91e435b9fcd7823a66bb9d",
+        "path": "proof-grove/evidence/proof-backed-release",
+        "ref": "cashu/proof-backed-release-evidence",
+        "repository": "patrickdugan/Spiral"
+      },
+      "track": "cashu-release-replay",
+      "unauthorized_release": false,
+      "variant": "attack"
+    },
+    {
+      "action_trace": [
+        {
+          "action": "mutate_witness",
+          "byte_index": -2,
+          "description": "Flip a bit in the holder approval signature on collateral input 1.",
+          "input_index": 1,
+          "mutation": "substituted_holder_approval",
+          "step": 0,
+          "witness_index": 1,
+          "wtxid_matches_upstream_control": true
+        },
+        {
+          "action": "testmempoolaccept",
+          "label": "substituted_holder_approval",
+          "raw_transaction": "02000000000102fb6743eb822a1ecca3cbdb6075dd40bfc01ba863814a9510edca9f727cdb47a1010000000006000000294f22daaf25a71de0855fd0ec5200f917ba34da0fb8b58cb6c1e238f400a42b0100000000fdffffff02ae6000000000000016001446b4c5aecb7ab99fb1fee82c82cbca92eef1e79fae60000000000000160014f9d71f9832b3d2200e8f43c89f1924fcbbda938f0400483045022100b4aeb8f362b4aef490413bf2a08a9af5d63b9c5a8add9f07d5256795e21ea3ad02201d2cc89ea9a6da62408576eb6436357349fc7877b8f4269c5f9d745e4d3bf7d601203975d40d1e70b71a8a964abea5e9855ded7f15f15e18ce58bb7a4d12dadf74877282012088a8209f5b0f986f9311cc266ebb1b73cab7ac81de3bcaad86255076b94f382b76d69788210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ad632102c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5ac6756b268064830450221008182b5ca464f0cddf3f24218e9086d08c87ad5b118912648ccf0d06ec716433802205b05ead61714034530becbf27c4c496f4b4e594e99be4b3c4b1d9c73e1f13b9a01483045022100da61f7b167e12662bb2e6fb55276ba3573d7a9feeac1cc262a084b811334af6b02203584e5abe5d30045520e7cd4ae65a362ab67b4e993851a422e55858df65e9d010147304402203a237da4cc01f14fe79369169bc083563b0e46c6345d19f2071d781682a9948802207d5de480139010e7408adc9782917310226a3eb4d529877e98751d554e89258c0110ad807cb72d66637235d1de168cb455d90101fd27012002934d758df64de43bd4f91d6b9715a94e2c5c721e4a0e558e0d434cf76d37ce7563826088a8209be3b02b3f0dea66e37e32dccb3f665d0e07481777b62c642da9d6dae2da9c188821027bca7bed47f0c83d1212bd89c0a060e5c7fc10064245d5792d02928674fc7e27ac6763826088a820dced7c6b11d301e7eae29e6d83e758ab24436b2e3cb90ad48e83b3b315c07b1b882103cc236055f8f151002dd7d9cf001f9a4132845e2ad11c4d11d4abbc14ac35589bac6758b27521033745dbfb44fddadd315e9531ae2d9ec3aab5b2340498e11abc5b857086ab4a5eac686869210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ad2103a83edd0f3068548432c481e465ac8e788818cde35d8cab69adb84abc19de1705ac00000000",
+          "result": {
+            "allowed": false,
+            "reject-details": "mempool-script-verify-flag-failed (Signature must be zero for failed CHECK(MULTI)SIG operation), input 1 of 32e9951df57f6cf0687b4682427bcafa5b7f5cc11f4f71f618082cc71884f564 (wtxid d924cd8588e3c8270bbd1277143256942ae6919c2935b64d5971ce78e7dafb45), spending 2ba400f438e2c1b68cb5b80fda34ba17f90052ecd05f85e01da725afda224f29:1",
+            "reject-reason": "mempool-script-verify-flag-failed (Signature must be zero for failed CHECK(MULTI)SIG operation)",
+            "txid": "32e9951df57f6cf0687b4682427bcafa5b7f5cc11f4f71f618082cc71884f564",
+            "wtxid": "d924cd8588e3c8270bbd1277143256942ae6919c2935b64d5971ce78e7dafb45"
+          },
+          "step": 1,
+          "txid": "32e9951df57f6cf0687b4682427bcafa5b7f5cc11f4f71f618082cc71884f564",
+          "wtxid": "d924cd8588e3c8270bbd1277143256942ae6919c2935b64d5971ce78e7dafb45"
+        }
+      ],
+      "attacker_success": false,
+      "diverted_principal_sats": 0,
+      "evidence_level": "arena_replayed_regtest",
+      "expectation_met": true,
+      "expected": {
+        "attacker_success": false,
+        "diverted_principal_sats": 0,
+        "legitimate_completion": false,
+        "legitimate_success": false,
+        "unauthorized_release": false
+      },
+      "family": "witness_control",
+      "funded_target": {
+        "authorization": "proof-grove/m14/cashu-joint-release/v2",
+        "collateral_outpoint": "2ba400f438e2c1b68cb5b80fda34ba17f90052ecd05f85e01da725afda224f29:1",
+        "collateral_sats": 25250,
+        "evidence_archive_sha256": "5446141e6c12c5ce4681f9c07a82ad7f1607a7accaadc51726492350db556a9b",
+        "holder_payout_sats": 24750,
+        "holder_script": "001446b4c5aecb7ab99fb1fee82c82cbca92eef1e79f",
+        "network": "regtest",
+        "recorded_payout_txid": "32e9951df57f6cf0687b4682427bcafa5b7f5cc11f4f71f618082cc71884f564",
+        "reserve_outpoint": "a147db7c729fcaed10954a8163a81bc0bf40dd7560dbcba3cc1e2a82eb4367fb:1",
+        "reserve_sats": 25000
+      },
+      "id": "cashu-release-replay.substituted_holder_approval",
+      "legitimate_completion": false,
+      "legitimate_success": false,
+      "observed_final_state": {
+        "allowed": false,
+        "collateral_unspent": true,
+        "expected_reason_fragment_matched": true,
+        "height": 211,
+        "reject_reason": "mempool-script-verify-flag-failed (Signature must be zero for failed CHECK(MULTI)SIG operation)",
+        "reserve_unspent": true,
+        "wallets_loaded": 0
+      },
+      "outcome": {
+        "attacker_success": false,
+        "diverted_principal_sats": 0,
+        "legitimate_completion": false,
+        "legitimate_success": false,
+        "unauthorized_release": false
+      },
+      "profile": "pinned_upstream_v2",
+      "recipe": "substituted_holder_approval",
+      "scenario_id": "cashu-release-replay.substituted_holder_approval",
+      "schema_version": 1,
+      "source_revision": {
+        "commit": "9cf56a56d02e8b63de91e435b9fcd7823a66bb9d",
+        "path": "proof-grove/evidence/proof-backed-release",
+        "ref": "cashu/proof-backed-release-evidence",
+        "repository": "patrickdugan/Spiral"
+      },
+      "track": "cashu-release-replay",
+      "unauthorized_release": false,
+      "variant": "attack"
+    },
+    {
+      "action_trace": [
+        {
+          "action": "invalidateblock",
+          "blockhash": "60434f6b92d0d50ff7ccfb5693bac57eaa5f8ad8733f977c5f0d10971871e60f",
+          "restored_both_inputs": true,
+          "step": 0
+        },
+        {
+          "action": "advance_empty_blocks",
+          "count": 7,
+          "step": 1,
+          "to_height": 218
+        },
+        {
+          "action": "reject_conflicting_block",
+          "error": "generateblock: {'code': -25, 'message': 'TestBlockValidity failed: bad-txns-inputs-missingorspent, CheckTxInputs: inputs missing/spent in transaction 084310bdd55345f8eb0ac04f07e4cc6b4d7ce62ae6c99a2f3d0bb4f45c42c9e5'}",
+          "pair": "joint+holder_fallback",
+          "step": 2
+        },
+        {
+          "action": "reject_conflicting_block",
+          "error": "generateblock: {'code': -25, 'message': 'TestBlockValidity failed: bad-txns-inputs-missingorspent, CheckTxInputs: inputs missing/spent in transaction 95dce0113ba61a12b43b36e4ea0b37fccd07f87ed43c1a76ea4978526c0afe25'}",
+          "pair": "joint+timeout",
+          "step": 3
+        },
+        {
+          "action": "generateblock_timeout_fork",
+          "blockhash": "3577be5dc35fc76334930da00c2785f27bb7f3b2158cf8c222a49b46f7832525",
+          "height": 219,
+          "holder_txid": "084310bdd55345f8eb0ac04f07e4cc6b4d7ce62ae6c99a2f3d0bb4f45c42c9e5",
+          "raw_timeout_transaction": "02000000000101294f22daaf25a71de0855fd0ec5200f917ba34da0fb8b58cb6c1e238f400a42b01000000000800000001ae6000000000000016001412d089f25335f8a676e2a42424e4dc86347197f806483045022100ad7fb9ec4af3794e69daf61a74dee28006cb2b34f3cdd04eac61aa232054b597022038060e831be63dbef3e36efc2b252b08cabe9c074a16fa9be6ac59b1cf462bf60147304402202b793d4c3dbc83a1551d33363085742f622ce03a4958080e5b98718c0a66848b02200ff37b482a6f4c8437b48b176c1b49d0ea8a34e6d09d6f732808835c8253516a01473044022028fdc1696384a69212f240d2f3450e4d15a8bdbf66e1616bf6be1d49c4709ef5022009142294e0ae6b77fb597460d3ae3e37165def566b7e9a29cd3a81338e18cc0c010000fd27012002934d758df64de43bd4f91d6b9715a94e2c5c721e4a0e558e0d434cf76d37ce7563826088a8209be3b02b3f0dea66e37e32dccb3f665d0e07481777b62c642da9d6dae2da9c188821027bca7bed47f0c83d1212bd89c0a060e5c7fc10064245d5792d02928674fc7e27ac6763826088a820dced7c6b11d301e7eae29e6d83e758ab24436b2e3cb90ad48e83b3b315c07b1b882103cc236055f8f151002dd7d9cf001f9a4132845e2ad11c4d11d4abbc14ac35589bac6758b27521033745dbfb44fddadd315e9531ae2d9ec3aab5b2340498e11abc5b857086ab4a5eac686869210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ad2103a83edd0f3068548432c481e465ac8e788818cde35d8cab69adb84abc19de1705ac00000000",
+          "step": 4,
+          "timeout_txid": "95dce0113ba61a12b43b36e4ea0b37fccd07f87ed43c1a76ea4978526c0afe25"
+        },
+        {
+          "action": "testmempoolaccept",
+          "label": "joint_after_holder_and_timeout",
+          "result": {
+            "allowed": false,
+            "reject-reason": "missing-inputs",
+            "txid": "32e9951df57f6cf0687b4682427bcafa5b7f5cc11f4f71f618082cc71884f564",
+            "wtxid": "456fdc6d9c8527106986f07c26efe549dbbd959793c06bed5c15bd0dac996e01"
+          },
+          "step": 5,
+          "txid": "32e9951df57f6cf0687b4682427bcafa5b7f5cc11f4f71f618082cc71884f564"
+        }
+      ],
+      "attacker_success": false,
+      "diverted_principal_sats": 0,
+      "evidence_level": "arena_replayed_regtest",
+      "expectation_met": true,
+      "expected": {
+        "attacker_success": false,
+        "diverted_principal_sats": 0,
+        "legitimate_completion": true,
+        "legitimate_success": true,
+        "unauthorized_release": false
+      },
+      "family": "reorg_and_timeout_exclusivity",
+      "funded_target": {
+        "authorization": "proof-grove/m14/cashu-joint-release/v2",
+        "collateral_outpoint": "2ba400f438e2c1b68cb5b80fda34ba17f90052ecd05f85e01da725afda224f29:1",
+        "collateral_sats": 25250,
+        "evidence_archive_sha256": "5446141e6c12c5ce4681f9c07a82ad7f1607a7accaadc51726492350db556a9b",
+        "holder_payout_sats": 24750,
+        "holder_script": "001446b4c5aecb7ab99fb1fee82c82cbca92eef1e79f",
+        "network": "regtest",
+        "recorded_payout_txid": "32e9951df57f6cf0687b4682427bcafa5b7f5cc11f4f71f618082cc71884f564",
+        "reserve_outpoint": "a147db7c729fcaed10954a8163a81bc0bf40dd7560dbcba3cc1e2a82eb4367fb:1",
+        "reserve_sats": 25000
+      },
+      "id": "cashu-release-replay.reorg_and_timeout_fork",
+      "legitimate_completion": true,
+      "legitimate_success": true,
+      "observed_final_state": {
+        "canonical_tip_restored": true,
+        "joint_rejected_after_fork": true,
+        "reorg_restored_both_inputs": true,
+        "timeout_fork_height": 219,
+        "wallets_loaded": 0
+      },
+      "outcome": {
+        "attacker_success": false,
+        "diverted_principal_sats": 0,
+        "legitimate_completion": true,
+        "legitimate_success": true,
+        "unauthorized_release": false
+      },
+      "profile": "pinned_upstream_v2",
+      "recipe": "reorg_and_timeout_fork",
+      "scenario_id": "cashu-release-replay.reorg_and_timeout_fork",
+      "schema_version": 1,
+      "source_revision": {
+        "commit": "9cf56a56d02e8b63de91e435b9fcd7823a66bb9d",
+        "path": "proof-grove/evidence/proof-backed-release",
+        "ref": "cashu/proof-backed-release-evidence",
+        "repository": "patrickdugan/Spiral"
+      },
+      "track": "cashu-release-replay",
+      "unauthorized_release": false,
+      "variant": "benign"
+    }
+  ],
+  "catalog_hash": "cef32a5cf18cd52e169807733022a102b118d8d70c74f1250eb784f8e444dfb1",
+  "evidence_hash": "5d81e7059d1626dc3fc0d5b08957adf750825283289539a766f65ca2e97cd1ea",
+  "evidence_level": "arena_replayed_regtest",
+  "funded_target": {
+    "authorization": "proof-grove/m14/cashu-joint-release/v2",
+    "collateral_outpoint": "2ba400f438e2c1b68cb5b80fda34ba17f90052ecd05f85e01da725afda224f29:1",
+    "collateral_sats": 25250,
+    "evidence_archive_sha256": "5446141e6c12c5ce4681f9c07a82ad7f1607a7accaadc51726492350db556a9b",
+    "holder_payout_sats": 24750,
+    "holder_script": "001446b4c5aecb7ab99fb1fee82c82cbca92eef1e79f",
+    "network": "regtest",
+    "recorded_payout_txid": "32e9951df57f6cf0687b4682427bcafa5b7f5cc11f4f71f618082cc71884f564",
+    "reserve_outpoint": "a147db7c729fcaed10954a8163a81bc0bf40dd7560dbcba3cc1e2a82eb4367fb:1",
+    "reserve_sats": 25000
+  },
+  "provenance": {
+    "binary_sha256": "f79eeb94e1379986df9f7be4c78c8fc8e18dc9be64a31cbaa8acad249d3db77a",
+    "chain": "regtest",
+    "genesis_hash": "0f9188f13cb7b2c71f2a335e3a4fc328bf5beb436012afca590b1a11466e2206",
+    "p2p_network_active": false,
+    "subversion": "/Satoshi:31.1.0/",
+    "version": 310100,
+    "wallets_loaded": 0
+  },
+  "schema_version": 1,
+  "source_revision": {
+    "commit": "9cf56a56d02e8b63de91e435b9fcd7823a66bb9d",
+    "path": "proof-grove/evidence/proof-backed-release",
+    "ref": "cashu/proof-backed-release-evidence",
+    "repository": "patrickdugan/Spiral"
+  },
+  "summary": {
+    "cases": 10,
+    "expectation_failures": [],
+    "honest_payout_confirmed": true,
+    "substitution_controls_rejected": 6,
+    "wallets_loaded": 0
+  },
+  "track": "cashu-release-replay"
+}

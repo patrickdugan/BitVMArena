@@ -37,7 +37,8 @@ def select(args):
 
 
 TRACK_MODULES = {"primitive": "native", "bitvm2": "bitvm2", "bitvm3": "bitvm3", "bitvm3-iob": "iob",
-                 "bitvm3-m14": "m14", "bitvm3-setup": "ceremony"}
+                 "bitvm3-m14": "m14", "bitvm3-setup": "ceremony",
+                 "cashu-release": "cashu_release", "cashu-release-replay": "cashu_replay"}
 
 
 def track_module(name):
