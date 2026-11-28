@@ -233,6 +233,56 @@ def testnet4_command(args):
     return 0 if not report["summary"]["expectation_failures"] else 1
 
 
+def cashu_testnet4_command(args):
+    """Stage cashu-release trajectories on testnet4 (run), rehearse them on regtest, audit a report."""
+    import os
+    import uuid
+    from . import cashu_testnet4 as ct4
+    from . import testnet4
+    root = Path(__file__).resolve().parents[1]
+    if args.action == "audit":
+        if args.report is None:
+            raise ValidationError("audit needs a report file")
+        report = load_json(args.report)
+        problems = ct4.audit(report)
+        emit({"track": report.get("track"), "wave": report.get("wave"), "network": report.get("network"),
+              "cases": len(report.get("cases", [])), "summary": report.get("summary"), "problems": problems,
+              "valid": not problems})
+        return 0 if not problems else 1
+    if args.action == "list":
+        rows = ct4.catalog(ct4.new_stage())
+        emit([{"id": r["id"], "wave": next((w for w, ids in ct4.WAVES.items() if r["id"] in ids), None)}
+              for r in rows], args.output)
+        return 0
+    wave = args.wave or "custom"
+    if args.action == "rehearse":
+        default = root / "work/toolchains/core-31.2/bitcoind.exe"
+        binary = args.bitcoind or Path(os.environ.get("BITVM_ARENA_BITCOIND", default))
+        report = ct4.rehearse(binary, root / "work" / "staging" / uuid.uuid4().hex, names=args.row,
+                              wave=args.wave, interval=args.interval, reorg_every=args.reorg_every)
+    else:
+        if not args.broadcast:
+            raise ValidationError("run broadcasts real testnet4 transactions; pass --broadcast")
+        if args.state is None or args.rpc_port is None or args.cookie is None or not args.wallet:
+            raise ValidationError("run needs --state, --rpc-port, --cookie and --wallet")
+        state = args.state.resolve()
+        if state == root.parent or root.parent in state.parents:
+            raise ValidationError("the state directory holds stage secrets; keep it outside the repository")
+        if (state / "stage.json").exists():
+            raise ValidationError("this state directory already holds a stage; use a new one per wave")
+        node = testnet4.StagingNode(args.rpc_port, args.cookie, args.wallet).check()
+        stage = ct4.new_stage()
+        rows = ct4.select(stage, args.row, args.wave)
+        state.mkdir(parents=True, exist_ok=True)
+        (state / "stage.json").write_text(json.dumps(ct4.stage_record(stage, private=True), indent=1),
+                                          encoding="utf-8")
+        report = ct4.run_wave(node, rows, stage, state, wave=wave)
+        (state / "report.json").write_text(json.dumps(report, indent=1, sort_keys=True), encoding="utf-8")
+    emit(report, args.output)
+    print(f"bitvm-corpus: {json.dumps(report['summary'])}", file=sys.stderr)
+    return 0 if not report["summary"]["expectation_failures"] else 1
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description="BitVM Arena model trajectories and control evaluations")
     parser.add_argument("--version", action="version", version=__version__)
@@ -311,8 +361,25 @@ def main(argv=None):
     p.add_argument("--state", type=Path, help="run: new directory outside the repository for keys and the journal; recover: that wave's directory")
     p.add_argument("--broadcast", action="store_true", help="run/recover: confirm that real testnet4 transactions are sent")
     p.add_argument("--output", type=Path)
+    p = sub.add_parser("cashu-testnet4", help="stage cashu-release trajectories on testnet4 (rehearse on regtest first)")
+    p.add_argument("action", choices=("list", "rehearse", "run", "audit"))
+    p.add_argument("report", nargs="?", type=Path, help="report file for audit")
+    from .cashu_testnet4 import WAVES as CASHU_WAVES
+    p.add_argument("--wave", choices=tuple(CASHU_WAVES), help="a predefined set of rows (cashu_testnet4.WAVES)")
+    p.add_argument("--row", action="append", default=[], help="a row id, or text a row id contains (repeatable)")
+    p.add_argument("--bitcoind", type=Path, help="rehearse: bitcoind binary")
+    p.add_argument("--interval", type=float, default=1.5, help="rehearse: seconds between the network's blocks")
+    p.add_argument("--reorg-every", type=int, default=0, help="rehearse: every Nth block is a reorg")
+    p.add_argument("--rpc-port", type=int, help="run: RPC port of an existing testnet4 node")
+    p.add_argument("--cookie", type=Path, help="run: that node's RPC cookie file")
+    p.add_argument("--wallet", help="run: the node wallet that funds the wave")
+    p.add_argument("--state", type=Path, help="run: new directory outside the repository for keys and the journal")
+    p.add_argument("--broadcast", action="store_true", help="run: confirm that real testnet4 transactions are sent")
+    p.add_argument("--output", type=Path)
     args = parser.parse_args(argv)
     try:
+        if args.command == "cashu-testnet4":
+            return cashu_testnet4_command(args)
         if args.command == "testnet4":
             return testnet4_command(args)
         if args.command == "native":

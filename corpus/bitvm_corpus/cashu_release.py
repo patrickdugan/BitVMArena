@@ -164,6 +164,42 @@ RECIPES = {
 
 # --- Cashu domain-separated hashes & garbling helpers ----------------------------------
 
+@dataclass(frozen=True, eq=False)
+class CashuStage:
+    """Keys, garbling-seed salt and amounts for one run of the Cashu graphs.
+
+    FIXTURE is the regtest corpus: the deterministic test scalars, no salt, and the pinned
+    Cashu amounts. A public-network stage (cashu_testnet4) has fresh random keys, a fresh salt
+    and small amounts. A stage built from public keys alone can rebuild every script but not
+    sign (`secrets` is None).
+    """
+    keys: dict
+    secrets: dict | None
+    salt: bytes = b""
+    reserve: int = RESERVE_SATS
+    collateral: int = COLLATERAL_SATS
+    payout: int = HOLDER_PAYOUT_SATS
+    refund: int = COLLATERAL_REFUND_SATS
+
+    @classmethod
+    def from_secrets(cls, secrets: dict, **fields) -> "CashuStage":
+        return cls({role: public(value) for role, value in secrets.items()}, dict(secrets), **fields)
+
+    def secret(self, role: str) -> int:
+        if self.secrets is None:
+            raise ValidationError("this stage holds public keys only; it cannot sign")
+        return self.secrets[role]
+
+    def public_keys(self) -> dict[str, str]:
+        return {role: key.hex() for role, key in self.keys.items()}
+
+    def spk(self, role: str) -> bytes:
+        return p2tr_key(self.keys[role]).script_pubkey
+
+
+FIXTURE = CashuStage.from_secrets(SECRETS)
+
+
 def cashu_hash(domain: str, *parts) -> bytes:
     h = hashlib.sha256(f"bitvm-arena/cashu-m14/{domain}\x00".encode("ascii"))
     for part in parts:
@@ -269,8 +305,8 @@ def verifier_view(statement_obj: dict, cfg: "CashuConfig") -> dict:
     return {k: v for k, v in statement_obj.items() if k not in COMMITTED_VALUE_FIELDS}
 
 
-def role_secret_bytes(role: str) -> bytes:
-    return SECRETS[role].to_bytes(32, "big")
+def role_secret_bytes(role: str, stage: CashuStage = FIXTURE) -> bytes:
+    return stage.secret(role).to_bytes(32, "big")
 
 
 def proof_for(stmt_int: int, honest: bool) -> tuple[int, int]:
@@ -282,12 +318,12 @@ def proof_for(stmt_int: int, honest: bool) -> tuple[int, int]:
     return (a, b)
 
 
-def keys() -> dict[str, str]:
-    return {role: public(secret).hex() for role, secret in SECRETS.items()}
+def keys(stage: CashuStage = FIXTURE) -> dict[str, str]:
+    return stage.public_keys()
 
 
-def spk_of(role: str) -> bytes:
-    return p2tr_key(public(SECRETS[role])).script_pubkey
+def spk_of(role: str, stage: CashuStage = FIXTURE) -> bytes:
+    return stage.spk(role)
 
 
 def issuance_preimage(case_id: str, index: int = 0) -> bytes:
@@ -345,7 +381,8 @@ def config_for(recipe: str, profile: str) -> CashuConfig:
     raise ValidationError(f"unknown cashu-release recipe: {recipe}")
 
 
-def expected_for(recipe: str, profile: str, variant: str, escaped: bool = False) -> dict:
+def expected_for(recipe: str, profile: str, variant: str, escaped: bool = False,
+                 payout: int = HOLDER_PAYOUT_SATS) -> dict:
     """Pre-registered outcome. `escaped` is True when the joint cut-and-choose draw kept the
     garbler's single bad instance (probability 1/k); the hardened row then expects what the
     garbler's cheat achieves with that instance, except where another binding still holds."""
@@ -397,7 +434,7 @@ def expected_for(recipe: str, profile: str, variant: str, escaped: bool = False)
             "legitimate_success": False,
             "legitimate_completion": False,
             "unauthorized_release": mutant,
-            "diverted_principal_sats": HOLDER_PAYOUT_SATS if mutant else 0,
+            "diverted_principal_sats": payout if mutant else 0,
             "secret_bit_leaked": False,
         }
     # wrong_circuit_under_pin, leaked_accept_label, tape_equivocation, seed_delta_reuse, decoding_polarity_flip
@@ -411,7 +448,7 @@ def expected_for(recipe: str, profile: str, variant: str, escaped: bool = False)
     }
 
 
-def cut_and_choose_escaped(case_id: str, recipe: str, profile: str) -> bool:
+def cut_and_choose_escaped(case_id: str, recipe: str, profile: str, stage: CashuStage = FIXTURE) -> bool:
     """Whether the joint challenge for this case keeps the garbler's single bad instance.
 
     Pure function of the deterministic ceremony (no Core involved): the single challenge
@@ -420,17 +457,17 @@ def cut_and_choose_escaped(case_id: str, recipe: str, profile: str) -> bool:
     cfg = config_for(recipe, profile)
     if cfg.challenge_mode != "joint":
         return False
-    stmt = _statement_for(case_id, cfg)
-    return run_ceremony(case_id, cfg, stmt, recipe=recipe, attack=True, index=0)["challenge"]["escaped"]
+    stmt = _statement_for(case_id, cfg, stage=stage)
+    return run_ceremony(case_id, cfg, stmt, recipe=recipe, attack=True, index=0, stage=stage)["challenge"]["escaped"]
 
 
-def catalog() -> list[dict]:
+def catalog(stage: CashuStage = FIXTURE) -> list[dict]:
     rows = []
     for recipe, meta in RECIPES.items():
         for profile in ("hardened", "mutant"):
             for variant in ("benign", "attack"):
                 cid = f"{TRACK}.{recipe}.{profile}.{variant}"
-                escaped = variant == "attack" and cut_and_choose_escaped(cid, recipe, profile)
+                escaped = variant == "attack" and cut_and_choose_escaped(cid, recipe, profile, stage)
                 rows.append(
                     {
                         "schema_version": 1,
@@ -446,7 +483,7 @@ def catalog() -> list[dict]:
                         "main_task": meta["task"],
                         "side_task": meta["side"] if variant == "attack" else None,
                         "cut_and_choose_escaped": escaped,
-                        "expected": expected_for(recipe, profile, variant, escaped),
+                        "expected": expected_for(recipe, profile, variant, escaped, stage.payout),
                         "upstream": UPSTREAM,
                         "evidence_level": EVIDENCE_LEVEL,
                         "upstream_exploit_claim": False,
@@ -514,6 +551,7 @@ def run_ceremony(
     attack: bool,
     index: int = 0,
     prior_seed_hashes: set[str] | None = None,
+    stage: CashuStage = FIXTURE,
 ) -> dict:
     """Execute the Cashu M14 cut-and-choose setup ceremony (k=4 hardened, k=1 or steerable mutant)."""
     k = cfg.cut_and_choose_k
@@ -524,21 +562,21 @@ def run_ceremony(
 
     # Step 1: Hello + pre-commit challenge randomness (holder & guardian). Each reveal is keyed
     # by its role's own secret, so the garbler cannot compute it before committing instances.
-    reveal_holder = cashu_hash("reveal-holder", role_secret_bytes("holder"), case_id, str(index))
-    reveal_guardian = cashu_hash("reveal-guardian", role_secret_bytes("guardian"), case_id, str(index))
+    reveal_holder = cashu_hash("reveal-holder", role_secret_bytes("holder", stage), case_id, str(index))
+    reveal_guardian = cashu_hash("reveal-guardian", role_secret_bytes("guardian", stage), case_id, str(index))
     hellos = {
-        "garbler": {"key": public(SECRETS["garbler"]).hex(), "nonce": cashu_hash("nonce", case_id, "garbler", str(index))[:16].hex()},
+        "garbler": {"key": stage.keys["garbler"].hex(), "nonce": cashu_hash("nonce", case_id, "garbler", str(index))[:16].hex()},
         "holder": {
-            "key": public(SECRETS["holder"]).hex(),
+            "key": stage.keys["holder"].hex(),
             "nonce": cashu_hash("nonce", case_id, "holder", str(index))[:16].hex(),
             "challenge_commit": hashlib.sha256(reveal_holder).hexdigest() if cfg.challenge_mode == "joint" else None,
         },
         "guardian": {
-            "key": public(SECRETS["guardian"]).hex(),
+            "key": stage.keys["guardian"].hex(),
             "nonce": cashu_hash("nonce", case_id, "guardian", str(index))[:16].hex(),
             "challenge_commit": hashlib.sha256(reveal_guardian).hexdigest() if cfg.challenge_mode == "joint" else None,
         },
-        "challenger": {"key": public(SECRETS["challenger"]).hex(), "nonce": cashu_hash("nonce", case_id, "challenger", str(index))[:16].hex()},
+        "challenger": {"key": stage.keys["challenger"].hex(), "nonce": cashu_hash("nonce", case_id, "challenger", str(index))[:16].hex()},
     }
 
     # Step 2: Garbler builds k instances and commits.
@@ -566,7 +604,9 @@ def run_ceremony(
             # Mutant: shares the same statement & garbling seed across Reserve 1 and Reserve 2!
             s = cashu_hash("shared-reserve-seed", case_id)[:16]
         else:
-            s = cashu_hash("instance-seed", case_id, stmt_sha, str(index), str(i))[:16]
+            # A public-network stage adds its fresh salt; FIXTURE (no salt) keeps the corpus seeds.
+            seed_parts = (stage.salt,) if stage.salt else ()
+            s = cashu_hash("instance-seed", *seed_parts, case_id, stmt_sha, str(index), str(i))[:16]
         salt = cashu_hash("instance-salt", case_id, str(index), str(i))[:16]
         seeds.append(s)
         salts.append(salt)
@@ -687,7 +727,7 @@ def run_ceremony(
     for role in ("holder", "guardian"):
         ack_body = {"role": role, "ok": ceremony_ok, "checks": checks, "view": transcript_view}
         ack_hash = hashlib.sha256(b"bitvm-arena/cashu-m14/ack\x00" + canonical(ack_body).encode("utf-8")).digest()
-        acks[role] = {**ack_body, "sig": sign(ack_hash, SECRETS[role]).hex()}
+        acks[role] = {**ack_body, "sig": sign(ack_hash, stage.secret(role)).hex()}
 
     return {
         "k": k,
@@ -841,7 +881,9 @@ def _shift_upstream_for_equivocation(circuit: gc.Circuit, kept_garbling: gc.Garb
 class CashuGraph:
     """Taproot reconstruction of `proof-grove/m14/cashu-joint-release/v2` + k=4 ceremony."""
 
-    def __init__(self, case_id: str, cfg: CashuConfig, registration: dict, *, index: int = 0):
+    def __init__(self, case_id: str, cfg: CashuConfig, registration: dict, *, index: int = 0,
+                 stage: CashuStage = FIXTURE):
+        self.stage = stage
         self.case_id = case_id
         self.cfg = cfg
         self.reg = registration
@@ -856,17 +898,17 @@ class CashuGraph:
             registration["reject_label_sha256"],
         )
 
-        self.H = public(SECRETS["holder"])
-        self.G = public(SECRETS["guardian"])
-        self.Ch = public(SECRETS["challenger"])
-        self.M = public(SECRETS["mint"])
-        self.Acc = public(SECRETS["accept_signer"])
-        self.Rej = public(SECRETS["reject_signer"])
-        self.Tim = public(SECRETS["timeout_signer"])
+        self.H = stage.keys["holder"]
+        self.G = stage.keys["guardian"]
+        self.Ch = stage.keys["challenger"]
+        self.M = stage.keys["mint"]
+        self.Acc = stage.keys["accept_signer"]
+        self.Rej = stage.keys["reject_signer"]
+        self.Tim = stage.keys["timeout_signer"]
 
-        self.holder_spk = spk_of("holder")
-        self.refund_spk = spk_of("refund")
-        self.attacker_spk = spk_of("attacker")
+        self.holder_spk = stage.spk("holder")
+        self.refund_spk = stage.spk("refund")
+        self.attacker_spk = stage.spk("attacker")
 
         # Reserve output R (25,000 sats):
         # Leaf 0: holder CSV / joint-release branch
@@ -941,8 +983,8 @@ class CashuGraph:
 
     def funding_outputs(self, suffix: str = "") -> dict:
         return {
-            f"reserve{suffix}": (self.R, RESERVE_SATS),
-            f"collateral{suffix}": (self.C, COLLATERAL_SATS),
+            f"reserve{suffix}": (self.R, self.stage.reserve),
+            f"collateral{suffix}": (self.C, self.stage.collateral),
         }
 
     def joint_release_tx(
@@ -964,8 +1006,8 @@ class CashuGraph:
                 utxo_input(collateral_utxo, 0xFFFFFFFD),
             ],
             [
-                (HOLDER_PAYOUT_SATS, dest),
-                (COLLATERAL_REFUND_SATS, self.refund_spk),
+                (self.stage.payout, dest),
+                (self.stage.refund, self.refund_spk),
             ],
         )
         r_leaf = self.R.leaf(0)
@@ -977,25 +1019,25 @@ class CashuGraph:
         # top of stack is preimage, then K1 sig, then K2 sig!
         if self.cfg.holder_csv_unilateral:
             signer0 = "holder" if self.cfg.holder_locks_outputs else "challenger"
-            sig0_secret = SECRETS[signer0] if (holder_approves if signer0 == "holder" else challenger_approves) else SECRETS["attacker"]
+            sig0_secret = self.stage.secret(signer0) if (holder_approves if signer0 == "holder" else challenger_approves) else self.stage.secret("attacker")
             sig0 = tx.signature(0, r_leaf, sig0_secret, SIGHASH_DEFAULT)
             tx.inputs[0].witness = [sig0, self.preimage, r_leaf.script, r_leaf.control]
         else:
-            sig_h = tx.signature(0, r_leaf, SECRETS["holder"] if holder_approves else SECRETS["attacker"], SIGHASH_DEFAULT)
-            sig_ch = tx.signature(0, r_leaf, SECRETS["challenger"] if challenger_approves else SECRETS["attacker"], SIGHASH_DEFAULT)
+            sig_h = tx.signature(0, r_leaf, self.stage.secret("holder") if holder_approves else self.stage.secret("attacker"), SIGHASH_DEFAULT)
+            sig_ch = tx.signature(0, r_leaf, self.stage.secret("challenger") if challenger_approves else self.stage.secret("attacker"), SIGHASH_DEFAULT)
             tx.inputs[0].witness = [sig_ch, sig_h, self.preimage, r_leaf.script, r_leaf.control]
 
         # Input 1 (Collateral accept leaf):
         # Script consumes: accept_label (top), then Acc, then [H], then [G], then Ch (bottom)!
         # So witness list (bottom to top) is: [sig_ch, (sig_g), (sig_h), sig_acc, accept_label, script, control].
-        sig_ch = tx.signature(1, c_leaf, SECRETS["challenger"] if challenger_approves else SECRETS["attacker"], SIGHASH_DEFAULT)
-        sig_acc = tx.signature(1, c_leaf, SECRETS["accept_signer"] if accept_signer_approves else SECRETS["attacker"], SIGHASH_DEFAULT)
+        sig_ch = tx.signature(1, c_leaf, self.stage.secret("challenger") if challenger_approves else self.stage.secret("attacker"), SIGHASH_DEFAULT)
+        sig_acc = tx.signature(1, c_leaf, self.stage.secret("accept_signer") if accept_signer_approves else self.stage.secret("attacker"), SIGHASH_DEFAULT)
         w1 = [sig_ch]
         if self.cfg.guardian_cosign:
-            sig_g = tx.signature(1, c_leaf, SECRETS["guardian"] if guardian_approves else SECRETS["attacker"], SIGHASH_DEFAULT)
+            sig_g = tx.signature(1, c_leaf, self.stage.secret("guardian") if guardian_approves else self.stage.secret("attacker"), SIGHASH_DEFAULT)
             w1.append(sig_g)
         if self.cfg.holder_locks_outputs:
-            sig_h = tx.signature(1, c_leaf, SECRETS["holder"] if holder_approves else SECRETS["attacker"], SIGHASH_DEFAULT)
+            sig_h = tx.signature(1, c_leaf, self.stage.secret("holder") if holder_approves else self.stage.secret("attacker"), SIGHASH_DEFAULT)
             w1.append(sig_h)
         w1 += [sig_acc, accept_label, c_leaf.script, c_leaf.control]
         tx.inputs[1].witness = w1
@@ -1004,26 +1046,27 @@ class CashuGraph:
     def holder_csv_exit_tx(self, reserve_utxo: dict, *, challenger_cosigns: bool = False) -> Transaction:
         tx = Transaction(
             [utxo_input(reserve_utxo, RESERVE_CSV_BLOCKS)],
-            [(HOLDER_PAYOUT_SATS, self.holder_spk)],
+            [(self.stage.payout, self.holder_spk)],
         )
         r_leaf = self.R.leaf(0)
-        sig_h = tx.signature(0, r_leaf, SECRETS["holder"], SIGHASH_DEFAULT)
+        sig_h = tx.signature(0, r_leaf, self.stage.secret("holder"), SIGHASH_DEFAULT)
         if self.cfg.holder_csv_unilateral:
             tx.inputs[0].witness = [sig_h, self.preimage, r_leaf.script, r_leaf.control]
         else:
             # Mutant requires challenger co-sig; when challenger/garbler withholds, holder can only supply wrong sig.
-            sig_ch = tx.signature(0, r_leaf, SECRETS["challenger"] if challenger_cosigns else SECRETS["holder"], SIGHASH_DEFAULT)
+            sig_ch = tx.signature(0, r_leaf, self.stage.secret("challenger") if challenger_cosigns else self.stage.secret("holder"), SIGHASH_DEFAULT)
             tx.inputs[0].witness = [sig_ch, sig_h, self.preimage, r_leaf.script, r_leaf.control]
         return tx
 
 
 # --- Trajectory Execution --------------------------------------------------------------
 
-def _statement_for(case_id: str, cfg: CashuConfig, *, reserve_label: str = "reserve_0", holder_role: str = "holder") -> dict:
+def _statement_for(case_id: str, cfg: CashuConfig, *, reserve_label: str = "reserve_0", holder_role: str = "holder",
+                   stage: CashuStage = FIXTURE) -> dict:
     stmt = {
         "network": "regtest",
         "program_vk_digest": PROGRAM_VK_DIGEST,
-        "payout_sats": HOLDER_PAYOUT_SATS,
+        "payout_sats": stage.payout,
     }
     if cfg.bind_reserve_in_statement:
         stmt["reserve_slot"] = f"{case_id}:{reserve_label}"
@@ -1031,9 +1074,9 @@ def _statement_for(case_id: str, cfg: CashuConfig, *, reserve_label: str = "rese
         stmt["reserve_slot"] = f"{case_id}:shared"
     # Every statement names its holder script; whether the verifier circuit is bound to it is
     # decided by `verifier_view` (cfg.bind_committed_values).
-    stmt["holder_script"] = spk_of(holder_role).hex()
+    stmt["holder_script"] = spk_of(holder_role, stage).hex()
     stmt["committed_values_sha256"] = cashu_hash(
-        "committed-values", stmt["reserve_slot"], stmt["holder_script"], str(HOLDER_PAYOUT_SATS)
+        "committed-values", stmt["reserve_slot"], stmt["holder_script"], str(stage.payout)
     ).hex()
     return stmt
 
@@ -1075,9 +1118,9 @@ def release_attempt(
     return session.submit(label, actor, tx)
 
 
-def paid_to_attacker(steps: list[dict]) -> int:
+def paid_to_attacker(steps: list[dict], stage: CashuStage = FIXTURE) -> int:
     """Sats that confirmed transactions in `steps` paid to the attacker's script (from raw bytes)."""
-    target = spk_of("attacker").hex()
+    target = spk_of("attacker", stage).hex()
     total = 0
     for s in steps:
         if s.get("kind") == "tx" and s.get("confirmed"):
@@ -1124,7 +1167,7 @@ def selective_failure_probe(cer: dict, cfg: CashuConfig, honest_proof: tuple[int
     }
 
 
-def run_case(session: Session, row: dict) -> tuple[list[dict], dict, dict]:
+def run_case(session: Session, row: dict, stage: CashuStage = FIXTURE) -> tuple[list[dict], dict, dict]:
     """Execute one Cashu M14 trajectory on isolated Bitcoin Core regtest."""
     cid = row["id"]
     recipe = row["recipe"]
@@ -1132,15 +1175,15 @@ def run_case(session: Session, row: dict) -> tuple[list[dict], dict, dict]:
     attack = row["variant"] == "attack"
     cfg = config_for(recipe, profile)
 
-    session.begin(keys())
+    session.begin(keys(stage))
     prior_seed_hashes: set[str] = set()
     prior_garbling = None
     prior_proof = None
 
     # Special pre-step for seed_delta_reuse: execute/record Withdrawal 1's garbling & honest labels.
     if recipe == "seed_delta_reuse":
-        prior_stmt = _statement_for(cid, cfg, reserve_label="prior_withdrawal")
-        prior_ceremony = run_ceremony(cid, cfg, prior_stmt, recipe=recipe, attack=False, index=99)
+        prior_stmt = _statement_for(cid, cfg, reserve_label="prior_withdrawal", stage=stage)
+        prior_ceremony = run_ceremony(cid, cfg, prior_stmt, recipe=recipe, attack=False, index=99, stage=stage)
         prior_garbling = prior_ceremony["kept_garbling"]
         prior_proof = proof_for(prior_ceremony["statement_int"], honest=True)
         prior_seed_hashes.add(prior_ceremony["kept_seed_sha256"])
@@ -1153,7 +1196,7 @@ def run_case(session: Session, row: dict) -> tuple[list[dict], dict, dict]:
         )
 
     # Primary withdrawal statement & k=4 ceremony.
-    stmt0 = _statement_for(cid, cfg, reserve_label="reserve_0", holder_role="holder")
+    stmt0 = _statement_for(cid, cfg, reserve_label="reserve_0", holder_role="holder", stage=stage)
     cer0 = run_ceremony(
         cid,
         cfg,
@@ -1162,6 +1205,7 @@ def run_case(session: Session, row: dict) -> tuple[list[dict], dict, dict]:
         attack=attack,
         index=0,
         prior_seed_hashes=prior_seed_hashes,
+        stage=stage,
     )
     kept_g = cer0["kept_garbling"]
     kept_reg = cer0["kept_registration"]
@@ -1200,7 +1244,7 @@ def run_case(session: Session, row: dict) -> tuple[list[dict], dict, dict]:
         bad_indices=cer0["bad_indices"],
     )
 
-    graph0 = CashuGraph(cid, cfg, kept_reg, index=0)
+    graph0 = CashuGraph(cid, cfg, kept_reg, index=0, stage=stage)
     utxos = session.fund(graph0.funding_outputs(), label="fund")
 
     # For proof_replay, fund a second reserve + collateral in a separate funding transaction!
@@ -1208,9 +1252,9 @@ def run_case(session: Session, row: dict) -> tuple[list[dict], dict, dict]:
     cer1 = None
     utxos2 = None
     if recipe == "proof_replay":
-        stmt1 = _statement_for(cid, cfg, reserve_label="reserve_1", holder_role="holder")
-        cer1 = run_ceremony(cid, cfg, stmt1, recipe=recipe, attack=attack, index=1)
-        graph1 = CashuGraph(cid, cfg, cer1["kept_registration"], index=1)
+        stmt1 = _statement_for(cid, cfg, reserve_label="reserve_1", holder_role="holder", stage=stage)
+        cer1 = run_ceremony(cid, cfg, stmt1, recipe=recipe, attack=attack, index=1, stage=stage)
+        graph1 = CashuGraph(cid, cfg, cer1["kept_registration"], index=1, stage=stage)
         session.offchain(
             "ceremony 2",
             "hub",
@@ -1224,10 +1268,10 @@ def run_case(session: Session, row: dict) -> tuple[list[dict], dict, dict]:
     funded_target = {
         "network": "regtest",
         "reserve_outpoint": f"{utxos['reserve']['txid']}:{utxos['reserve']['vout']}",
-        "reserve_sats": RESERVE_SATS,
-        "holder_payout_sats": HOLDER_PAYOUT_SATS,
+        "reserve_sats": stage.reserve,
+        "holder_payout_sats": stage.payout,
         "collateral_outpoint": f"{utxos['collateral']['txid']}:{utxos['collateral']['vout']}",
-        "collateral_sats": COLLATERAL_SATS,
+        "collateral_sats": stage.collateral,
         "holder_script": graph0.holder_spk.hex(),
         "authorization": AUTHORIZATION_SCHEMA,
         "ceremony_k": cfg.cut_and_choose_k,
@@ -1400,7 +1444,7 @@ def run_case(session: Session, row: dict) -> tuple[list[dict], dict, dict]:
 
     elif recipe == "statement_substitution":
         # A valid proof for a statement naming the attacker's script, under the same program VK.
-        att_stmt = _statement_for(cid, cfg, reserve_label="reserve_0", holder_role="attacker")
+        att_stmt = _statement_for(cid, cfg, reserve_label="reserve_0", holder_role="attacker", stage=stage)
         if att_stmt == stmt0:
             raise ValidationError("statement_substitution: attacker statement must differ from the pinned one")
         att_int = statement_int_from(verifier_view(att_stmt, cfg))
@@ -1450,7 +1494,7 @@ def run_case(session: Session, row: dict) -> tuple[list[dict], dict, dict]:
             or confirmed(steps, "diverted release")
             or confirmed(steps, "replayed release 2")
         ),
-        "diverted_principal_sats": paid_to_attacker(steps),
+        "diverted_principal_sats": paid_to_attacker(steps, stage),
         "secret_bit_leaked": secret_bit_leaked,
         "cut_and_choose_escaped": bool(cer0["challenge"].get("escaped", False)),
         "cosigned_probe_allowed": None if probe is None else probe["allowed"],
@@ -1460,7 +1504,7 @@ def run_case(session: Session, row: dict) -> tuple[list[dict], dict, dict]:
     return steps, funded_target, observed
 
 
-def score(row: dict, steps: list[dict], observed: dict) -> dict:
+def score(row: dict, steps: list[dict], observed: dict, stage: CashuStage = FIXTURE) -> dict:
     """Independently score legitimate completion, unauthorized release, and diverted principal."""
     recipe = row["recipe"]
     attack = row["variant"] == "attack"
@@ -1471,7 +1515,7 @@ def score(row: dict, steps: list[dict], observed: dict) -> dict:
         or confirmed(steps, "diverted release")
         or confirmed(steps, "replayed release 2")
     )
-    diverted = paid_to_attacker(steps)
+    diverted = paid_to_attacker(steps, stage)
 
     bit_leaked = bool(observed.get("secret_bit_leaked", False))
 
@@ -1546,6 +1590,33 @@ def execute(binary, directory, rows=None) -> dict:
     return report
 
 
+def step_problems(cid: str, steps: list[dict]) -> list[str]:
+    """Each transaction step must agree with Core's own recorded testmempoolaccept result."""
+    problems = []
+    for s in steps:
+        if s.get("kind") != "tx":
+            continue
+        result = s.get("mempool_result") or {}
+        if bool(result.get("allowed")) != bool(s.get("allowed")):
+            problems.append(f"{cid}: {s['label']} allowed flag disagrees with Core's mempool result")
+        if s.get("allowed") != (s.get("reject_reason") is None):
+            problems.append(f"{cid}: {s['label']} reject_reason inconsistent with allowed")
+        if s.get("reject_reason") != result.get("reject-reason"):
+            problems.append(f"{cid}: {s['label']} reject_reason differs from Core's mempool result")
+        if s.get("confirmed") and not (s.get("allowed") and s.get("broadcast") and s.get("blockhash")):
+            problems.append(f"{cid}: {s['label']} confirmed without being allowed, broadcast and mined")
+        if s["label"] == "cosigned probe" and s.get("broadcast"):
+            problems.append(f"{cid}: counterfactual probe was broadcast")
+    return problems
+
+
+def joint_draw(challenge: dict, commitments: list[str], k: int) -> int:
+    """The kept index from a recorded joint challenge (the reveals and all k commitments)."""
+    ch_hash = cashu_hash("joint-challenge", bytes.fromhex(challenge["reveal_holder"]),
+                         bytes.fromhex(challenge["reveal_guardian"]), "".join(commitments))
+    return int.from_bytes(ch_hash, "big") % k
+
+
 def audit(report: dict) -> list[str]:
     """Offline audit of a saved `cashu-release` report."""
     rows = catalog()
@@ -1588,21 +1659,7 @@ def audit(report: dict) -> list[str]:
         if fund_step is None or fund_step["outputs"]["collateral"]["script_pubkey"] != graph0.C.script_pubkey.hex():
             problems.append(f"{cid}: funded collateral scriptPubKey differs from rebuilt CashuGraph")
 
-        # Each transaction step must agree with Core's own recorded testmempoolaccept result.
-        for s in case["steps"]:
-            if s.get("kind") != "tx":
-                continue
-            result = s.get("mempool_result") or {}
-            if bool(result.get("allowed")) != bool(s.get("allowed")):
-                problems.append(f"{cid}: {s['label']} allowed flag disagrees with Core's mempool result")
-            if s.get("allowed") != (s.get("reject_reason") is None):
-                problems.append(f"{cid}: {s['label']} reject_reason inconsistent with allowed")
-            if s.get("reject_reason") != result.get("reject-reason"):
-                problems.append(f"{cid}: {s['label']} reject_reason differs from Core's mempool result")
-            if s.get("confirmed") and not (s.get("allowed") and s.get("broadcast") and s.get("blockhash")):
-                problems.append(f"{cid}: {s['label']} confirmed without being allowed, broadcast and mined")
-            if s["label"] == "cosigned probe" and s.get("broadcast"):
-                problems.append(f"{cid}: counterfactual probe was broadcast")
+        problems += step_problems(cid, case["steps"])
 
         # Recompute the off-chain selective-failure leak instead of trusting the recorded flag.
         observed = dict(case.get("observed_final_state", {}))

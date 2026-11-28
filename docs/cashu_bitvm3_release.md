@@ -63,6 +63,19 @@ How the receipt separates what Bitcoin decides from what the parties decide:
 
 `proof_replay` scores on a second, separately funded reserve; under the fixed-target rule above it is a calibration control, not an attack on the pinned reserve.
 
+### 3. Staged for testnet4 (`cashu-release-testnet4`)
+
+Module: `corpus/bitvm_corpus/cashu_testnet4.py`; CLI `python -m bitvm_corpus cashu-testnet4 list|rehearse|run|audit`. The same `cashu_release.run_case` trajectories run through the BitVM3 staging session, with a stage per wave (`cashu_release.CashuStage`):
+- fresh random keys for all ten roles and a fresh garbling-seed salt, kept in a state directory outside the repository (the corpus's fixed test scalars would let anyone on testnet4 spend the funded outputs). The FIXTURE stage keeps every regtest receipt byte-identical;
+- the holder and guardian reveals are keyed by those secrets, so each row's cut-and-choose draw and expectation are fixed when the stage is made, before anything is broadcast;
+- a 1,000-sat reserve and 1,250-sat collateral with the pinned fee deltas: the joint release pays 750 + 750 refund (750 fee), the holder CSV exit pays 750 (250 fee).
+
+The audit works from public data: the stage's public keys, each joint draw recomputed from its recorded reveals and commitments, the expectation that draw implies, funding scripts rebuilt from public keys and the recorded setup pin, every step against Core's recorded mempool result, and the scores.
+
+Rehearsal (`corpus/examples/cashu-testnet4/rehearsal.json`): all 40 rows on an owned Core 31.1 regtest network mining every 1.5 s with a reorg every 3rd block (6 reorgs): 40/40 expectations met, 35 confirmed / 14 rejected, 2 transactions reorganized out and confirmed again, audit 0 problems. That stage's draws kept no bad instance, so every hardened attack was stopped.
+
+Wave `cashu1` (the hardened benign row: the k=4 ceremony and joint release end to end, sized to the staging wallet's 2,954 sats; its coins return to imported stage keys) has not been broadcast yet.
+
 ## What remains a design hypothesis (not executed)
 
 1. **Full 971M-gate M14 `k=4` cut-and-choose at scale.** The live `k=4` ceremony in `cashu_release.py` uses `gc.py` free-XOR + half-gates (32 AND gates per instance) standing in for M14's 971,724,042 non-free gates (~1,700 s and ~15.5 GB ciphertext tape per instance in the upstream run).

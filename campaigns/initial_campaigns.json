@@ -626,10 +626,16 @@
           "track": "cashu-release",
           "evidence_level": "arena_reconstruction_regtest",
           "receipts": "corpus/examples/native/cashu-release-core31.1.json"
+        },
+        "testnet4_staging": {
+          "path": "corpus/bitvm_corpus/cashu_testnet4.py",
+          "track": "cashu-release-testnet4",
+          "rehearsal": "corpus/examples/cashu-testnet4/rehearsal.json"
         }
       },
       "upstream_commands": [],
       "next_acceptance_gates": [
+        "Broadcast wave cashu1 (hardened k=4 ceremony and joint release, 2,550 sats from the bitvm-arena-staging wallet) on testnet4 and commit its audited report.",
         "Scale the k=4 cut-and-choose ceremony from the 32-AND-gate half-gates reconstruction to four full 971,724,042-gate M14 garblings and record setup/open/evaluate receipts.",
         "Testnet4: bind a new withdrawal statement to the testnet4 genesis and a funded testnet4 reserve, re-prove Core and recursion, and replay hardened profiles on testnet4 only with explicit broadcast approval."
       ],
@@ -646,7 +652,8 @@
       ],
       "completed_checks": [
         "Arena walletless Core 31.1 replay (cashu-release-replay, evidence_level arena_replayed_regtest, 0 wallets loaded, 212 blocks): verified archive sha256 5446141e...db556a9b and all 47 manifest members; reproduced honest payout 32e9951d...f564 (24,750 sats to holder at height 212), holder CSV fallback before/after release, reorg restoration and competing 8-block timeout fork, and 6 substitution rejections (5 witness substitutions: accept label, holder signature, issuance preimage, challenger approval, holder approval; 1 output substitution: beneficiary), each audited against Core's recorded reject reason; 10/10 expectations met, offline audit 0 problems.",
-        "Ported BVA-BITVM3 k=4 joint commit-reveal cut-and-choose ceremony (holder + guardian choose kept instance) and all 10 malicious-garbler attack families to Cashu M14 (cashu-release, evidence_level arena_reconstruction_regtest): 10 families x hardened/mutant x benign/attack = 40/40 expectations met on isolated Bitcoin Core 31.1 regtest (36 confirmed, 11 rejected transactions including non-broadcast co-signed probes), with one joint challenge draw per ceremony keyed by holder and guardian secrets, diverted principal computed from confirmed outputs paying the attacker script, a selective-failure leak judged against a bit-0 counterfactual, and an offline audit that rechecks every step against Core's recorded mempool result; offline audit 0 problems."
+        "Ported BVA-BITVM3 k=4 joint commit-reveal cut-and-choose ceremony (holder + guardian choose kept instance) and all 10 malicious-garbler attack families to Cashu M14 (cashu-release, evidence_level arena_reconstruction_regtest): 10 families x hardened/mutant x benign/attack = 40/40 expectations met on isolated Bitcoin Core 31.1 regtest (36 confirmed, 11 rejected transactions including non-broadcast co-signed probes), with one joint challenge draw per ceremony keyed by holder and guardian secrets, diverted principal computed from confirmed outputs paying the attacker script, a selective-failure leak judged against a bit-0 counterfactual, and an offline audit that rechecks every step against Core's recorded mempool result; offline audit 0 problems.",
+        "cashu-release-testnet4 staging (fresh random keys and salt per wave, 1,000/1,250-sat reserve/collateral with the pinned fee deltas) rehearsed on an owned Core 31.1 regtest network mining every 1.5 s with a reorg every 3rd block: 40/40 expectations met, 35 confirmed / 14 rejected, 2 transactions reorganized out and reconfirmed, public-data audit 0 problems."
       ]
     }
   ]
