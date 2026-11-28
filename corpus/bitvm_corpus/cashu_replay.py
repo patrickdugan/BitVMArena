@@ -877,6 +877,55 @@ def execute(binary, directory, archive_path, rows=None):
     return report
 
 
+CORE_SUBVERSION = "/Satoshi:31.1.0/"
+
+
+def _audit_case_results(case: dict) -> list[str]:
+    """Tie each case's outcome to Core's recorded results for the pinned transactions."""
+    problems = []
+    recipe = case.get("recipe")
+    trace = case.get("action_trace", [])
+    outcome = case.get("outcome", {})
+    tma = [s for s in trace if s.get("action") == "testmempoolaccept"]
+
+    def result(s):
+        r = s.get("result")
+        return r if isinstance(r, dict) else {}
+
+    def tested(txid, allowed):
+        return [s for s in tma if s.get("txid") == txid and result(s).get("allowed") is allowed]
+
+    if recipe == "honest_payout":
+        mined = any(s.get("action") == "submit_block" and s.get("confirmed_txid") == PAYOUT_TXID
+                    and s.get("height") == PAYOUT_HEIGHT and s.get("blockhash") == PAYOUT_BLOCK_HASH for s in trace)
+        if not tested(PAYOUT_TXID, True) or not mined:
+            problems.append("honest payout not accepted and mined as the pinned transaction at block 212")
+        if outcome.get("legitimate_completion") is not True:
+            problems.append("honest payout outcome does not record legitimate completion")
+    elif recipe == "holder_fallback_before_release":
+        if not tested(FALLBACK_TXID, True) or outcome.get("legitimate_completion") is not True:
+            problems.append("fallback before release not accepted by Core or not scored as completion")
+    elif recipe == "holder_fallback_after_release":
+        rejected = [s for s in tested(FALLBACK_TXID, False) if result(s).get("reject-reason") == "missing-inputs"]
+        if not rejected or outcome.get("legitimate_completion") is not False:
+            problems.append("fallback after release not rejected as missing-inputs or scored as completion")
+    elif recipe in WITNESS_CONTROLS or recipe == "substituted_beneficiary":
+        fragment = WITNESS_CONTROLS.get(recipe, {}).get("expected_reason_fragment", "")
+        rejected = [s for s in tma if s.get("label") == recipe and result(s).get("allowed") is False
+                    and fragment in (result(s).get("reject-reason") or "")]
+        if not rejected:
+            problems.append(f"control not rejected by Core with a reason containing {fragment!r}")
+        if outcome.get("attacker_success") or outcome.get("unauthorized_release"):
+            problems.append("rejected control scored as attacker success")
+    elif recipe == "reorg_and_timeout_fork":
+        fork = [s for s in trace if s.get("action") == "generateblock_timeout_fork"
+                and s.get("holder_txid") == FALLBACK_TXID and s.get("timeout_txid") == TIMEOUT_TXID]
+        excluded = [s for s in tested(PAYOUT_TXID, False) if result(s).get("reject-reason") == "missing-inputs"]
+        if not fork or not excluded:
+            problems.append("timeout fork or exclusion of the joint release not recorded from Core")
+    return problems
+
+
 def audit(report: dict) -> list[str]:
     """Offline audit of a saved BVA-CASHU-RELEASE replay report."""
     problems = []
@@ -891,6 +940,8 @@ def audit(report: dict) -> list[str]:
         problems.append("provenance chain is not regtest")
     if report.get("provenance", {}).get("wallets_loaded") != 0:
         problems.append("replay must be walletless (wallets_loaded == 0)")
+    if report.get("provenance", {}).get("subversion") != CORE_SUBVERSION:
+        problems.append(f"provenance is not {CORE_SUBVERSION}: {report.get('provenance', {}).get('subversion')}")
 
     rows = catalog()
     if report.get("catalog_hash") != digest(rows):
@@ -916,6 +967,7 @@ def audit(report: dict) -> list[str]:
             problems.append(f"{cid}: wrong evidence_level")
         if case.get("expectation_met") != (case.get("outcome") == row["expected"]):
             problems.append(f"{cid}: expectation_met inconsistent with outcome")
+        problems += [f"{cid}: {p}" for p in _audit_case_results(case)]
 
         # Independently re-parse raw transactions and verify cryptographic bindings.
         for step in case.get("action_trace", []):

@@ -87,16 +87,65 @@ class CashuReleaseCeremonyAndAttackTests(unittest.TestCase):
         ):
             self.assertIn(family, families)
 
-    def test_k4_cut_and_choose_catches_wrong_circuit_and_swapped_polarity(self):
-        for recipe in ("wrong_circuit_under_pin", "decoding_polarity_flip"):
-            cfg = cashu_release.config_for(recipe, "hardened")
-            self.assertEqual(cfg.cut_and_choose_k, 4)
-            self.assertEqual(cfg.challenge_mode, "joint")
-            stmt = cashu_release._statement_for(f"test.{recipe}", cfg)
-            cer = cashu_release.run_ceremony(f"test.{recipe}", cfg, stmt, recipe=recipe, attack=True)
+    def test_k4_cut_and_choose_always_catches_cheating_on_every_instance(self):
+        recipe = "wrong_circuit_under_pin"
+        cfg = cashu_release.config_for(recipe, "hardened")
+        self.assertEqual((cfg.cut_and_choose_k, cfg.challenge_mode), (4, "joint"))
+        for n in range(20):
+            cid = f"test.{recipe}.{n}"
+            cer = cashu_release.run_ceremony(cid, cfg, cashu_release._statement_for(cid, cfg), recipe=recipe, attack=True)
             self.assertFalse(cer["checks"]["openings_verified"])
             self.assertFalse(cer["ceremony_ok"])
+            self.assertFalse(cer["challenge"]["escaped"])
             self.assertEqual(cer["opened_count"], 3)
+
+    def test_single_bad_instance_escapes_exactly_when_kept(self):
+        # One honest draw per ceremony: a 1-of-4 cheat escapes iff its instance is kept (~1/4).
+        recipe = "decoding_polarity_flip"
+        cfg = cashu_release.config_for(recipe, "hardened")
+        escapes = 0
+        trials = 200
+        for n in range(trials):
+            cid = f"test.{recipe}.{n}"
+            cer = cashu_release.run_ceremony(cid, cfg, cashu_release._statement_for(cid, cfg), recipe=recipe, attack=True)
+            kept_bad = cer["kept"] in cer["bad_indices"]
+            self.assertEqual(cer["challenge"]["escaped"], kept_bad)
+            self.assertEqual(cer["ceremony_ok"], kept_bad)
+            self.assertNotIn("extra_nonce", cer["challenge"])
+            escapes += kept_bad
+        self.assertTrue(0.15 < escapes / trials < 0.35, escapes)
+
+    def test_challenge_reveals_are_keyed_by_role_secrets(self):
+        cfg = cashu_release.config_for("decoding_polarity_flip", "hardened")
+        cid = "test.reveal"
+        cer = cashu_release.run_ceremony(cid, cfg, cashu_release._statement_for(cid, cfg),
+                                         recipe="decoding_polarity_flip", attack=True)
+        public_only = cashu_release.cashu_hash("reveal-holder", cid, "0").hex()
+        self.assertNotEqual(cer["challenge"]["reveal_holder"], public_only)
+        self.assertNotIn("kept_seed", cer)
+
+    def test_statement_substitution_statement_differs_and_binding_decides(self):
+        for profile, same_int in (("hardened", False), ("mutant", True)):
+            cfg = cashu_release.config_for("statement_substitution", profile)
+            pinned = cashu_release._statement_for("test.sub", cfg)
+            attacker = cashu_release._statement_for("test.sub", cfg, holder_role="attacker")
+            self.assertNotEqual(pinned, attacker)
+            ints = [cashu_release.statement_int_from(cashu_release.verifier_view(s, cfg)) for s in (pinned, attacker)]
+            self.assertEqual(ints[0] == ints[1], same_int)
+
+    def test_selective_failure_leak_needs_a_bad_kept_instance(self):
+        recipe = "selective_failure"
+        for profile, leaked in (("mutant", True), ("hardened", False)):
+            cfg = cashu_release.config_for(recipe, profile)
+            cid = f"test.{recipe}.{profile}"
+            cer = cashu_release.run_ceremony(cid, cfg, cashu_release._statement_for(cid, cfg), recipe=recipe,
+                                             attack=(profile == "mutant"))
+            probe = cashu_release.selective_failure_probe(
+                cer, cfg, cashu_release.proof_for(cer["statement_int"], honest=True))
+            self.assertEqual(probe["secret_bit_leaked"], leaked)
+            if leaked:
+                self.assertEqual(probe["actual"]["verdict"], "invalid")
+                self.assertNotEqual(probe["counterfactual"]["verdict"], "invalid")
 
     def test_always_accept_circuit_matches_gate_count_and_accepts_false_proof(self):
         stmt = 48_400
@@ -150,6 +199,32 @@ class CashuReleaseCeremonyAndAttackTests(unittest.TestCase):
         bad2.pop("evidence_hash")
         bad2["evidence_hash"] = digest(bad2)
         self.assertTrue(any("transcript_view" in p for p in cashu_release.audit(bad2)))
+
+        # Flip a Core-rejected attack to confirmed and rescore consistently: the step check catches it.
+        bad3 = deepcopy(report)
+        case = next(c for c in bad3["cases"] if c["id"] == "cashu-release.proof_replay.hardened.attack")
+        s = next(s for s in case["steps"] if s["label"] == "replayed release 2")
+        s.update(allowed=True, broadcast=True, confirmed=True, reject_reason=None, blockhash="00" * 32)
+        case["outcome"] = cashu_release.score(next(r for r in cashu_release.catalog() if r["id"] == case["id"]),
+                                              case["steps"], case["observed_final_state"])
+        bad3.pop("evidence_hash")
+        bad3["evidence_hash"] = digest(bad3)
+        self.assertTrue(any("mempool result" in p for p in cashu_release.audit(bad3)))
+
+        # Claim a leaked bit where the offline recomputation finds none.
+        bad4 = deepcopy(report)
+        case = next(c for c in bad4["cases"] if c["id"] == "cashu-release.selective_failure.hardened.attack")
+        case["observed_final_state"]["secret_bit_leaked"] = True
+        bad4.pop("evidence_hash")
+        bad4["evidence_hash"] = digest(bad4)
+        self.assertTrue(any("secret_bit_leaked" in p for p in cashu_release.audit(bad4)))
+
+    def test_diverted_sats_come_from_confirmed_outputs(self):
+        report = json.loads(RELEASE_REPORT.read_text(encoding="utf-8"))
+        by_id = {c["id"]: c for c in report["cases"]}
+        self.assertEqual(cashu_release.paid_to_attacker(by_id["cashu-release.garbler_challenger_collusion.mutant.attack"]["steps"]), 24_750)
+        self.assertEqual(cashu_release.paid_to_attacker(by_id["cashu-release.proof_replay.mutant.attack"]["steps"]), 0)
+        self.assertTrue(by_id["cashu-release.proof_replay.mutant.attack"]["unauthorized_release"])
 
 
 class LiveCashuReleaseCoreTests(unittest.TestCase):

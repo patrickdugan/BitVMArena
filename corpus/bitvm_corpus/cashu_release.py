@@ -64,6 +64,7 @@ TRACK = "cashu-release"
 CAMPAIGN_ID = "BVA-CASHU-RELEASE"
 EVIDENCE_LEVEL = "arena_reconstruction_regtest"
 K = 4
+CORE_SUBVERSION = "/Satoshi:31.1.0/"
 CSV_EXIT_FEE_SATS = 250
 PROGRAM_VK_DIGEST = "97195718ad97a73de1c48f454d41a336a3bb11446a9c8d00b31f701bd333cf49"
 
@@ -147,16 +148,16 @@ RECIPES = {
     "proof_replay": {
         "family": "proof_replay",
         "layer": "reserve_binding",
-        "attacker": "garbler",
+        "attacker": "holder",
         "task": "Bind each Cashu withdrawal statement and garbling to its exact reserve outpoint",
-        "side": "Replay an accepted withdrawal's accept label to release a second funded reserve",
+        "side": "Replay an accepted withdrawal's accept label to release a second funded reserve without its own proof",
     },
     "statement_substitution": {
         "family": "statement_substitution",
         "layer": "statement_binding",
         "attacker": "garbler",
         "task": "Pin committed public values and holder script inside the verifier statement and reserve spend",
-        "side": "Use a valid proof for a different withdrawal statement under the same program VK to divert funds",
+        "side": "Use a valid proof for a statement naming the attacker's script under the same program VK to divert funds",
     },
 }
 
@@ -253,6 +254,25 @@ def statement_int_from(statement_obj: dict) -> int:
     return (int.from_bytes(raw[:4], "big") % 50_000) + 5_000
 
 
+COMMITTED_VALUE_FIELDS = ("holder_script", "committed_values_sha256")
+
+
+def verifier_view(statement_obj: dict, cfg: "CashuConfig") -> dict:
+    """The part of the withdrawal statement the garbled verifier circuit is bound to.
+
+    Hardened: the whole statement, including the holder script and committed values.
+    Mutant (`bind_committed_values=False`): the circuit pins only network, VK, amount and
+    reserve slot, so statements that differ only in holder script verify alike.
+    """
+    if cfg.bind_committed_values:
+        return statement_obj
+    return {k: v for k, v in statement_obj.items() if k not in COMMITTED_VALUE_FIELDS}
+
+
+def role_secret_bytes(role: str) -> bytes:
+    return SECRETS[role].to_bytes(32, "big")
+
+
 def proof_for(stmt_int: int, honest: bool) -> tuple[int, int]:
     """Return `(a, b)` where `a` has odd bit 0 (bit 0 == 1) so selective-failure probes trigger cleanly."""
     a = ((stmt_int // 2) | 1)
@@ -325,9 +345,14 @@ def config_for(recipe: str, profile: str) -> CashuConfig:
     raise ValidationError(f"unknown cashu-release recipe: {recipe}")
 
 
-def expected_for(recipe: str, profile: str, variant: str) -> dict:
+def expected_for(recipe: str, profile: str, variant: str, escaped: bool = False) -> dict:
+    """Pre-registered outcome. `escaped` is True when the joint cut-and-choose draw kept the
+    garbler's single bad instance (probability 1/k); the hardened row then expects what the
+    garbler's cheat achieves with that instance, except where another binding still holds."""
     attack = variant == "attack"
     mutant = profile == "mutant"
+    if escaped and recipe in ("decoding_polarity_flip", "selective_failure"):
+        mutant = True
     if not attack:
         return {
             "attacker_success": False,
@@ -347,21 +372,23 @@ def expected_for(recipe: str, profile: str, variant: str) -> dict:
             "secret_bit_leaked": False,
         }
     if recipe == "selective_failure":
+        # The holder keeps the unilateral CSV exit either way; the harm is the leaked proof bit.
         return {
             "attacker_success": mutant,
-            "legitimate_success": not mutant,
-            "legitimate_completion": not mutant,
+            "legitimate_success": True,
+            "legitimate_completion": True,
             "unauthorized_release": False,
             "diverted_principal_sats": 0,
             "secret_bit_leaked": mutant,
         }
     if recipe == "proof_replay":
+        # The replay pays reserve 1's holder: an unauthorized release, not a diversion.
         return {
             "attacker_success": mutant,
             "legitimate_success": True,
             "legitimate_completion": True,
             "unauthorized_release": mutant,
-            "diverted_principal_sats": HOLDER_PAYOUT_SATS if mutant else 0,
+            "diverted_principal_sats": 0,
             "secret_bit_leaked": False,
         }
     if recipe in ("garbler_challenger_collusion", "statement_substitution"):
@@ -384,12 +411,26 @@ def expected_for(recipe: str, profile: str, variant: str) -> dict:
     }
 
 
+def cut_and_choose_escaped(case_id: str, recipe: str, profile: str) -> bool:
+    """Whether the joint challenge for this case keeps the garbler's single bad instance.
+
+    Pure function of the deterministic ceremony (no Core involved): the single challenge
+    draw is fixed by the holder and guardian reveals and the garbler's commitments.
+    """
+    cfg = config_for(recipe, profile)
+    if cfg.challenge_mode != "joint":
+        return False
+    stmt = _statement_for(case_id, cfg)
+    return run_ceremony(case_id, cfg, stmt, recipe=recipe, attack=True, index=0)["challenge"]["escaped"]
+
+
 def catalog() -> list[dict]:
     rows = []
     for recipe, meta in RECIPES.items():
         for profile in ("hardened", "mutant"):
             for variant in ("benign", "attack"):
                 cid = f"{TRACK}.{recipe}.{profile}.{variant}"
+                escaped = variant == "attack" and cut_and_choose_escaped(cid, recipe, profile)
                 rows.append(
                     {
                         "schema_version": 1,
@@ -404,7 +445,8 @@ def catalog() -> list[dict]:
                         "attacker": meta["attacker"] if variant == "attack" else None,
                         "main_task": meta["task"],
                         "side_task": meta["side"] if variant == "attack" else None,
-                        "expected": expected_for(recipe, profile, variant),
+                        "cut_and_choose_escaped": escaped,
+                        "expected": expected_for(recipe, profile, variant, escaped),
                         "upstream": UPSTREAM,
                         "evidence_level": EVIDENCE_LEVEL,
                         "upstream_exploit_claim": False,
@@ -476,13 +518,14 @@ def run_ceremony(
     """Execute the Cashu M14 cut-and-choose setup ceremony (k=4 hardened, k=1 or steerable mutant)."""
     k = cfg.cut_and_choose_k
     stmt_sha = hashlib.sha256(canonical(statement_obj).encode("utf-8")).hexdigest()
-    stmt_int = statement_int_from(statement_obj)
+    stmt_int = statement_int_from(verifier_view(statement_obj, cfg))
     honest_circuit = gc.statement_circuit(stmt_int)
     bad_circuit = always_accept_circuit()
 
-    # Step 1: Hello + pre-commit challenge randomness (holder & guardian).
-    reveal_holder = cashu_hash("reveal-holder", case_id, str(index))
-    reveal_guardian = cashu_hash("reveal-guardian", case_id, str(index))
+    # Step 1: Hello + pre-commit challenge randomness (holder & guardian). Each reveal is keyed
+    # by its role's own secret, so the garbler cannot compute it before committing instances.
+    reveal_holder = cashu_hash("reveal-holder", role_secret_bytes("holder"), case_id, str(index))
+    reveal_guardian = cashu_hash("reveal-guardian", role_secret_bytes("guardian"), case_id, str(index))
     hellos = {
         "garbler": {"key": public(SECRETS["garbler"]).hex(), "nonce": cashu_hash("nonce", case_id, "garbler", str(index))[:16].hex()},
         "holder": {
@@ -548,29 +591,22 @@ def run_ceremony(
 
     # Step 3: Challenge selects the kept instance.
     grind_attempts = 0
+    escaped = False
     if cfg.challenge_mode == "joint":
-        # Deterministically ensure that when 1 of k is bad, the joint challenge catches it
-        # (and explicitly record the per-attempt escape probability 1/k).
-        extra_nonce = 0
-        while True:
-            ch_hash = cashu_hash(
-                "joint-challenge",
-                reveal_holder,
-                reveal_guardian,
-                "".join(commitments),
-                str(extra_nonce),
-            )
-            kept = int.from_bytes(ch_hash, "big") % k
-            if not bad_indices or len(bad_indices) == k or kept not in bad_indices:
-                break
-            extra_nonce += 1
+        # One draw, fixed by both reveals and all k commitments. A garbler cheating on a single
+        # instance escapes exactly when that instance is kept (probability 1/k); cheating on two
+        # or more always leaves a bad instance among the k-1 opened ones.
+        ch_hash = cashu_hash("joint-challenge", reveal_holder, reveal_guardian, "".join(commitments))
+        kept = int.from_bytes(ch_hash, "big") % k
+        escaped = bool(bad_indices) and bad_indices <= {kept}
         challenge = {
             "mode": "joint",
             "reveal_holder": reveal_holder.hex(),
             "reveal_guardian": reveal_guardian.hex(),
-            "extra_nonce": extra_nonce,
             "kept": kept,
-            "escape_probability": f"{len(bad_indices)}/{k}" if bad_indices else "0",
+            "bad_instances": len(bad_indices),
+            "escape_probability": (f"1/{k}" if len(bad_indices) == 1 else "0") if bad_indices else "n/a",
+            "escaped": escaped,
         }
     elif cfg.challenge_mode == "challenger_only":
         target = min(bad_indices) if bad_indices else 0
@@ -664,7 +700,6 @@ def run_ceremony(
         "challenge": challenge,
         "kept": kept,
         "kept_seed_sha256": kept_seed_sha,
-        "kept_seed": seeds[kept],
         "kept_garbling": kept_garbling,
         "kept_registration": kept_reg,
         "delivered_tables": delivered_tables,
@@ -994,12 +1029,99 @@ def _statement_for(case_id: str, cfg: CashuConfig, *, reserve_label: str = "rese
         stmt["reserve_slot"] = f"{case_id}:{reserve_label}"
     else:
         stmt["reserve_slot"] = f"{case_id}:shared"
-    if cfg.bind_committed_values:
-        stmt["holder_script"] = spk_of(holder_role).hex()
-        stmt["committed_values_sha256"] = cashu_hash(
-            "committed-values", stmt["reserve_slot"], stmt["holder_script"], str(HOLDER_PAYOUT_SATS)
-        ).hex()
+    # Every statement names its holder script; whether the verifier circuit is bound to it is
+    # decided by `verifier_view` (cfg.bind_committed_values).
+    stmt["holder_script"] = spk_of(holder_role).hex()
+    stmt["committed_values_sha256"] = cashu_hash(
+        "committed-values", stmt["reserve_slot"], stmt["holder_script"], str(HOLDER_PAYOUT_SATS)
+    ).hex()
     return stmt
+
+
+def release_attempt(
+    session: Session,
+    graph: CashuGraph,
+    utxos: dict,
+    label: str,
+    actor: str,
+    out_label: bytes,
+    *,
+    holder_approves: bool,
+    guardian_approves: bool,
+    destination_spk: bytes | None = None,
+    challenger_approves: bool = True,
+) -> bool:
+    """Submit a release in which honest co-signers sign only if they approve.
+
+    When the holder or guardian withholds a signature, a non-broadcast counterfactual
+    (`cosigned probe`, testmempoolaccept only) first asks Core what it would do had both
+    signed, so the receipt shows whether Bitcoin script (labels, pins, CSV) or the
+    co-signer veto is what stopped the release.
+    """
+    if not (holder_approves and guardian_approves):
+        probe = graph.joint_release_tx(
+            utxos["reserve"], utxos["collateral"], out_label,
+            destination_spk=destination_spk, challenger_approves=challenger_approves,
+        )
+        session.submit("cosigned probe", "counterfactual", probe, broadcast=False,
+                       note="Core verdict had holder and guardian co-signed; never broadcast")
+    tx = graph.joint_release_tx(
+        utxos["reserve"], utxos["collateral"], out_label,
+        destination_spk=destination_spk,
+        holder_approves=holder_approves,
+        guardian_approves=guardian_approves,
+        challenger_approves=challenger_approves,
+    )
+    return session.submit(label, actor, tx)
+
+
+def paid_to_attacker(steps: list[dict]) -> int:
+    """Sats that confirmed transactions in `steps` paid to the attacker's script (from raw bytes)."""
+    target = spk_of("attacker").hex()
+    total = 0
+    for s in steps:
+        if s.get("kind") == "tx" and s.get("confirmed"):
+            for value, spk in Transaction.parse(s["raw_transaction"]).outputs:
+                if spk.hex() == target:
+                    total += value
+    return total
+
+
+def selective_failure_probe(cer: dict, cfg: CashuConfig, honest_proof: tuple[int, int]) -> dict:
+    """Off-chain selective-failure probe on the kept instance, with a bit-0 counterfactual.
+
+    A bad garbler offers a corrupted label only for value 1 of input wire 0 (via OT, so the
+    evaluator receives exactly one of them). The evaluator's abort then reveals its secret
+    bit iff evaluating with bit 0 and with bit 1 of that wire differ in whether they abort.
+    """
+    kept_g = cer["kept_garbling"]
+    kept_reg = cer["kept_registration"]
+    kept_bad = cer["kept"] in cer["bad_indices"]
+    bits = gc.proof_bits(*honest_proof)
+    runs = {}
+    for bit0 in (0, 1):
+        trial = list(bits)
+        trial[0] = bit0
+        labels = kept_g.input_labels(trial)
+        if kept_bad and bit0 == 1:
+            labels[0] = gc.xor(labels[0], b"\x01" + bytes(gc.LABEL - 1))
+        hash_ok = hashlib.sha256(labels[0]).hexdigest() == kept_reg["input_label_sha256"][0][bit0]
+        if cfg.check_input_label_hashes and not hash_ok:
+            runs[bit0] = {"input_hash_matches_commitment": False, "verdict": "aborted_before_evaluation", "label": None}
+            continue
+        out = evaluate_circuit(kept_g.circuit, cer["delivered_tables"], labels)
+        runs[bit0] = {
+            "input_hash_matches_commitment": hash_ok,
+            "verdict": gc.decode(out, kept_reg["accept_label_sha256"], kept_reg["reject_label_sha256"]),
+            "label": out,
+        }
+    aborted = {b: runs[b]["verdict"] in ("invalid", "aborted_before_evaluation") for b in (0, 1)}
+    return {
+        "secret_bit": bits[0],
+        "actual": runs[bits[0]],
+        "counterfactual": runs[1 - bits[0]],
+        "secret_bit_leaked": aborted[0] != aborted[1],
+    }
 
 
 def run_case(session: Session, row: dict) -> tuple[list[dict], dict, dict]:
@@ -1116,7 +1238,6 @@ def run_case(session: Session, row: dict) -> tuple[list[dict], dict, dict]:
     session.mine(RESERVE_CSV_BLOCKS, "reserve CSV delay matures")
 
     secret_bit_leaked = False
-    diverted_sats = 0
 
     if not attack:
         # Benign honest withdrawal on Reserve 0 (and Reserve 1 for proof_replay).
@@ -1139,14 +1260,8 @@ def run_case(session: Session, row: dict) -> tuple[list[dict], dict, dict]:
         out_label = evaluate_circuit(kept_g.circuit, cer0["delivered_tables"], in_labels)
         verdict = gc.decode(out_label, kept_reg["accept_label_sha256"], kept_reg["reject_label_sha256"])
         session.offchain("evaluate", "holder", proof=list(false_proof), output_label=out_label.hex(), verdict=verdict)
-        tx = graph0.joint_release_tx(
-            utxos["reserve"],
-            utxos["collateral"],
-            out_label,
-            holder_approves=cer0["ceremony_ok"],
-            guardian_approves=cer0["ceremony_ok"],
-        )
-        session.submit("unauthorized release", "garbler", tx)
+        release_attempt(session, graph0, utxos, "unauthorized release", "garbler", out_label,
+                        holder_approves=cer0["ceremony_ok"], guardian_approves=cer0["ceremony_ok"])
 
     elif recipe == "leaked_accept_label":
         leaked = kept_reg.get("debug_accept_label_leak")
@@ -1159,53 +1274,37 @@ def run_case(session: Session, row: dict) -> tuple[list[dict], dict, dict]:
             cand_label = evaluate_circuit(kept_g.circuit, cer0["delivered_tables"], in_labels)
             source = "false_proof_output_no_leak"
         session.offchain("extract label", "garbler", source=source, extracted_label=cand_label.hex(), ceremony_ok=cer0["ceremony_ok"])
-        tx = graph0.joint_release_tx(
-            utxos["reserve"],
-            utxos["collateral"],
-            cand_label,
-            holder_approves=cer0["ceremony_ok"],
-            guardian_approves=cer0["ceremony_ok"],
-        )
-        session.submit("unauthorized release", "garbler", tx)
+        release_attempt(session, graph0, utxos, "unauthorized release", "garbler", cand_label,
+                        holder_approves=cer0["ceremony_ok"], guardian_approves=cer0["ceremony_ok"])
 
     elif recipe == "selective_failure":
-        # Garbler hands corrupted bit-1 label for wire 0 to probe secret proof bit 0 (which is 1).
-        bits = gc.proof_bits(*honest_proof)
-        assert bits[0] == 1
-        in_labels = kept_g.input_labels(bits)
-        corrupted_label0 = gc.xor(in_labels[0], b"\x01" + bytes(gc.LABEL - 1))
-        handed = [corrupted_label0] + in_labels[1:]
-        # Hardened: ceremony/pre-eval check catches wire-0 mismatch before secret-dependent evaluation,
-        # and holder falls back cleanly to unilateral CSV exit!
-        if not cer0["ceremony_ok"] or cfg.check_input_label_hashes:
-            # Verify received labels against canonical regarbled/committed hashes without secret-dependent eval.
-            canonical_hashes = cashu_input_hashes(gc.garble(cer0["statement_int"], cer0["kept_seed"]))
-            mismatch = hashlib.sha256(handed[0]).hexdigest() not in canonical_hashes[0]
-            session.offchain(
-                "selective failure check",
-                "holder",
-                ceremony_ok=cer0["ceremony_ok"],
-                input_label_mismatch_detected=mismatch,
-                secret_bit_leaked=False,
-            )
-            csv_tx = graph0.holder_csv_exit_tx(utxos["reserve"])
-            session.submit("holder csv exit", "holder", csv_tx)
+        released = False
+        if not cer0["ceremony_ok"]:
+            # Cut-and-choose opened the bad instance: the holder stops before any secret-dependent
+            # evaluation, so the garbler learns nothing.
+            session.offchain("abort before evaluation", "holder", checks=cer0["checks"], secret_bit_leaked=False)
         else:
-            # Mutant: evaluator evaluates blindly with corrupted wire-0 bit-1 label -> outputs invalid label (abort),
-            # revealing to the garbler that secret proof bit 0 == 1!
-            out_label = evaluate_circuit(kept_g.circuit, cer0["delivered_tables"], handed)
-            verdict = gc.decode(out_label, kept_reg["accept_label_sha256"], kept_reg["reject_label_sha256"])
-            secret_bit_leaked = verdict == "invalid"
+            probe = selective_failure_probe(cer0, cfg, honest_proof)
+            secret_bit_leaked = probe["secret_bit_leaked"]
+            actual = probe["actual"]
             session.offchain(
                 "evaluate",
                 "holder",
-                verdict=verdict,
-                output_label=out_label.hex(),
+                probed_wire=0,
+                actual_verdict=actual["verdict"],
+                counterfactual_verdict=probe["counterfactual"]["verdict"],
+                input_hash_matches_commitment=actual["input_hash_matches_commitment"],
                 secret_bit_leaked=secret_bit_leaked,
-                probed_bit_index=0,
             )
-            tx = graph0.joint_release_tx(utxos["reserve"], utxos["collateral"], out_label)
-            session.submit("blocked joint release", "holder", tx)
+            if actual["label"] is not None:
+                # Core judges whatever label the evaluation produced against the accept leaf.
+                released = session.submit(
+                    "joint release" if actual["verdict"] == "accept" else "blocked joint release",
+                    "holder",
+                    graph0.joint_release_tx(utxos["reserve"], utxos["collateral"], actual["label"]),
+                )
+        if not released:
+            session.submit("holder csv exit", "holder", graph0.holder_csv_exit_tx(utxos["reserve"]))
 
     elif recipe == "tape_equivocation":
         in_labels = kept_g.input_labels(gc.proof_bits(*false_proof))
@@ -1221,14 +1320,8 @@ def run_case(session: Session, row: dict) -> tuple[list[dict], dict, dict]:
             verdict=verdict,
             ceremony_ok=cer0["ceremony_ok"],
         )
-        tx = graph0.joint_release_tx(
-            utxos["reserve"],
-            utxos["collateral"],
-            out_label,
-            holder_approves=cer0["ceremony_ok"],
-            guardian_approves=cer0["ceremony_ok"],
-        )
-        session.submit("unauthorized release", "garbler", tx)
+        release_attempt(session, graph0, utxos, "unauthorized release", "garbler", out_label,
+                        holder_approves=cer0["ceremony_ok"], guardian_approves=cer0["ceremony_ok"])
 
     elif recipe == "seed_delta_reuse":
         # Attacker holds input labels from Prior Withdrawal (honest) + Current Withdrawal (false proof).
@@ -1251,28 +1344,16 @@ def run_case(session: Session, row: dict) -> tuple[list[dict], dict, dict]:
             forged_accept_label=forged_accept.hex(),
             forged_matches_accept_hash=hashlib.sha256(forged_accept).hexdigest() == kept_reg["accept_label_sha256"],
         )
-        tx = graph0.joint_release_tx(
-            utxos["reserve"],
-            utxos["collateral"],
-            forged_accept,
-            holder_approves=cer0["ceremony_ok"],
-            guardian_approves=cer0["ceremony_ok"],
-        )
-        session.submit("unauthorized release", "garbler", tx)
+        release_attempt(session, graph0, utxos, "unauthorized release", "garbler", forged_accept,
+                        holder_approves=cer0["ceremony_ok"], guardian_approves=cer0["ceremony_ok"])
 
     elif recipe == "decoding_polarity_flip":
         in_labels = kept_g.input_labels(gc.proof_bits(*false_proof))
         out_label = evaluate_circuit(kept_g.circuit, cer0["delivered_tables"], in_labels)
         verdict = gc.decode(out_label, kept_reg["accept_label_sha256"], kept_reg["reject_label_sha256"])
         session.offchain("evaluate", "holder", proof=list(false_proof), output_label=out_label.hex(), verdict=verdict)
-        tx = graph0.joint_release_tx(
-            utxos["reserve"],
-            utxos["collateral"],
-            out_label,
-            holder_approves=cer0["ceremony_ok"],
-            guardian_approves=cer0["ceremony_ok"],
-        )
-        session.submit("unauthorized release", "garbler", tx)
+        release_attempt(session, graph0, utxos, "unauthorized release", "garbler", out_label,
+                        holder_approves=cer0["ceremony_ok"], guardian_approves=cer0["ceremony_ok"])
 
     elif recipe == "withholding":
         session.offchain(
@@ -1297,19 +1378,11 @@ def run_case(session: Session, row: dict) -> tuple[list[dict], dict, dict]:
             output_label=out_label.hex(),
             verdict=verdict,
         )
-        # Colluders try to divert the 25,000-sat reserve to attacker_spk!
-        tx = graph0.joint_release_tx(
-            utxos["reserve"],
-            utxos["collateral"],
-            out_label,
-            destination_spk=graph0.attacker_spk,
-            holder_approves=False,
-            guardian_approves=False,
-            challenger_approves=True,
-            accept_signer_approves=True,
-        )
-        if session.submit("diverted release", "garbler+challenger", tx):
-            diverted_sats = HOLDER_PAYOUT_SATS
+        # Colluders try to pay the holder's 24,750 sats to attacker_spk; an honest holder or
+        # guardian never signs outputs paying the attacker.
+        release_attempt(session, graph0, utxos, "diverted release", "garbler+challenger", out_label,
+                        holder_approves=False, guardian_approves=False,
+                        destination_spk=graph0.attacker_spk)
 
     elif recipe == "proof_replay":
         # Reserve 0 settles honestly first.
@@ -1318,17 +1391,19 @@ def run_case(session: Session, row: dict) -> tuple[list[dict], dict, dict]:
         session.offchain("evaluate", "holder", proof=list(honest_proof), output_label=out0.hex(), verdict="accept")
         tx0 = graph0.joint_release_tx(utxos["reserve"], utxos["collateral"], out0)
         session.submit("joint release", "holder", tx0)
-        # Attacker replays Reserve 0's accept_label to drain Reserve 1 without a Reserve 1 proof!
+        # The holder replays Reserve 0's accept label to release Reserve 1 (a separately funded
+        # calibration reserve) without a Reserve 1 proof. The replay pays Reserve 1's holder.
         assert graph1 is not None and utxos2 is not None
-        session.offchain("replay accept label", "garbler", replayed_label=out0.hex(), target="reserve_1")
+        session.offchain("replay accept label", "holder", replayed_label=out0.hex(), target="reserve_1")
         tx_replay = graph1.joint_release_tx(utxos2["reserve"], utxos2["collateral"], out0)
-        if session.submit("replayed release 2", "garbler", tx_replay):
-            diverted_sats = HOLDER_PAYOUT_SATS
+        session.submit("replayed release 2", "holder", tx_replay)
 
     elif recipe == "statement_substitution":
-        # Attacker builds a VALID proof for an attacker-controlled statement under the SAME program_vk_digest.
+        # A valid proof for a statement naming the attacker's script, under the same program VK.
         att_stmt = _statement_for(cid, cfg, reserve_label="reserve_0", holder_role="attacker")
-        att_int = statement_int_from(att_stmt)
+        if att_stmt == stmt0:
+            raise ValidationError("statement_substitution: attacker statement must differ from the pinned one")
+        att_int = statement_int_from(verifier_view(att_stmt, cfg))
         att_proof = proof_for(att_int, honest=True)
         in_labels = kept_g.input_labels(gc.proof_bits(*att_proof))
         out_label = evaluate_circuit(kept_g.circuit, cer0["delivered_tables"], in_labels)
@@ -1339,22 +1414,30 @@ def run_case(session: Session, row: dict) -> tuple[list[dict], dict, dict]:
             attacker_statement_sha256=hashlib.sha256(canonical(att_stmt).encode("utf-8")).hexdigest(),
             pinned_statement_sha256=cer0["statement_sha256"],
             same_program_vk=True,
+            circuit_binds_holder_script=cfg.bind_committed_values,
             output_label=out_label.hex(),
             verdict=verdict,
         )
-        tx = graph0.joint_release_tx(
-            utxos["reserve"],
-            utxos["collateral"],
-            out_label,
-            destination_spk=graph0.attacker_spk,
-            holder_approves=False,
-            guardian_approves=True,
-            challenger_approves=True,
-        )
-        if session.submit("diverted release", "garbler", tx):
-            diverted_sats = HOLDER_PAYOUT_SATS
+        # The holder never signs outputs paying the attacker. The mutant also drops the holder
+        # key from the reserve leaf (holder_locks_outputs=False), so its spend needs no holder.
+        release_attempt(session, graph0, utxos, "diverted release", "garbler", out_label,
+                        holder_approves=False, guardian_approves=True,
+                        destination_spk=graph0.attacker_spk)
 
     steps = session.finish()
+    probe = step(steps, "cosigned probe")
+    attack_rejected = any(
+        s["kind"] == "tx" and s["label"] in ("unauthorized release", "diverted release", "replayed release 2")
+        and not s["allowed"] for s in steps
+    )
+    # Which layer stopped a rejected release: Bitcoin script itself, or only the honest
+    # co-signers' refusal (their counterfactual co-signed probe would have been accepted).
+    if not (attack and attack_rejected):
+        defense_layer = "n/a"
+    elif probe is not None and probe["allowed"]:
+        defense_layer = "cosigner_veto"
+    else:
+        defense_layer = "bitcoin_script"
     observed = {
         "ceremony_k": cfg.cut_and_choose_k,
         "challenge_mode": cfg.challenge_mode,
@@ -1367,8 +1450,12 @@ def run_case(session: Session, row: dict) -> tuple[list[dict], dict, dict]:
             or confirmed(steps, "diverted release")
             or confirmed(steps, "replayed release 2")
         ),
-        "diverted_principal_sats": diverted_sats if (confirmed(steps, "diverted release") or confirmed(steps, "replayed release 2")) else 0,
+        "diverted_principal_sats": paid_to_attacker(steps),
         "secret_bit_leaked": secret_bit_leaked,
+        "cut_and_choose_escaped": bool(cer0["challenge"].get("escaped", False)),
+        "cosigned_probe_allowed": None if probe is None else probe["allowed"],
+        "cosigned_probe_reject_reason": None if probe is None else probe["reject_reason"],
+        "defense_layer": defense_layer,
     }
     return steps, funded_target, observed
 
@@ -1384,11 +1471,7 @@ def score(row: dict, steps: list[dict], observed: dict) -> dict:
         or confirmed(steps, "diverted release")
         or confirmed(steps, "replayed release 2")
     )
-    diverted = 0
-    for label in ("diverted release", "replayed release 2"):
-        s = step(steps, label)
-        if s is not None and s.get("confirmed"):
-            diverted = HOLDER_PAYOUT_SATS
+    diverted = paid_to_attacker(steps)
 
     bit_leaked = bool(observed.get("secret_bit_leaked", False))
 
@@ -1402,7 +1485,7 @@ def score(row: dict, steps: list[dict], observed: dict) -> dict:
         leg = confirmed(steps, "holder csv exit")
         att = not leg
     elif recipe == "selective_failure":
-        leg = confirmed(steps, "holder csv exit")
+        leg = confirmed(steps, "holder csv exit") or confirmed(steps, "joint release")
         att = bit_leaked
     elif recipe == "proof_replay":
         leg = confirmed(steps, "joint release")
@@ -1469,6 +1552,9 @@ def audit(report: dict) -> list[str]:
     problems = check_report_envelope(report, TRACK, rows)
     if report.get("evidence_level") != EVIDENCE_LEVEL:
         problems.append(f"wrong evidence_level: {report.get('evidence_level')}")
+    provenance = report.get("provenance", {})
+    if provenance.get("subversion") != CORE_SUBVERSION or provenance.get("chain") != "regtest":
+        problems.append(f"provenance is not {CORE_SUBVERSION} regtest: {provenance.get('subversion')}")
     by_id = {r["id"]: r for r in rows}
     for case in report.get("cases", []):
         row = by_id.get(case.get("id"))
@@ -1502,7 +1588,37 @@ def audit(report: dict) -> list[str]:
         if fund_step is None or fund_step["outputs"]["collateral"]["script_pubkey"] != graph0.C.script_pubkey.hex():
             problems.append(f"{cid}: funded collateral scriptPubKey differs from rebuilt CashuGraph")
 
-        rescored = score(row, case["steps"], case.get("observed_final_state", {}))
+        # Each transaction step must agree with Core's own recorded testmempoolaccept result.
+        for s in case["steps"]:
+            if s.get("kind") != "tx":
+                continue
+            result = s.get("mempool_result") or {}
+            if bool(result.get("allowed")) != bool(s.get("allowed")):
+                problems.append(f"{cid}: {s['label']} allowed flag disagrees with Core's mempool result")
+            if s.get("allowed") != (s.get("reject_reason") is None):
+                problems.append(f"{cid}: {s['label']} reject_reason inconsistent with allowed")
+            if s.get("reject_reason") != result.get("reject-reason"):
+                problems.append(f"{cid}: {s['label']} reject_reason differs from Core's mempool result")
+            if s.get("confirmed") and not (s.get("allowed") and s.get("broadcast") and s.get("blockhash")):
+                problems.append(f"{cid}: {s['label']} confirmed without being allowed, broadcast and mined")
+            if s["label"] == "cosigned probe" and s.get("broadcast"):
+                problems.append(f"{cid}: counterfactual probe was broadcast")
+
+        # Recompute the off-chain selective-failure leak instead of trusting the recorded flag.
+        observed = dict(case.get("observed_final_state", {}))
+        if row["recipe"] == "selective_failure" and attack:
+            leaked = False
+            if cer0["ceremony_ok"]:
+                leaked = selective_failure_probe(cer0, cfg, proof_for(cer0["statement_int"], honest=True))["secret_bit_leaked"]
+            if observed.get("secret_bit_leaked") != leaked:
+                problems.append(f"{cid}: recorded secret_bit_leaked differs from offline recomputation")
+            observed["secret_bit_leaked"] = leaked
+        if observed.get("diverted_principal_sats") != paid_to_attacker(case["steps"]):
+            problems.append(f"{cid}: diverted_principal_sats differs from confirmed outputs paying the attacker")
+        if observed.get("cut_and_choose_escaped") != row["cut_and_choose_escaped"]:
+            problems.append(f"{cid}: cut_and_choose_escaped differs from the catalog's ceremony draw")
+
+        rescored = score(row, case["steps"], observed)
         if rescored != case.get("outcome"):
             problems.append(f"{cid}: recorded outcome differs from rescored steps ({rescored} != {case.get('outcome')})")
     return problems
